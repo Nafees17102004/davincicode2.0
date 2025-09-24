@@ -1,3 +1,6 @@
+CREATE DATABASE davinci_code;
+USE davinci_code;
+
 CREATE TABLE languages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
