@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require("express");
+const cors = require("cors");
 const app = express();
 const apiRoutes = require('./src/config/routes/api');
 
-// Middleware to parse JSON
+app.use(cors());
 app.use(express.json());
 
 // Register API routes
