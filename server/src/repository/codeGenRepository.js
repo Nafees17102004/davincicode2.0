@@ -12,10 +12,10 @@ const getProjectDetails=async(project_code)=>{
   }
 }
 
-const insertModule = async (project_id, name, status, inactive_reason) => {
+const insertModule = async (project_id,m_name,m_desc,status,inactive_reason) => {
   try {
-    const query = "CALL InsertModule(?,?,?,?)";
-    const data = [project_id, name, status, inactive_reason];
+    const query = "CALL InsertModule(?,?,?,?,?)";
+    const data = [project_id,m_name,m_desc,status,inactive_reason];
     const result = await pool.query(query, data);
     return result[0];
   } catch (err) {
