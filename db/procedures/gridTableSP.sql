@@ -127,3 +127,31 @@ CALL InsertProject('ERP002', 'ERP Analytics', 1, 'active', NULL);
 
 CALL InsertModule('ERP002', 'Reporting',null, 'active', NULL);
 
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertLanguage( 
+IN l_name varchar(30),
+IN l_status ENUM('active','inactive'),
+IN l_inactive_reason VARCHAR(255)
+)
+BEGIN 
+	INSERT INTO languages(name,status,inactive_reason) VALUES(l_name,l_status,l_inactive_reason);
+END$$
+
+DELIMITER ;
+
+
+call InsertLanguage("html","active",null);
+
+DELIMITER $$
+
+CREATE PROCEDURE GetLanguage()
+BEGIN
+	SELECT * FROM languages;
+END$$
+
+DELIMITER ;
+
+
+CALL GetLanguage();
