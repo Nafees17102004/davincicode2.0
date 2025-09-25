@@ -41,6 +41,7 @@ BEGIN
     SELECT 
         m.id AS module_id,
         m.name AS module_name,
+        m.module_desc,
         m.status,
         m.inactive_reason
     FROM modules m
@@ -90,6 +91,7 @@ DELIMITER $$
 CREATE PROCEDURE InsertModule(
     IN p_project_code VARCHAR(30),
     IN m_name VARCHAR(150),
+    IN m_desc varchar(255),
     IN m_status ENUM('active','inactive'),
     IN m_inactive_reason VARCHAR(255)
 )
@@ -113,8 +115,8 @@ BEGIN
     END IF;
 
     -- Insert new module
-    INSERT INTO modules (project_id, name, status, inactive_reason)
-    VALUES (proj_id, m_name, m_status, m_inactive_reason);
+    INSERT INTO modules (project_id, name,module_desc, status, inactive_reason)
+    VALUES (proj_id, m_name, m_desc, m_status, m_inactive_reason);
 END$$
 
 DELIMITER ;
@@ -123,5 +125,5 @@ DELIMITER ;
 CALL InsertProject('ERP002', 'ERP Analytics', 1, 'active', NULL);
 
 
-CALL InsertModule('ERP002', 'Reporting', 'active', NULL);
+CALL InsertModule('ERP002', 'Reporting',null, 'active', NULL);
 
