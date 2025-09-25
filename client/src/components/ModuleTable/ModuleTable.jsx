@@ -18,18 +18,18 @@ const ModuleTable = ({ modules, onChange }) => {
                         <td>
                             <Form.Control
                                 type="text"
-                                name="module_name"
-                                value={module.module_name}
-                                onChange={(e) => onChange(e, index)}
+                                name="m_name"
+                                value={module.m_name}
+                                onChange={(e) => onChange(index, m_name,e.target.value)}
                                 required
                             />
                         </td>
                         <td>
                             <Form.Control
                                 as="textarea"
-                                name="description"
-                                value={module.description}
-                                onChange={(e) => onChange(e, index)}
+                                name="m_desc"
+                                value={module.m_desc}
+                                onChange={(e) => onChange(index, m_desc,e.target.value)}
                                 style={{ minHeight: '38px' }}
                             />
                         </td>
@@ -37,9 +37,9 @@ const ModuleTable = ({ modules, onChange }) => {
                             <Form.Check
                                 type="switch"
                                 id={`inactive-switch-${index}`}
-                                name="inactive_status"
-                                checked={module.inactive_status === true}
-                                onChange={(e) => onChange(e, index)}
+                                name="status"
+                                checked={module.status === active}
+                                onChange={(e) => onChange(index, status,e.target.value)}
                                 className="d-inline-block"
                             />
                         </td>
@@ -47,7 +47,7 @@ const ModuleTable = ({ modules, onChange }) => {
                             <Form.Select
                                 name="status"
                                 value={module.status}
-                                onChange={(e) => onChange(e, index)}
+                                onChange={(e) => onChange(index, m_name,e.target.value)}
                             >
                                 <option value="active">Active</option>
                                 <option value="inactive">Inactive</option>

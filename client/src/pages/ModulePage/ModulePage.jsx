@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import LeftTabMenu from '../../components/LeftTabMenu/LeftTabMenu';
 // Corrected import path for the ModuleForm component.
 // Please ensure your folder and file names match this path exactly, including capitalization.
 import ModuleForm from '../../components/ModuleForm/ModuleForm';
@@ -20,10 +21,11 @@ const ModulePage = () => {
     // State to manage the dynamic rows of module input fields
     const [modules, setModules] = useState([
         {
-            module_name: '',
-            description: '',
-            inactive_status: null, // Default value is null as per requirement
-            status: 'active',      // Default value is 'active'
+            project_id: 0,
+            m_name: '',
+            m_desc: '',
+            inactive_reason: null,
+            status: 'active',     // Default value is 'active'
         },
     ]);
 
@@ -36,7 +38,7 @@ const ModulePage = () => {
     useEffect(() => {
         const fetchProjects = async () => {
             try {
-                const response = await api.post('/getProjectDetails');
+                const response = await api.get('/getProjectDetails');
                 setProjects(response.data.projects || response.data);
             } catch (err) {
                 setError('Failed to fetch projects. Please check the API endpoint.');
@@ -84,6 +86,7 @@ const ModulePage = () => {
 
     return (
         <Container className="my-5">
+            <LeftTabMenu/>
             <h1 className="text-center mb-4">Module Management</h1>
             {error && <Alert variant="danger">{error}</Alert>}
             {submitSuccess && <Alert variant="success">Modules submitted successfully!</Alert>}

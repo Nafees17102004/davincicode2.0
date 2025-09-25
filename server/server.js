@@ -1,13 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const routes=require("../server/src/routes/createProjectRoutes");
+const routes = require('./src/routes/createProjectRoutes');
 
 app.use(cors());
 app.use(express.json());
 
 // Register API routes
-app.use('/api', routes);
+app.use('/code', routes);
 
 // Example: Start the server
 const PORT = process.env.PORT || 3000;
