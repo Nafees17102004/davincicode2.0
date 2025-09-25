@@ -4,7 +4,8 @@ const repo = require("../repository/codeGenRepository");
 const getProjectDetails=async(project_code)=>{
     try {
     const [result]=await repo.getProjectDetails(project_code);
-    return result[0,1];
+    const [project,module]=result;
+    return {project,module};
   } catch (err) {
     console.error("err in service", err);
     throw err; // rethrow to controller
