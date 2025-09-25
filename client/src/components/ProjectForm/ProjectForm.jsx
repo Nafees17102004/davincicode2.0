@@ -37,8 +37,8 @@ function ProjectForm() {
   return (
     <div className="container mt-4">
       <div className="d-flex justify-content-between mb-3">
-        <h3>Employee Master</h3>
-        <Button onClick={handleAddRow}>Add</Button>
+        <h3 className='project-page-heading'>Project Creation</h3>
+        <Button onClick={handleAddRow}>Create Project</Button>
       </div>
 
       <ProjectTable rows={rows} onChange={handleChange}/>
