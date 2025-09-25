@@ -22,6 +22,7 @@ CREATE TABLE modules (
     id INT AUTO_INCREMENT PRIMARY KEY,
     project_id INT NOT NULL,
     name VARCHAR(150) NOT NULL,
+    module_desc varchar(255),
     status ENUM('active','inactive') DEFAULT 'active',
     inactive_reason VARCHAR(255) NULL,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,

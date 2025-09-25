@@ -11,9 +11,9 @@ const getProjectDetails=async(project_code)=>{
   }
 }
 
-const insertModule = async (project_id, name, status, inactive_reason) => {
+const insertModule = async (project_id,m_name,m_desc,status,inactive_reason) => {
   try {
-    return await repo.insertModule(project_id, name, status, inactive_reason);
+    return await repo.insertModule(project_id,m_name,m_desc,status,inactive_reason);
   } catch (err) {
     console.error("err in service", err);
     throw err; // rethrow to controller
