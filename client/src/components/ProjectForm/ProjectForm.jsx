@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 function ProjectForm() {
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
+  const navigate = useNavigate();
 
   const handleAddRow = () => {
     setRows([
@@ -41,6 +42,7 @@ function ProjectForm() {
       alert("An error occurred while submitting the projects.");
     });
     setRows([]);
+    useNavigate('/view-projects');
   };
   return (
     <div className="project-form-container mt-4">
@@ -55,7 +57,7 @@ function ProjectForm() {
         <Button onClick={handleSubmit} className='submit-btn'>
           Submit
         </Button>
-        <Button className='view-project-btn'>
+        <Button className='view-project-btn' onClick={() => navigate('/view-projects')}>
           View Stored Data
         </Button>
       </div>

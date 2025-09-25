@@ -9,8 +9,18 @@ const insertProject = (projectData) => {
     return api.post('add-project', projectData);
 }
 
+const viewProjects = () =>{
+    return api.get('/projects');
+}
+
+const getProjectByCode = (pCode) => {
+    return api.get(`/getProjectDetails/${pCode}`)
+}
+
 const projectAPI = {
-    insertProject
+    insertProject, 
+    viewProjects,
+    getProjectByCode
 }
 
 export default projectAPI;

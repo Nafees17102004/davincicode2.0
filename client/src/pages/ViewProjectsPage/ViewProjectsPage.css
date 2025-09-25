@@ -1,0 +1,72 @@
+/* Layout */
+.view-projects-page {
+  min-height: 100vh;
+  background: #f3f4f6;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Verdana, sans-serif;
+  color: #111827;
+  padding: 30px;
+}
+
+/* Sidebar (fixed) */
+.left-tab-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 260px;            /* change width here if you want */
+  height: 100vh;
+  padding: 28px 18px;
+  background: linear-gradient(180deg,#0f172a,#1e293b);
+  box-shadow: 2px 0 18px rgba(2,6,23,0.12);
+  z-index: 1000;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+/* Sidebar items */
+.left-tab-menu .menu-list { padding: 0; margin: 0; }
+.left-tab-menu .menu-item { margin-bottom: 10px; }
+.left-tab-menu .nav-link {
+  display: block;
+  padding: 10px 12px;
+  color: #e6eefc;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background .18s ease, transform .12s ease;
+}
+.left-tab-menu .nav-link:hover { background: rgba(255,255,255,0.04); transform: translateX(4px); }
+.left-tab-menu .nav-link.active { background: #fff; color: #0f172a; }
+
+/* Main content area — reserve space for the fixed sidebar */
+.main-content {
+  margin-left: 260px;     /* must match sidebar width */
+  padding: 36px;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+/* Make the table area centered and readable */
+.main-content .view-table-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Ensure table fills the available width */
+.main-content .table {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Responsive: collapse sidebar on small screens */
+@media (max-width: 992px) {
+  .left-tab-menu {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 10px 12px;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 16px;
+  }
+}

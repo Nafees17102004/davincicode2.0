@@ -10,6 +10,17 @@ const insertProject = async (pCode, pName, pLanguageId, pStatus, pInactiveReason
     }
 }
 
+const viewProjectDetails = async () => {
+    try {
+        const query = "CALL GetAllProjects();";
+        const result = await pool.query(query);
+        return result[0][0];
+    }catch(err){
+        console.error("Error: ", err); 
+    }
+}
+
 module.exports = {
-    insertProject
+    insertProject,
+    viewProjectDetails
 }
