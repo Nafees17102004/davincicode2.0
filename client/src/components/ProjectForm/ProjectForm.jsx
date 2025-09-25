@@ -4,7 +4,7 @@ import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 function ProjectForm() {
-     const [rows, setRows] = useState([]);
+  const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
 
   const handleAddRow = () => {
