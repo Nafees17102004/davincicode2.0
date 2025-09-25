@@ -9,6 +9,16 @@ const insertProject = async (pCode, pName, pLanguageId, pStatus, pInactiveReason
     }
 }
 
+const viewProjectDetails = async () => {
+    try {
+        const result = await createProjectRepo.viewProjectDetails();
+        return result;
+    }catch(err){
+        console.error(err);
+    }
+}
+
 module.exports = {
-    insertProject
+    insertProject,
+    viewProjectDetails
 }

@@ -10,7 +10,7 @@ const insertProject = async (req,res) =>{
       const { pCode, pName, pLanguageId, pStatus, pInactiveReason } = project;
 
       // validation
-      if (!pCode || !pName || !pLanguageId || !pStatus || !pInactiveReason) {
+      if (!pCode || !pName || !pLanguageId || !pStatus) {
         errors.push({ index, error: "All fields are required", employee: project });
         continue; // skip this one, continue with next
       }
@@ -42,6 +42,16 @@ const insertProject = async (req,res) =>{
   }
 }
 
+const viewProjectDetails=async(req,res)=>{
+    try {
+        const result=await createProjectService.viewProjectDetails();
+        res.status(200).json(result);
+    } catch (err) {
+        res.status(500).json({message:err.message});
+    }
+  }
+
 module.exports = {
-    insertProject
+    insertProject,
+    viewProjectDetails
 }

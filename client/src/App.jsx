@@ -1,19 +1,19 @@
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
-// Corrected the import paths to match the folder names.
-import ProjectPage from './pages/ProjectPage/ProjectPage.jsx';
-import ModulePage from './pages/ModulePage/ModulePage.jsx';
-// The Bootstrap import has been removed from this file. It is recommended
-// to import it in your main entry point (main.jsx) or reference it
-// via a CDN in your index.html.
+import ProjectPage from './pages/ProjectPage/ProjectPage'
+import LanguagePage from './pages/LanguagePage/LanguagePage';
+import ModulePage from './pages/ModulePage/ModulePage';
+import ViewProjectsPage from './pages/ViewProjectsPage/ViewProjectsPage';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<ProjectPage />} />
-      <Route path="/modules" element={<ModulePage />} />
-    </Routes>
-  );
+      <Routes>
+        <Route path="/" element={<LanguagePage />} />
+        <Route path='/project' element={<ProjectPage/>}/>
+        <Route path='/module' element={<ModulePage/>}/>
+        <Route path='/view-Projects' element={<ViewProjectsPage/>}/>
+      </Routes>
+  )
 }
 
 export default App;

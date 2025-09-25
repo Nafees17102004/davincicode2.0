@@ -1,14 +1,13 @@
 import React, {useState} from 'react'
-import ProjectTable from '../ProjectTable/ProjectTable'
 import { Button } from "react-bootstrap";
 import projectAPI from '../../api/Api';
-import './ProjectForm.css'
+import './LanguageForm.css'
 import { useNavigate } from "react-router-dom";
+import LanguageTable from '../LanguageTable/LanguageTable';
 
-function ProjectForm() {
+function LanguageForm() {
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
-  const navigate = useNavigate();
 
   const handleAddRow = () => {
     setRows([
@@ -42,7 +41,6 @@ function ProjectForm() {
       alert("An error occurred while submitting the projects.");
     });
     setRows([]);
-    useNavigate('/view-projects');
   };
   return (
     <div className="project-form-container mt-4">
@@ -51,13 +49,13 @@ function ProjectForm() {
         <Button onClick={handleAddRow} className='create-project-btn'>Create Project</Button>
       </div>
 
-      <ProjectTable rows={rows} onChange={handleChange}/>
+      <LanguageTable rows={rows} onChange={handleChange}/>
 
       <div className="project-btn-container">
         <Button onClick={handleSubmit} className='submit-btn'>
           Submit
         </Button>
-        <Button className='view-project-btn' onClick={() => navigate('/view-projects')}>
+        <Button className='view-project-btn'>
           View Stored Data
         </Button>
       </div>
@@ -65,4 +63,4 @@ function ProjectForm() {
   )
 }
 
-export default ProjectForm
+export default LanguageForm
