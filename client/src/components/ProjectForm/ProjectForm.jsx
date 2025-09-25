@@ -1,6 +1,7 @@
 import React, {useState} from 'react'
 import ProjectTable from '../ProjectTable/ProjectTable'
 import { Button } from "react-bootstrap";
+import projectAPI from '../../api/Api';
 import { useNavigate } from "react-router-dom";
 
 function ProjectForm() {
@@ -31,7 +32,7 @@ function ProjectForm() {
   };
 
   const handleSubmit = () => {
-    empApi.addEmployeeDetails(rows);
+    projectAPI.insertProject(rows);
     setRows([]);
   };
   return (
