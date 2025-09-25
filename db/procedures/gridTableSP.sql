@@ -1,0 +1,127 @@
+DELIMITER $$
+
+CREATE PROCEDURE GetAllProjects()
+BEGIN
+    SELECT 
+        p.project_code,
+        p.name AS project_name,
+        l.name AS language_name,
+        p.status,
+        p.inactive_reason,
+        COUNT(m.id) AS module_count
+    FROM projects p
+    JOIN languages l ON p.language_id = l.id
+    LEFT JOIN modules m ON p.id = m.project_id
+    GROUP BY p.id, p.project_code, p.name, l.name, p.status, p.inactive_reason
+    ORDER BY p.project_code;
+END$$
+
+DELIMITER ;
+
+
+CALL GetAllProjects();
+
+
+DELIMITER $$
+
+CREATE PROCEDURE GetProjectDetails(IN p_code VARCHAR(30))
+BEGIN
+    -- First return project details
+    SELECT 
+        p.project_code,
+        p.name AS project_name,
+        l.name AS language_name,
+        p.status,
+        p.inactive_reason
+    FROM projects p
+    JOIN languages l ON p.language_id = l.id
+    WHERE p.project_code = p_code;
+
+    -- Then return all modules for that project
+    SELECT 
+        m.id AS module_id,
+        m.name AS module_name,
+        m.status,
+        m.inactive_reason
+    FROM modules m
+    JOIN projects p ON m.project_id = p.id
+    WHERE p.project_code = p_code
+    ORDER BY m.name;
+END$$
+
+DELIMITER ;
+
+
+CALL GetProjectDetails('ERP001');
+
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertProject(
+    IN p_code VARCHAR(30),
+    IN p_name VARCHAR(150),
+    IN p_language_id INT,
+    IN p_status ENUM('active','inactive'),
+    IN p_inactive_reason VARCHAR(255)
+)
+BEGIN
+    -- Check if project code already exists
+    IF EXISTS (SELECT 1 FROM projects WHERE project_code = p_code) THEN
+        SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Project code already exists';
+    END IF;
+
+    -- Check if project name already exists
+    IF EXISTS (SELECT 1 FROM projects WHERE name = p_name) THEN
+        SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Project name already exists';
+    END IF;
+
+    -- Insert new project
+    INSERT INTO projects (project_code, name, language_id, status, inactive_reason)
+    VALUES (p_code, p_name, p_language_id, p_status, p_inactive_reason);
+END$$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertModule(
+    IN p_project_code VARCHAR(30),
+    IN m_name VARCHAR(150),
+    IN m_status ENUM('active','inactive'),
+    IN m_inactive_reason VARCHAR(255)
+)
+BEGIN
+    DECLARE proj_id INT;
+
+    -- Find the project id from project code
+    SELECT id INTO proj_id 
+    FROM projects 
+    WHERE project_code = p_project_code;
+
+    IF proj_id IS NULL THEN
+        SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Project code does not exist';
+    END IF;
+
+    -- Check if module already exists in the project
+    IF EXISTS (SELECT 1 FROM modules WHERE project_id = proj_id AND name = m_name) THEN
+        SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Module already exists in this project';
+    END IF;
+
+    -- Insert new module
+    INSERT INTO modules (project_id, name, status, inactive_reason)
+    VALUES (proj_id, m_name, m_status, m_inactive_reason);
+END$$
+
+DELIMITER ;
+
+
+CALL InsertProject('ERP002', 'ERP Analytics', 1, 'active', NULL);
+
+
+CALL InsertModule('ERP002', 'Reporting', 'active', NULL);
+
