@@ -1,5 +1,6 @@
 import React from 'react'
 import { Table, Form } from "react-bootstrap";
+import './ProjectTable.css'
 
 function ProjectTable({rows, onChange}) {
   return (
