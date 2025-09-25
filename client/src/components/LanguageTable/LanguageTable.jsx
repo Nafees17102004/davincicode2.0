@@ -1,24 +1,22 @@
-import React, {useState} from 'react'
+import React from 'react';
 import { Table, Form } from "react-bootstrap";
-import './ProjectTable.css'
+import './LanguageTable.css'
 
-function ProjectTable({rows, onChange}) {
+function LanguageTable({rows, onChange}) {
   return (
     <Table bordered hover className='table'>
       <thead className='table-header'>
         <tr className='table-field-row'>
           <th className='field-name'>ID</th>
-          <th className='field-name'>Project Code</th>
-          <th className='field-name'>Project Name</th>
           <th className='field-name'>Language Name</th>
           <th className='field-name'>Project Status</th>
-          {rows.some(row => row.pStatus === "inactive") && (
+          {/* {rows.some(row => row.pStatus === "inactive") && (
             <th className='field-name'>Inactive Reason</th>
-          )}
+          )} */}
         </tr>
       </thead>
       <tbody className='table-body'>
-        {rows.map((row, index) => (
+        {/* {rows.map((row, index) => (
           <tr key={row.id}>
             <td>{row.id}</td>
             <td>
@@ -76,10 +74,10 @@ function ProjectTable({rows, onChange}) {
                 
               )}
           </tr>
-        ))}
+        ))} */}
       </tbody>
     </Table>
   );
-};
+}
 
-export default ProjectTable
+export default LanguageTable

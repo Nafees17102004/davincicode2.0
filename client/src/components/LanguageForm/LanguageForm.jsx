@@ -1,11 +1,11 @@
 import React, {useState} from 'react'
-import ProjectTable from '../ProjectTable/ProjectTable'
 import { Button } from "react-bootstrap";
 import projectAPI from '../../api/Api';
-import './ProjectForm.css'
+import './LanguageForm.css'
 import { useNavigate } from "react-router-dom";
+import LanguageTable from '../LanguageTable/LanguageTable';
 
-function ProjectForm() {
+function LanguageForm() {
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
 
@@ -49,7 +49,7 @@ function ProjectForm() {
         <Button onClick={handleAddRow} className='create-project-btn'>Create Project</Button>
       </div>
 
-      <ProjectTable rows={rows} onChange={handleChange}/>
+      <LanguageTable rows={rows} onChange={handleChange}/>
 
       <div className="project-btn-container">
         <Button onClick={handleSubmit} className='submit-btn'>
@@ -63,4 +63,4 @@ function ProjectForm() {
   )
 }
 
-export default ProjectForm
+export default LanguageForm

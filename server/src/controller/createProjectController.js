@@ -10,7 +10,7 @@ const insertProject = async (req,res) =>{
       const { pCode, pName, pLanguageId, pStatus, pInactiveReason } = project;
 
       // validation
-      if (!pCode || !pName || !pLanguageId || !pStatus || !pInactiveReason) {
+      if (!pCode || !pName || !pLanguageId || !pStatus) {
         errors.push({ index, error: "All fields are required", employee: project });
         continue; // skip this one, continue with next
       }
