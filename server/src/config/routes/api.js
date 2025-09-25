@@ -1,12 +1,16 @@
 const express = require('express');
-
 const router = express.Router();
+
+// Example data
+let exampleData = {
+    name: "Sample Project",
+    value: 42
+};
 
 // GET API - fetch example data
 router.get('/example', (req, res) => {
     res.json(exampleData);
 });
-
 
 // PUT API - update example data
 router.put('/example', (req, res) => {
@@ -15,7 +19,5 @@ router.put('/example', (req, res) => {
     if (value !== undefined) exampleData.value = value;
     res.json(exampleData);
 });
-
-// Example data
 
 module.exports = router;
