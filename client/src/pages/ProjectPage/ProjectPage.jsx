@@ -5,9 +5,9 @@ import './ProjectPage.css'
 
 function ProjectPage() {
   return (
-    <div className='project-page-container'>
+    <div className='project-page-container d-flex'>
         <LeftTabMenu/>
-        <div className='project-page'>
+        <div className='project-page d-flex justify-content-center align-items-center'>
             <ProjectForm/>
         </div>
     </div>
