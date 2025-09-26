@@ -21,11 +21,16 @@ const insertModule = (moduleData)=>{
     return api.post('/insertModule',moduleData);
 }
 
+const insertLanguage = (languageData) => {
+    return api.post('/add-lang', languageData);
+}
+
 const projectAPI = {
     insertProject, 
     viewProjects,
     getProjectByCode,
-    insertModule
+    insertModule,
+    insertLanguage
 }
 
 export default projectAPI;
