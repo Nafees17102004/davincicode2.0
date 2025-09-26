@@ -14,11 +14,9 @@ function LanguageForm() {
       ...rows,
       {
         id: idCounter,
-        pCode: '',
-        pName: '',
-        pLanguageId: 0,
-        pStatus: "active",
-        pInactiveReason: null
+        lName: '',
+        lStatus: 'active',
+        lInactiveReason: null,
       },
     ]);
     setIdCounter(idCounter + 1);
@@ -33,7 +31,7 @@ function LanguageForm() {
   };
 
   const handleSubmit = () => {
-    projectAPI.insertProject(rows).then((response) => {
+    projectAPI.insertLanguage(rows).then((response) => {
       console.log("Response:", response.data);
       alert(`Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`);
     }).catch((error) => {
@@ -45,8 +43,8 @@ function LanguageForm() {
   return (
     <div className="project-form-container mt-4">
       <div className="project-form-header">
-        <h3 className='project-page-heading'>Project Creation</h3>
-        <Button onClick={handleAddRow} className='create-project-btn'>Create Project</Button>
+        <h3 className='project-page-heading'>Language Creation</h3>
+        <Button onClick={handleAddRow} className='create-project-btn'>Add Language</Button>
       </div>
 
       <LanguageTable rows={rows} onChange={handleChange}/>

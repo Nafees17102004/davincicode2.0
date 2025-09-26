@@ -127,3 +127,15 @@ CALL InsertProject('ERP002', 'ERP Analytics', 1, 'active', NULL);
 
 CALL InsertModule('ERP002', 'Reporting',null, 'active', NULL);
 
+DELIMITER //
+
+CREATE PROCEDURE insertLanguage(
+IN l_name varchar(100), IN l_status ENUM('active','inactive'),
+IN l_inactive_reason VARCHAR(255))
+BEGIN
+	INSERT INTO languages (name, status, inactive_reason) VALUES (l_name, l_status, l_inactive_reason);
+END //
+
+DELIMITER ;
+
+CALL insertLanguage("ASV.net", 'active', null);
