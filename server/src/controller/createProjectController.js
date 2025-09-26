@@ -50,7 +50,36 @@ const viewProjectDetails=async(req,res)=>{
         res.status(500).json({message:err.message});
     }
   }
+const insertLanguage = async (req, res) => {
+    try {
+      const language = Array.isArray(req.body) ? req.body : [req.body];
+      const results = [];
+      const errors = [];
 
+      for (const [index, lang] of language.entries()) {
+        const { lName, lStatus, lInactiveReason } = lang;
+        if (!lName || !lStatus) {
+          errors.push({ index, error: "All fields are required", language: lang });
+          continue; // skip this one, continue with next
+        }
+        try {
+          const result = await createProjectService.insertLanguage(lName, lStatus, lInactiveReason);
+          results.push({ ...lang, dbResult: result });
+        } catch (dbErr) {
+          errors.push({ index, error: dbErr.message, language: lang });
+        }
+      }
+      res.status(201).json({
+        message: "Processing completed",
+        addedCount: results.length,
+        failedCount: errors.length,
+        addedLanguages: results,
+        failedLanguages: errors
+      });
+    } catch(err){
+      res.status(500).json({error: err.message})
+    }
+  };
   const getLanguage=async(req,res)=>{
     try{
         const result=await createProjectService.getLanguage();
@@ -62,5 +91,6 @@ const viewProjectDetails=async(req,res)=>{
 module.exports = {
     insertProject,
     viewProjectDetails,
+    insertLanguage,
     getLanguage
 }

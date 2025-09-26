@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Button, Table, Alert, Badge } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import projectAPI from "../../api/Api";
 import LeftTabMenu from "../../components/LeftTabMenu/LeftTabMenu";
 
 const ModulePage = () => {
+    const { pCode } = useParams();
   const [project, setProject] = useState(null);
   const [modules, setModules] = useState([]);
   const [error, setError] = useState(null);
@@ -14,7 +15,7 @@ const ModulePage = () => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const res = await projectAPI.getProjectByCode("ERP001");
+        const res = await projectAPI.getProjectByCode(pCode);
         setProject(res.data.result.project[0]);
         setModules(res.data.result.module || []);
       } catch (err) {
