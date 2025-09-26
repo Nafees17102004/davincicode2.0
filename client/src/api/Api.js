@@ -18,7 +18,7 @@ const getProjectByCode = (pCode) => {
 }
 
 const insertLanguage = (langData) => {
-    return api.post('/add-language', langData);
+    return api.post('/add-lang', langData);
 }
 
 const projectAPI = {
