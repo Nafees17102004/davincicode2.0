@@ -50,7 +50,6 @@ const viewProjectDetails=async(req,res)=>{
         res.status(500).json({message:err.message});
     }
   }
-
 const insertLanguage = async (req, res) => {
     try {
       const language = Array.isArray(req.body) ? req.body : [req.body];
@@ -81,9 +80,17 @@ const insertLanguage = async (req, res) => {
       res.status(500).json({error: err.message})
     }
   };
-
+  const getLanguage=async(req,res)=>{
+    try{
+        const result=await createProjectService.getLanguage();
+        res.status(200).json(result);
+    }catch(err){
+      res.status(500).json({message:err.message});
+    }
+  }
 module.exports = {
     insertProject,
-    viewProjectDetails, 
-    insertLanguage
+    viewProjectDetails,
+    insertLanguage,
+    getLanguage
 }

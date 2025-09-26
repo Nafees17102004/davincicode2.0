@@ -11,7 +11,7 @@ const getProjectDetails=async(req,res)=>{
     } catch (err) {
         res.status(500).json(err);
     }
-};
+};  
 
 const insertModule = async (req, res) => {
   try {
@@ -22,7 +22,7 @@ const insertModule = async (req, res) => {
     for (const [index, module] of modules.entries()) {
           const { project_id,m_name,m_desc,status,inactive_reason} = module;
         
-          if (!project_id || !m_name || !m_desc || !status) {
+          if (!project_id || !m_name || !status) {
               errors.push({ index, error: "All fields are required", module: module });
               continue; // skip this one, continue with next
             }

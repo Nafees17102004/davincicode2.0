@@ -30,8 +30,18 @@ const insertLanguage = async (lName, lStatus, lInactiveReason) =>{
     }
 }
 
+const getLanguage= async ()=>{
+    try{
+        const query = "CALL GetLanguage()";
+        const [result]= await pool.query(query);
+        return result[0];
+    }catch(err){
+        console.error("Error: ",err);
+    }
+}
 module.exports = {
     insertProject,
     viewProjectDetails,
-    insertLanguage
+    insertLanguage,
+    getLanguage
 }
