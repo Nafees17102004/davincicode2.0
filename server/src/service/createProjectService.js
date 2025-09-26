@@ -18,7 +18,17 @@ const viewProjectDetails = async () => {
     }
 }
 
+const getLanguage=async()=>{
+    try {
+        const result=await createProjectRepo.getLanguage();
+        return result;
+    } catch (err) {
+        console.error(err);
+    }
+}
+
 module.exports = {
     insertProject,
-    viewProjectDetails
+    viewProjectDetails,
+    getLanguage
 }

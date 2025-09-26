@@ -8,5 +8,6 @@ router.get('/projects', createProjectController.viewProjectDetails);
 router.post('/add-project', createProjectController.insertProject);
 router.post("/insertModule",controller.insertModule);
 router.get("/getProjectDetails/:p_code",controller.getProjectDetails);
+router.get("/getLanguage",createProjectController.getLanguage);
 
 module.exports = router;
