@@ -8,6 +8,7 @@ import LanguageTable from '../LanguageTable/LanguageTable';
 function LanguageForm() {
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
+  const navigate = useNavigate();
 
   const handleAddRow = () => {
     setRows([
@@ -40,6 +41,9 @@ function LanguageForm() {
     });
     setRows([]);
   };
+  const handleViewLanguage = () => {
+    navigate('/view-languages')
+  }
   return (
     <div className="project-form-container mt-4">
       <div className="project-form-header">
@@ -53,7 +57,7 @@ function LanguageForm() {
         <Button onClick={handleSubmit} className='submit-btn'>
           Submit
         </Button>
-        <Button className='view-project-btn'>
+        <Button className='view-project-btn' onClick={() => handleViewLanguage()}>
           View Stored Data
         </Button>
       </div>
