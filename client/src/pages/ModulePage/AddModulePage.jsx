@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Container, Card, Button, Form, Table } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import projectAPI from "../../api/Api";
 
 const AddModulePage = () => {
   const [modules, setModules] = useState([
     { m_name: "", m_desc: "", status: "active", inactive_reason: null},
   ]);
+  const {pCode} = useParams();
 
   const navigate = useNavigate();
 
@@ -39,14 +40,13 @@ const AddModulePage = () => {
     e.preventDefault();
     try {
       const formatted = modules.map((m) => ({
-        project_id: "ERP001",
         m_name: m.m_name,
         m_desc: m.m_desc,
         status: m.status,
         inactive_reason: m.status === "inactive" ? m.inactive_reason : null,
       }));
 
-      const res = await projectAPI.insertModule(formatted);
+      const res = await projectAPI.insertModule(pCode, formatted);
       console.log("API response:", res.data);
 
       // Clear all previous errors
@@ -58,15 +58,12 @@ const AddModulePage = () => {
           updatedModules[p.index].error = p.error;
         });
         setModules(updatedModules);
-        alert(`${res.data.addedCount} module(s) added, ${res.data.failedCount} module(s) failed. See table for errors.`);
       } else {
-        alert(`${res.data.addedCount} module(s) added successfully!`);
-        navigate("/modules");
+        navigate(`/module/${pCode}`);
       }
 
     } catch (err) {
       console.error("Error submitting modules:", err.response || err);
-      alert("Error submitting modules");
     }
   };
 
