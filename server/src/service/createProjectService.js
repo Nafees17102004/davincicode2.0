@@ -39,7 +39,7 @@ const getLanguage=async()=>{
 module.exports = {
     insertProject,
     viewProjectDetails,
-    insertLanguage
+    insertLanguage,
     viewProjectDetails,
     getLanguage
 }

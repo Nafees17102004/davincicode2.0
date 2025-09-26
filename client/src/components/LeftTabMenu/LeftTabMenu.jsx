@@ -12,9 +12,6 @@ function LeftTabMenu() {
         <li className='menu-item'>
             <Link to="/project" className='nav-link'>Project</Link>
         </li>
-        <li className='menu-item'>
-            <Link to="/module/:pCode" className='nav-link'>Module</Link>
-        </li>
       </ul>
     </div>
   )

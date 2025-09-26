@@ -1,8 +1,31 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import { Table, Form } from "react-bootstrap";
+import projectAPI from '../../api/Api';
 import './ProjectTable.css'
 
 function ProjectTable({rows, onChange}) {
+  const [language, setLanguage] = useState([]);
+
+  useEffect(()=>{
+    fetchLanguages();
+  }, []);
+
+  const fetchLanguages = async () => {
+    try {
+      await projectAPI.getLangauge().then((response)=>{
+        const formattedLangiages = response.data.map((lang)=>({
+          lId: lang.id,
+          lName:lang.name,
+          lStatus: lang.status,
+          lInactiveReason: lang.inactive_reason
+        }))
+        setLanguage(formattedLangiages);
+      })
+    } catch(err){
+      console.error("Error fetching languages:", err);
+    }
+  }
+
   return (
     <Table bordered hover className='table'>
       <thead className='table-header'>
@@ -44,11 +67,14 @@ function ProjectTable({rows, onChange}) {
                 onChange={(e) => onChange(index, "pLanguageId", e.target.value)}
               >
                 <option value="">Select Language</option>
-                <option value="1">Node JS</option>
+                {language.map((eachLang)=>(
+                  <option key={eachLang.lId} value={eachLang.lId}>{eachLang.lName}</option>
+                ))}
+                {/* <option value="1">Node JS</option>
                 <option value="2">Python</option>
                 <option value="3">Java</option>
                 <option value="4">React</option>
-                <option value="5">C#</option>
+                <option value="5">C#</option> */}
               </Form.Select>
             </td>
             <td>
@@ -82,4 +108,4 @@ function ProjectTable({rows, onChange}) {
   );
 };
 
-export default ProjectTable
+export default ProjectTable;
