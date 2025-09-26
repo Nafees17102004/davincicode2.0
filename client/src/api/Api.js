@@ -17,8 +17,8 @@ const getProjectByCode = (pCode) => {
     return api.get(`/getProjectDetails/${pCode}`)
 }
 
-const insertModule = (moduleData)=>{
-    return api.post('/insertModule',moduleData);
+const insertModule = (pCode, moduleData)=>{
+    return api.post(`/insertModule/${pCode}`,moduleData);
 }
 
 const insertLanguage = (languageData) => {
