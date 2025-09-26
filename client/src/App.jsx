@@ -4,6 +4,7 @@ import ProjectPage from './pages/ProjectPage/ProjectPage'
 import LanguagePage from './pages/LanguagePage/LanguagePage';
 import ModulePage from './pages/ModulePage/ModulePage';
 import ViewProjectsPage from './pages/ViewProjectsPage/ViewProjectsPage';
+import AddModulePage from './pages/ModulePage/AddModulePage'
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path='/project' element={<ProjectPage/>}/>
         <Route path='/module' element={<ModulePage/>}/>
         <Route path='/view-Projects' element={<ViewProjectsPage/>}/>
+        <Route path='/add-module/:pCode' element={<AddModulePage/>}/>
       </Routes>
   )
 }
