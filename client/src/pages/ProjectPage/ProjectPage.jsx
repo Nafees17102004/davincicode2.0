@@ -5,11 +5,14 @@ import './ProjectPage.css'
 
 function ProjectPage() {
   return (
-    <div className='project-page-container d-flex'>
+    <div>
+      <div>
         <LeftTabMenu/>
-        <div className='project-page d-flex justify-content-center align-items-center'>
-            <ProjectForm/>
-        </div>
+      </div>
+        
+      <div>
+        <ProjectForm/>
+      </div>
     </div>
   )
 }

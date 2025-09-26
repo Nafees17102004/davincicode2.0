@@ -16,19 +16,20 @@ const getProjectDetails=async(req,res)=>{
 const insertModule = async (req, res) => {
   try {
     const modules = Array.isArray(req.body) ? req.body : [req.body];
+    const project_id = req.params.project_id;
     const results=[];
     const errors = [];
 
     for (const [index, module] of modules.entries()) {
-          const { project_id,m_name,m_desc,status,inactive_reason} = module;
+          const { m_name,m_desc,status,inactive_reason} = module;
         
-          if (!project_id || !m_name || !m_desc || !status) {
+          if (!project_id || !m_name || !status) {
               errors.push({ index, error: "All fields are required", module: module });
               continue; // skip this one, continue with next
             }
 
             try{
-                const result= await service.insertModule(project_id,m_name,m_desc,status,inactive_reason);
+                const result= await service.insertModule(project_id, m_name, m_desc,status ,inactive_reason);
                 results.push({...module,dbResult:result})
             }catch(err){
                 errors.push({index,error:err.message,module: module});

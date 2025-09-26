@@ -26,8 +26,8 @@ const ModulePage = () => {
     fetchProject();
   }, []);
 
-  const handleAddModule = () => {
-    navigate("/add-module"); // go to Add Module Page
+  const handleAddModule = (pCode) => {
+    navigate(`/add-module/${pCode}`); // go to Add Module Page
   };
 
   return (
@@ -97,7 +97,7 @@ const ModulePage = () => {
                 </tbody>
               </Table>
               <div className="d-flex justify-content-start mt-3">
-                <Button variant="primary" onClick={handleAddModule}>
+                <Button variant="primary" onClick={() => handleAddModule(pCode)}>
                   ➕ Add Module
                 </Button>
               </div>
