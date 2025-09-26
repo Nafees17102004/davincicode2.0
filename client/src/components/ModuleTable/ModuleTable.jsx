@@ -1,63 +1,81 @@
-import React from 'react';
-import { Table, Form } from 'react-bootstrap';
+import React from "react";
+import { Table, Form } from "react-bootstrap";
 
 const ModuleTable = ({ modules, onChange }) => {
-    return (
-        <Table bordered hover>
-            <thead>
-                <tr className="table-light">
-                    <th>Module Name</th>
-                    <th>Description</th>
-                    <th>Inactive Status</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {modules.map((module, index) => (
-                    <tr key={index}>
-                        <td>
-                            <Form.Control
-                                type="text"
-                                name="m_name"
-                                value={module.m_name}
-                                onChange={(e) => onChange(index, m_name,e.target.value)}
-                                required
-                            />
-                        </td>
-                        <td>
-                            <Form.Control
-                                as="textarea"
-                                name="m_desc"
-                                value={module.m_desc}
-                                onChange={(e) => onChange(index, m_desc,e.target.value)}
-                                style={{ minHeight: '38px' }}
-                            />
-                        </td>
-                        <td className="text-center align-middle">
-                            <Form.Check
-                                type="switch"
-                                id={`inactive-switch-${index}`}
-                                name="status"
-                                checked={module.status === active}
-                                onChange={(e) => onChange(index, status,e.target.value)}
-                                className="d-inline-block"
-                            />
-                        </td>
-                        <td>
-                            <Form.Select
-                                name="status"
-                                value={module.status}
-                                onChange={(e) => onChange(index, m_name,e.target.value)}
-                            >
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                            </Form.Select>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </Table>
-    );
+  return (
+    <Table striped bordered hover responsive>
+      <thead className="table-dark">
+        <tr>
+          <th>Module ID</th>
+          <th>Module Name</th>
+          <th>Description</th>
+          <th>Status</th>
+          <th>Inactive Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {modules && modules.length > 0 ? (
+          modules.map((module, index) => (
+            <tr key={index}>
+              <td>{module.module_id || "New"}</td>
+
+              {/* Module Name */}
+              <td>
+                <Form.Control
+                  type="text"
+                  name="module_name"
+                  value={module.module_name || ""}
+                  onChange={(e) => onChange(e, index)}
+                  placeholder="Enter module name"
+                />
+              </td>
+
+              {/* Module Description */}
+              <td>
+                <Form.Control
+                  type="text"
+                  name="module_desc"
+                  value={module.module_desc || ""}
+                  onChange={(e) => onChange(e, index)}
+                  placeholder="Enter description"
+                />
+              </td>
+
+              {/* Status */}
+              <td>
+                <Form.Select
+                  name="status"
+                  value={module.status || "active"}
+                  onChange={(e) => onChange(e, index)}
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </Form.Select>
+              </td>
+
+              {/* Inactive Reason */}
+              <td>
+                <Form.Control
+                  type="text"
+                  name="inactive_reason"
+                  value={module.inactive_reason || ""}
+                  onChange={(e) => onChange(e, index)}
+                  placeholder="Enter reason (if inactive)"
+                  disabled={module.status === "active"}
+                />
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="5" className="text-center">
+              No modules found.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </Table>
+  );
 };
 
 export default ModuleTable;

@@ -17,10 +17,15 @@ const getProjectByCode = (pCode) => {
     return api.get(`/getProjectDetails/${pCode}`)
 }
 
+const insertModule = (moduleData)=>{
+    return api.post('/insertModule',moduleData);
+}
+
 const projectAPI = {
     insertProject, 
     viewProjects,
-    getProjectByCode
+    getProjectByCode,
+    insertModule
 }
 
 export default projectAPI;
