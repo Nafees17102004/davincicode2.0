@@ -79,6 +79,7 @@ CREATE TABLE CODE_SNIPPET (
 	inactive_reason VARCHAR(255) NULL
 );
 
+<<<<<<< HEAD
 INSERT INTO CODE_SNIPPET (Snippet_Name, Snippet, status) VALUES
 -- Textbox
 ('Textbox', '<input type="text" id="{name}" name="{name}" value={formData.{name}} onChange={handleChange} className="form-control" />', 'active'),
@@ -126,3 +127,5 @@ INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) V
 -- Radio Button → React snippet
 INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) VALUES
 (5, 9, 4, 'active');
+=======
+>>>>>>> f7790b03f55000638e67639ab79e5a1f26076afd

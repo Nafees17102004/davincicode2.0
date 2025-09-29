@@ -39,7 +39,6 @@ const projectAPI = {
     insertModule,
     insertLanguage,
     getLangauge,
-    insertLanguage,
     getSnippetById
 }
 
