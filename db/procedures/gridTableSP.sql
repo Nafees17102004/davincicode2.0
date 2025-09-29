@@ -155,3 +155,61 @@ DELIMITER ;
 
 
 CALL GetLanguage();
+
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertFieldType(
+    IN p_field_name VARCHAR(30)
+)
+BEGIN
+        INSERT INTO FIELD_TYPE (FIELD_NAME)
+        VALUES (p_field_name);
+END$$
+
+DELIMITER ;
+
+call insertfieldtype("drop");
+
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertSnippet(
+    IN p_field_type_id INT,
+    IN p_language_id INT,
+    IN p_snippet_name VARCHAR(100),
+    IN p_snippet TEXT
+)
+BEGIN
+    DECLARE v_snippet_id INT;
+
+    -- Check if a snippet already exists for this field + language
+    SELECT s.Snippet_ID INTO v_snippet_id
+    FROM CODE_SNIPPET s
+    JOIN FIELD_SNIPPET_MAP m 
+      ON s.Snippet_ID = m.SNIPPET_ID
+    WHERE m.FIELD_TYPE_ID = p_field_type_id
+      AND m.LANGUAGE_ID = p_language_id;
+
+    IF v_snippet_id IS NULL THEN
+        -- Insert new snippet
+        INSERT INTO CODE_SNIPPET (Snippet_Name, Snippet, status)
+        VALUES (p_snippet_name, p_snippet, 'active');
+
+        SET v_snippet_id = LAST_INSERT_ID();
+
+        -- Map to field type + language
+        INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, LANGUAGE_ID, status)
+        VALUES (p_field_type_id, v_snippet_id, p_language_id, 'active');
+    ELSE
+        -- Update existing snippet
+        UPDATE CODE_SNIPPET
+        SET Snippet = p_snippet,
+            Snippet_Name = p_snippet_name,
+            status = 'active',
+            inactive_reason = NULL
+        WHERE Snippet_ID = v_snippet_id;
+    END IF;
+END$$
+
+DELIMITER ;

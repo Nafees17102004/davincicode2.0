@@ -36,6 +36,7 @@ const getLanguage=async()=>{
     }
 };
 
+
 const getFieldTypes= async()=>{
         try {
             const result = await createProjectRepo.getFieldTypes();
@@ -58,11 +59,7 @@ module.exports = {
     insertProject,
     viewProjectDetails,
     insertLanguage,
-    viewProjectDetails,
-    getLanguage
-}
-    insertLanguage,
     getLanguage,
     getFieldTypes,
     getSnippetById
-};
+}
