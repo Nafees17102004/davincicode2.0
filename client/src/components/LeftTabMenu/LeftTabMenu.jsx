@@ -21,6 +21,11 @@ function LeftTabMenu() {
             Field
           </Link>
         </li>
+        <li className="menu-item">
+          <Link to="/snippet" className="nav-link">
+            Snippet
+          </Link>
+        </li>
       </ul>
     </div>
   );
