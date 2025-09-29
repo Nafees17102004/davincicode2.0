@@ -50,6 +50,16 @@ const getFieldTypes=async()=>{
     } 
 };
 
+const insertFieldTypes = async (fieldName) => {
+    try {
+        const query = "CALL InsertFieldType(?)";
+        const [result]=await pool.query(query,[fieldName]);
+        return result[0];
+    } catch(err){
+        console.error("Repo Error: ", err);
+    }
+}
+
 const getSnippetById=async(s_id)=>{
     try {
         const query = "CALL GetSnippetById(?)";
@@ -66,5 +76,6 @@ module.exports = {
     insertLanguage,
     getLanguage,
     getFieldTypes,
-    getSnippetById
+    getSnippetById,
+    insertFieldTypes
 }
