@@ -25,12 +25,16 @@ const insertLanguage = (languageData) => {
     return api.post('/add-lang', languageData);
 }
 
+const getSnippetById=(s_id)=>{
+    return api.get(`/getSnippetById/${s_id}`);
+}
 const projectAPI = {
     insertProject, 
     viewProjects,
     getProjectByCode,
     insertModule,
-    insertLanguage
+    insertLanguage,
+    getSnippetById
 }
 
 export default projectAPI;

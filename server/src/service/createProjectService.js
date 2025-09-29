@@ -7,7 +7,7 @@ const insertProject = async (pCode, pName, pLanguageId, pStatus, pInactiveReason
     }catch(err){
         console.error(err)
     }
-}
+};
 
 const viewProjectDetails = async () => {
     try {
@@ -16,7 +16,7 @@ const viewProjectDetails = async () => {
     }catch(err){
         console.error(err);
     }
-}
+};
 
 const insertLanguage = async (lName, lStatus, lInactiveReason) =>{
     try {
@@ -25,7 +25,7 @@ const insertLanguage = async (lName, lStatus, lInactiveReason) =>{
     } catch(err){
         console.error(err);
     }
-}
+};
 
 const getLanguage=async()=>{
     try {
@@ -34,12 +34,31 @@ const getLanguage=async()=>{
     } catch (err) {
         console.error(err);
     }
+};
+
+const getFieldTypes= async()=>{
+        try {
+            const result = await createProjectRepo.getFieldTypes();
+            return result;
+        } catch (err) {
+            console.error("Error :",err);
+        }
+};
+
+const getSnippetById=async(s_id)=>{
+    try {
+        const result=await createProjectRepo.getSnippetById(s_id);
+        return result;
+    } catch (err){
+        console.error("Error :",err);
+    }
 }
 
 module.exports = {
     insertProject,
     viewProjectDetails,
-    insertLanguage
-    viewProjectDetails,
-    getLanguage
-}
+    insertLanguage,
+    getLanguage,
+    getFieldTypes,
+    getSnippetById
+};

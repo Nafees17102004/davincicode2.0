@@ -54,3 +54,20 @@ INSERT INTO modules (project_id, name, status) VALUES
 (3, 'Product Catalog', 'active'),
 (3, 'Checkout', 'active'),
 (4, 'Employee Records', 'inactive');
+
+
+create table FIELD_TYPE(
+FIELD_TYPE_ID int auto_increment primary key,
+FIELD_NAME varchar(30) unique not null,
+status ENUM('active','inactive') DEFAULT 'active',
+inactive_reason VARCHAR(255) NULL
+);
+
+
+CREATE TABLE CODE_SNIPPET (
+    Snippet_ID INT AUTO_INCREMENT PRIMARY KEY,
+    Snippet_Name VARCHAR(100) unique  NOT NULL,   -- e.g., "CRUD", "Model", "Validation"
+    Snippet TEXT NOT NULL,                -- actual code snippet
+    status ENUM('active','inactive') DEFAULT 'active',
+	inactive_reason VARCHAR(255) NULL
+);

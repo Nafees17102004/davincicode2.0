@@ -16,7 +16,7 @@ const viewProjectDetails = async () => {
         const result = await pool.query(query);
         return result[0][0];
     }catch(err){
-        console.error("Error: ", err); 
+        console.error("Error: ", err);
     }
 }
 
@@ -39,9 +39,31 @@ const getLanguage= async ()=>{
         console.error("Error: ",err);
     }
 }
+
+const getFieldTypes=async()=>{
+    try {
+        const query = "CALL GetFieldTypes()";
+        const [result]=await pool.query(query);
+        return result[0];
+    } catch (err) {
+        console.error("Error: ",err);
+    } 
+};
+
+const getSnippetById=async(s_id)=>{
+    try {
+        const query = "CALL GetSnippetById(?)";
+        const [result]=await pool.query(query,[s_id]);
+        return result[0];
+    } catch (err){
+        console.err("Error:",err);
+    }
+}
 module.exports = {
     insertProject,
     viewProjectDetails,
     insertLanguage,
-    getLanguage
+    getLanguage,
+    getFieldTypes,
+    getSnippetById
 }
