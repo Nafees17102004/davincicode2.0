@@ -7,10 +7,10 @@ const insertProject = async (req, res) => {
     const errors = [];
 
     for (const [index, project] of projects.entries()) {
-      const { pCode, pName, pLanguageId, pStatus, pInactiveReason } = project;
+      const { pName, pLanguageId, pStatus, pInactiveReason } = project;
 
       // validation
-      if (!pCode || !pName || !pLanguageId || !pStatus) {
+      if (!pName || !pLanguageId || !pStatus) {
         errors.push({
           index,
           error: "All fields are required",
@@ -20,13 +20,20 @@ const insertProject = async (req, res) => {
       }
 
       try {
-        const [result] = await createProjectService.insertProject(
-          pCode,
+        const result = await createProjectService.insertProject(
           pName,
           pLanguageId,
           pStatus,
           pInactiveReason
         );
+        if (!result || result.affectedRows === 0) {
+          errors.push({
+            index,
+            error: "Duplicate Error",
+            projects: project,
+          });
+          continue;
+        }
         results.push({ ...project, dbResult: result });
       } catch (dbErr) {
         errors.push({ index, error: dbErr.message, employee: project });
@@ -75,6 +82,14 @@ const insertLanguage = async (req, res) => {
           lStatus,
           lInactiveReason
         );
+        if (!result || result.affectedRows == 0) {
+          errors.push({
+            index,
+            error: "Duplicate Error",
+            language: lang,
+          });
+          continue;
+        }
         results.push({ ...lang, dbResult: result });
       } catch (dbErr) {
         errors.push({ index, error: dbErr.message, language: lang });
@@ -112,16 +127,48 @@ const getFieldTypes = async (req, res) => {
 
 const insertFieldTypes = async (req, res) => {
   try {
-    const { fieldName } = req.body;
-    if (!fieldName) {
-      res.status(401).json({ message: "All fields are required" });
+    const FieldArray = Array.isArray(req.body) ? req.body : [req.body];
+    const results = [];
+    const errors = [];
+
+    for (const [index, field] of FieldArray.entries()) {
+      const { fieldName, fStatus, fInactiveReason } = field;
+      if (!fieldName || !fStatus) {
+        errors.push({
+          index,
+          error: "All fields are required",
+          FieldArray: field,
+        });
+        continue; // skip this one, continue with next
+      }
+      try {
+        const result = await createProjectService.insertFieldTypes(
+          fieldName,
+          fStatus,
+          fInactiveReason
+        );
+        if (!result || result.affectedRows == 0) {
+          errors.push({
+            index,
+            error: "Duplicate Error",
+            FieldArray: field,
+          });
+          continue;
+        }
+        results.push({ ...field, dbResult: result });
+      } catch (dbErr) {
+        errors.push({ index, error: dbErr.message, FieldArray: field });
+      }
     }
-    const result = await createProjectService.insertFieldTypes(fieldName);
-    res
-      .status(201)
-      .json({ message: "Field types added successfully", data: result });
-  } catch (error) {
-    res.status(500).json({ message: err.message });
+    res.status(201).json({
+      message: "Processing completed",
+      addedCount: results.length,
+      failedCount: errors.length,
+      addedFields: results,
+      failedFields: errors,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
