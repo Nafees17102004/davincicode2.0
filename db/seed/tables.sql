@@ -63,6 +63,13 @@ status ENUM('active','inactive') DEFAULT 'active',
 inactive_reason VARCHAR(255) NULL
 );
 
+INSERT INTO FIELD_TYPE (FIELD_NAME, status) VALUES
+('Textbox', 'active'),
+('Password Box', 'active'),
+('Textarea', 'active'),
+('Dropdown', 'active'),
+('Radio Button', 'active');
+
 
 CREATE TABLE CODE_SNIPPET (
     Snippet_ID INT AUTO_INCREMENT PRIMARY KEY,
@@ -72,3 +79,53 @@ CREATE TABLE CODE_SNIPPET (
 	inactive_reason VARCHAR(255) NULL
 );
 
+<<<<<<< HEAD
+INSERT INTO CODE_SNIPPET (Snippet_Name, Snippet, status) VALUES
+-- Textbox
+('Textbox', '<input type="text" id="{name}" name="{name}" value={formData.{name}} onChange={handleChange} className="form-control" />', 'active'),
+
+-- Password Box
+('Password Box', '<input type="password" id="{name}" name="{name}" value={formData.{name}} onChange={handleChange} className="form-control" />', 'active'),
+
+-- Textarea
+('Textarea', '<textarea id="{name}" name="{name}" value={formData.{name}} onChange={handleChange} className="form-control"></textarea>', 'active'),
+
+-- Dropdown
+('Dropdown', '<select id="{name}" name="{name}" value={formData.{name}} onChange={handleChange} className="form-control">{options.map((opt, idx) => (<option key={idx} value={opt.value}>{opt.label}</option>))}</select>', 'active'),
+
+-- Radio Button
+('Radio Button', '{options.map((opt, idx) => (<input type="radio" name="{name}" value={opt.value} checked={formData.{name} === opt.value} onChange={handleChange} key={idx} />))}', 'active');
+
+CREATE TABLE FIELD_SNIPPET_MAP (
+    MAP_ID INT AUTO_INCREMENT PRIMARY KEY,
+    FIELD_TYPE_ID INT NOT NULL,
+    SNIPPET_ID INT NOT NULL,
+    LANGUAGE_ID INT NOT NULL,
+    status ENUM('active','inactive') DEFAULT 'active',
+    inactive_reason VARCHAR(255) NULL,
+    FOREIGN KEY (FIELD_TYPE_ID) REFERENCES FIELD_TYPE(FIELD_TYPE_ID) ON DELETE CASCADE,
+    FOREIGN KEY (SNIPPET_ID) REFERENCES CODE_SNIPPET(Snippet_ID) ON DELETE CASCADE,
+    FOREIGN KEY (LANGUAGE_ID) REFERENCES languages(id) ON DELETE CASCADE,
+    UNIQUE (FIELD_TYPE_ID, LANGUAGE_ID) -- ensure one snippet per field+language
+);
+
+INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) VALUES
+(  1, 5, 4, 'active');
+
+-- Password Box → React snippet
+INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) VALUES
+(2, 6, 4, 'active');
+
+-- Textarea → React snippet
+INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) VALUES
+(3, 7, 4, 'active');
+
+-- Dropdown → React snippet
+INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) VALUES
+(4, 8, 4, 'active');
+
+-- Radio Button → React snippet
+INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) VALUES
+(5, 9, 4, 'active');
+=======
+>>>>>>> f7790b03f55000638e67639ab79e5a1f26076afd
