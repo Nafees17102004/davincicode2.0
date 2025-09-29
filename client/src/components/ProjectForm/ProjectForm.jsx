@@ -33,7 +33,8 @@ function ProjectForm() {
     setRows(updatedRows);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     projectAPI.insertProject(rows).then((response) => {
       console.log("Response:", response.data);
       alert(`Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`);

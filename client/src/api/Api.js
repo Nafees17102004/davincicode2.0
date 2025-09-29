@@ -25,6 +25,10 @@ const insertLanguage = (languageData) => {
     return api.post('/add-lang', languageData);
 }
 
+const getLangauge = () => {
+    return api.get('/getLanguage');
+}
+
 const getSnippetById=(s_id)=>{
     return api.get(`/getSnippetById/${s_id}`);
 }
@@ -33,6 +37,8 @@ const projectAPI = {
     viewProjects,
     getProjectByCode,
     insertModule,
+    insertLanguage,
+    getLangauge
     insertLanguage,
     getSnippetById
 }

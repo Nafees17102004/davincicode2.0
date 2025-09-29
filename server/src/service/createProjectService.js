@@ -58,6 +58,10 @@ module.exports = {
     insertProject,
     viewProjectDetails,
     insertLanguage,
+    viewProjectDetails,
+    getLanguage
+}
+    insertLanguage,
     getLanguage,
     getFieldTypes,
     getSnippetById
