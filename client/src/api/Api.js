@@ -29,6 +29,9 @@ const getLangauge = () => {
     return api.get('/getLanguage');
 }
 
+const getSnippetById=(s_id)=>{
+    return api.get(`/getSnippetById/${s_id}`);
+}
 const projectAPI = {
     insertProject, 
     viewProjects,
@@ -36,6 +39,8 @@ const projectAPI = {
     insertModule,
     insertLanguage,
     getLangauge
+    insertLanguage,
+    getSnippetById
 }
 
 export default projectAPI;

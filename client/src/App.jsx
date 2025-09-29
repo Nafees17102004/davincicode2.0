@@ -6,6 +6,7 @@ import ModulePage from './pages/ModulePage/ModulePage';
 import ViewProjectsPage from './pages/ViewProjectsPage/ViewProjectsPage';
 import ViewLanguagePage from './pages/ViewLanguagePage/ViewLanguagePage';
 import AddModulePage from './pages/ModulePage/AddModulePage'
+import SnippetPage from './pages/snippet/SnippetPage';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path='/view-languages' element={<ViewLanguagePage/>}/>
         <Route path='/view-Projects' element={<ViewProjectsPage/>}/>
         <Route path='/add-module/:pCode' element={<AddModulePage/>}/>
+        <Route path='/snippet' element={<SnippetPage/>}/>
       </Routes>
   )
 }

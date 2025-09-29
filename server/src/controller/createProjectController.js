@@ -80,6 +80,7 @@ const insertLanguage = async (req, res) => {
       res.status(500).json({error: err.message})
     }
   };
+
   const getLanguage=async(req,res)=>{
     try{
         const result=await createProjectService.getLanguage();
@@ -87,10 +88,32 @@ const insertLanguage = async (req, res) => {
     }catch(err){
       res.status(500).json({message:err.message});
     }
-  }
+  };
+
+  const getFieldTypes=async(req,res)=>{
+    try {
+      const result=await createProjectService.getFieldTypes();
+      res.status(200).json(result);
+    } catch (err) {
+        res.status(500).json({message:err.message});
+    }
+  };
+  
+  const getSnippetById=async(req,res)=>{
+    try {
+      const s_id=req.params.s_id;
+      const result = await createProjectService.getSnippetById(s_id);
+      res.status(200).json(result);
+    } catch (err){
+      res.status(500).json({message:err.message});
+    }
+  };
+
 module.exports = {
     insertProject,
     viewProjectDetails,
     insertLanguage,
-    getLanguage
+    getLanguage,
+    getFieldTypes,
+    getSnippetById
 }
