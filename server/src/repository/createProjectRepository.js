@@ -59,6 +59,7 @@ const getSnippetById=async(s_id)=>{
         console.err("Error:",err);
     }
 }
+
 module.exports = {
     insertProject,
     viewProjectDetails,

@@ -59,8 +59,7 @@ module.exports = {
     viewProjectDetails,
     insertLanguage,
     viewProjectDetails,
-    getLanguage
-}
+    getLanguage,
     insertLanguage,
     getLanguage,
     getFieldTypes,

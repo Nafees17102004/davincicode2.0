@@ -71,3 +71,4 @@ CREATE TABLE CODE_SNIPPET (
     status ENUM('active','inactive') DEFAULT 'active',
 	inactive_reason VARCHAR(255) NULL
 );
+
