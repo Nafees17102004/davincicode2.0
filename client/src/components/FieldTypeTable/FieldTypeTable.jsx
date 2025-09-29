@@ -9,7 +9,7 @@ function FieldTypeTable({ rows, onChange }) {
           <th className="field-name">ID</th>
           <th className="field-name">Field Name</th>
           <th className="field-name">Field Status</th>
-          {rows.some((row) => row.lStatus === "inactive") && (
+          {rows.some((row) => row.fStatus === "inactive") && (
             <th className="field-name">Inactive Reason</th>
           )}
         </tr>
@@ -21,35 +21,35 @@ function FieldTypeTable({ rows, onChange }) {
             <td>
               <Form.Control
                 type="text"
-                value={row.lName}
-                name="lName"
-                onChange={(e) => onChange(index, "lName", e.target.value)}
+                value={row.fieldName}
+                name="fieldName"
+                onChange={(e) => onChange(index, "fieldName", e.target.value)}
               />
             </td>
             <td>
               <Form.Check
                 type="switch"
                 id={`status-switch-${index}`}
-                label={row.lStatus === "active" ? "active" : "inactive"}
-                checked={row.lStatus === "active"}
+                label={row.fStatus === "active" ? "active" : "inactive"}
+                checked={row.fStatus === "active"}
                 onChange={(e) =>
                   onChange(
                     index,
-                    "lStatus",
+                    "fStatus",
                     e.target.checked ? "active" : "inactive"
                   )
                 }
               />
             </td>
-            {row.lStatus === "inactive" && (
+            {row.fStatus === "inactive" && (
               <td>
                 <Form.Control
                   as="textarea"
                   placeholder="Enter inactive reason"
-                  value={row.lInactiveReason || ""}
-                  name="lInactiveReason"
+                  value={row.fInactiveReason || ""}
+                  name="fInactiveReason"
                   onChange={(e) =>
-                    onChange(index, "lInactiveReason", e.target.value)
+                    onChange(index, "fInactiveReason", e.target.value)
                   }
                   className="inactive-textarea"
                 />
