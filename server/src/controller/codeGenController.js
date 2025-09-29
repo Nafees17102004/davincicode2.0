@@ -52,4 +52,38 @@ const insertModule = async (req, res) => {
   }
 };
 
-module.exports = { insertModule ,getProjectDetails};
+const insertSnippet = async (req, res) => {
+    try {
+    const snippets = Array.isArray(req.body) ? req.body : [req.body];
+    const results=[];
+    const errors = [];
+
+    for (const [index, snip] of snippets.entries()) {
+          const { fieldTypeId, languageId, snippetName, snippet} = snip;
+      
+      if (!fieldTypeId || !languageId || !snippetName || !snippet) {
+        errors.push({ index, error: "All fields are required", snippet: snip });
+        continue;
+      }
+
+      try{
+            const result= await service.insertSnippet(fieldTypeId, languageId, snippetName, snippet);
+            results.push({...snip,dbResult:result})
+        }catch(err){
+            errors.push({index,error:err.message,snip: snip});
+        }
+    }
+    res.status(201).json({
+            message: "Processing completed",
+            addedCount: results.length,
+            failedCount: errors.length,
+            addedSnippets: results,
+            failedSnippets: errors 
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+module.exports = { insertModule ,getProjectDetails,insertSnippet};

@@ -12,5 +12,6 @@ router.post('/add-lang', createProjectController.insertLanguage);
 router.get("/getLanguage",createProjectController.getLanguage);
 router.get("/getFieldTypes",createProjectController.getFieldTypes);
 router.get("/getSnippetById/:s_id",createProjectController.getSnippetById);
+router.post("/insertSnippet",controller.insertSnippet);
 
 module.exports = router;
