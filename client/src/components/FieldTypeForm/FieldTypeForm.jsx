@@ -14,9 +14,9 @@ function FieldTypeForm() {
       ...rows,
       {
         id: idCounter,
-        lName: "",
-        lStatus: "active",
-        lInactiveReason: null,
+        fieldName: "",
+        fStatus: "active",
+        fInactiveReason: null,
       },
     ]);
     setIdCounter(idCounter + 1);
@@ -31,19 +31,19 @@ function FieldTypeForm() {
   };
 
   const handleSubmit = () => {
-    // projectAPI
-    //   .insertLanguage(rows)
-    //   .then((response) => {
-    //     console.log("Response:", response.data);
-    //     alert(
-    //       `Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`
-    //     );
-    //   })
-    //   .catch((error) => {
-    //     console.error("There was an error!", error);
-    //     alert("An error occurred while submitting the projects.");
-    //   });
-    // setRows([]);
+    projectAPI
+      .insertFieldTypes(rows)
+      .then((response) => {
+        console.log("Response:", response.data);
+        alert(
+          `Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`
+        );
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+        alert("An error occurred while submitting the projects.");
+      });
+    setRows([]);
   };
   const handleViewLanguage = () => {
     navigate("/view-languages");

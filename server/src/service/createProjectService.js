@@ -1,15 +1,8 @@
 const createProjectRepo = require("../repository/createProjectRepository");
 
-const insertProject = async (
-  pCode,
-  pName,
-  pLanguageId,
-  pStatus,
-  pInactiveReason
-) => {
+const insertProject = async (pName, pLanguageId, pStatus, pInactiveReason) => {
   try {
     const result = await createProjectRepo.insertProject(
-      pCode,
       pName,
       pLanguageId,
       pStatus,
@@ -61,11 +54,16 @@ const getFieldTypes = async () => {
   }
 };
 
-const insertFieldTypes = async (fieldName) => {
+const insertFieldTypes = async (fieldName, fStatus, fInactiveReason) => {
   try {
-    const result = await createProjectRepo.insertFieldTypes(fieldName);
+    const result = await createProjectRepo.insertFieldTypes(
+      fieldName,
+      fStatus,
+      fInactiveReason
+    );
+    console.log(result);
     return result;
-  } catch (error) {
+  } catch (err) {
     console.error("Service ERROR: ", err);
   }
 };
