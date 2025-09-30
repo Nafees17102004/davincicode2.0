@@ -5,29 +5,18 @@ import projectAPI from "../../api/Api";
 import { useNavigate } from "react-router-dom";
 
 function SnippetForm() {
-  const [rows, setRows] = useState([]);
-  const [idCounter, setIdCounter] = useState(1);
+  const [rows, setRows] = useState({
+    fieldTypeId: 0,
+    languageId: 0,
+    snippetName: "",
+    snippet: "",
+  });
   const navigate = useNavigate();
-
-  const handleAddRow = () => {
-    setRows([
-      ...rows,
-      {
-        fieldTypeId: 0,
-        languageId: 0,
-        snippetName: "",
-        snippet: "",
-      },
-    ]);
-    setIdCounter(idCounter + 1);
-  };
 
   console.log(rows);
 
-  const handleChange = (index, field, value) => {
-    const updatedRows = [...rows];
-    updatedRows[index][field] = value;
-    setRows(updatedRows);
+  const handleChange = (e) => {
+    setRows({ ...rows, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = (e) => {
@@ -50,12 +39,9 @@ function SnippetForm() {
     <div className="project-form-container mt-4">
       <div className="project-form-header">
         <h3 className="project-page-heading">Snippet Creation</h3>
-        <Button onClick={handleAddRow} className="create-project-btn">
-          Create Snippet
-        </Button>
       </div>
 
-      <SnippetTable rows={rows} onChange={handleChange} />
+      <SnippetTable rows={rows} onChange={(e) => handleChange(e)} />
 
       <div className="project-btn-container">
         <Button onClick={handleSubmit} className="submit-btn">
