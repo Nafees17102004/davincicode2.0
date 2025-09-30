@@ -21,6 +21,14 @@ const insertModule = async (project_id,m_name,m_desc,status,inactive_reason) => 
   }
 };
 
+const insertSnippet=async(fieldTypeId,languageId,snippetName,snippet)=>{
+  try{
+  const result = await repo.insertSnippet(fieldTypeId,languageId,snippetName,snippet);
+  return result;
+  }catch(err){
+    console.error("Error :",err);
+    throw err;
+  }
+}
 
-
-module.exports = { insertModule ,getProjectDetails};
+module.exports = { insertModule ,getProjectDetails, insertSnippet};

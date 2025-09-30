@@ -6,18 +6,23 @@ import ModulePage from './pages/ModulePage/ModulePage';
 import ViewProjectsPage from './pages/ViewProjectsPage/ViewProjectsPage';
 import ViewLanguagePage from './pages/ViewLanguagePage/ViewLanguagePage';
 import AddModulePage from './pages/ModulePage/AddModulePage'
+import FieldTypePage from './pages/FieldTypePage/FieldTypePage';
+import SnippetPage from './pages/SnippetPage/SnippetPage';
 
 function App() {
   return (
-      <Routes>
-        <Route path="/" element={<LanguagePage />} />
-        <Route path='/project' element={<ProjectPage/>}/>
-        <Route path='/module/:pCode' element={<ModulePage/>}/>
-        <Route path='/view-languages' element={<ViewLanguagePage/>}/>
-        <Route path='/view-Projects' element={<ViewProjectsPage/>}/>
-        <Route path='/add-module/:pCode' element={<AddModulePage/>}/>
-      </Routes>
-  )
+    <Routes>
+      <Route path="/" element={<LanguagePage />} />
+      <Route path="/project" element={<ProjectPage />} />
+      <Route path="/module/:pCode" element={<ModulePage />} />
+      <Route path="/view-languages" element={<ViewLanguagePage />} />
+      <Route path="/view-Projects" element={<ViewProjectsPage />} />
+      <Route path="/add-module/:pCode" element={<AddModulePage />} />
+      <Route path="/snippet" element={<SnippetPage />} />
+      <Route path="/field" element={<FieldTypePage />} />
+      <Route path="/snippet" element={<SnippetPage />} />
+    </Routes>
+  );
 }
 
 export default App;

@@ -24,4 +24,17 @@ const insertModule = async (project_id,m_name,m_desc,status,inactive_reason) => 
   }
 };
 
-module.exports = { insertModule,getProjectDetails };
+const insertSnippet=async(fieldTypeId,languageId,snippetName,snippet)=>{
+  try{
+  const query="Call InsertSnippet(?,?,?,?)";
+  const data=[fieldTypeId,languageId,snippetName,snippet];
+  const result= await pool.query(query,data);
+  return result[0];
+  }catch(err){
+    console.error("Error in Repository.insertSnippet:",err);
+    throw err;
+  }
+};
+
+
+module.exports = { insertModule,getProjectDetails ,insertSnippet};
