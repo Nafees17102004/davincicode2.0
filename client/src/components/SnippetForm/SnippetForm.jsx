@@ -13,6 +13,7 @@ function SnippetForm() {
     setRows([
       ...rows,
       {
+        id: idCounter,
         fieldTypeId: 0,
         languageId: 0,
         snippetName: "",
