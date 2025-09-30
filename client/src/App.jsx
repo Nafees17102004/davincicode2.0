@@ -8,6 +8,8 @@ import ViewLanguagePage from './pages/ViewLanguagePage/ViewLanguagePage';
 import AddModulePage from './pages/ModulePage/AddModulePage'
 import FieldTypePage from './pages/FieldTypePage/FieldTypePage';
 import SnippetPage from './pages/SnippetPage/SnippetPage';
+import LoginPage from './pages/LoginPage/LoginPage'; 
+
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
       <Route path="/snippet" element={<SnippetPage />} />
       <Route path="/field" element={<FieldTypePage />} />
       <Route path="/snippet" element={<SnippetPage />} />
+      <Route path="/login" element={<LoginPage />} />
     </Routes>
   );
 }
