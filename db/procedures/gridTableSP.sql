@@ -213,3 +213,15 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+DELIMITER $$
+
+create procedure GetFieldTypes()
+BEGIN
+select * FROM FIELD_TYPE;
+END $$
+
+DELIMITER ;
+
+CALL GetFieldTypes();
