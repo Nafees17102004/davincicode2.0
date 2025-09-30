@@ -33,9 +33,17 @@ const getSnippetById = (s_id) => {
   return api.get(`/getSnippetById/${s_id}`);
 };
 
+const getFieldTypes = () => {
+  return api.get('/getFieldTypes');
+}
+
 const insertFieldTypes = (fieldData) => {
   return api.post("/add-field-type", fieldData);
 };
+
+const insertSnippet =(snippetData)=>{
+  return api.post("/insertSnippet",snippetData);
+}
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -45,6 +53,8 @@ const projectAPI = {
   getLangauge,
   getSnippetById,
   insertFieldTypes,
+  insertSnippet,
+  getFieldTypes
 };
 
 export default projectAPI;
