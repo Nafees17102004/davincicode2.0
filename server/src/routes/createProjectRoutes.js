@@ -16,6 +16,6 @@ router.post('/add-project', createProjectController.insertProject);
 router.post("/insertModule/:project_id",controller.insertModule);
 router.post('/add-lang', createProjectController.insertLanguage);
 router.post('/add-field-type', createProjectController.insertFieldTypes);
-
+router.post("/insertSnippet",controller.insertSnippet);
 
 module.exports = router;

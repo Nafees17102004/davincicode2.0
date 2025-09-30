@@ -13,12 +13,10 @@ function SnippetForm() {
     setRows([
       ...rows,
       {
-        id: idCounter,
-        pCode: "",
-        pName: "",
-        pLanguageId: 0,
-        pStatus: "active",
-        pInactiveReason: null,
+        fieldTypeId: 0,
+        languageId: 0,
+        snippetName: "",
+        snippet: "",
       },
     ]);
     setIdCounter(idCounter + 1);
@@ -35,11 +33,11 @@ function SnippetForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     projectAPI
-      .insertProject(rows)
+      .insertSnippet(rows)
       .then((response) => {
         console.log("Response:", response.data);
         alert(
-          `Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`
+          `snippet added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`
         );
       })
       .catch((error) => {
@@ -47,7 +45,6 @@ function SnippetForm() {
         alert("An error occurred while submitting the projects.");
       });
     setRows([]);
-    useNavigate("/view-projects");
   };
   return (
     <div className="project-form-container mt-4">
