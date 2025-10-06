@@ -1,5 +1,6 @@
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
+
 import ProjectPage from './pages/ProjectPage/ProjectPage'
 import LanguagePage from './pages/LanguagePage/LanguagePage';
 import ModulePage from './pages/ModulePage/ModulePage';
@@ -8,6 +9,7 @@ import ViewLanguagePage from './pages/ViewLanguagePage/ViewLanguagePage';
 import AddModulePage from './pages/ModulePage/AddModulePage'
 import FieldTypePage from './pages/FieldTypePage/FieldTypePage';
 import SnippetPage from './pages/SnippetPage/SnippetPage';
+import ViewFieldPage from './pages/ViewFieldPage/ViewFieldPage';
 
 function App() {
   return (
@@ -20,7 +22,7 @@ function App() {
       <Route path="/add-module/:pCode" element={<AddModulePage />} />
       <Route path="/snippet" element={<SnippetPage />} />
       <Route path="/field" element={<FieldTypePage />} />
-      <Route path="/snippet" element={<SnippetPage />} />
+      <Route path="/view-field" element={<ViewFieldPage />} />
     </Routes>
   );
 }

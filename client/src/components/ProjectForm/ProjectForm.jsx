@@ -14,7 +14,7 @@ function ProjectForm() {
     setRows([
       ...rows,
       {
-        id: idCounter,
+        sNO: idCounter,
         pCode: '',
         pName: '',
         pLanguageId: 0,

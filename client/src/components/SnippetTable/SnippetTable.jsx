@@ -43,14 +43,15 @@ function SnippetTable({ rows, onChange }) {
     }
   };
 
-  console.log(field);
-
   return (
-    <Form className="table">
+    <Form.Group className="p-2">
+      <Form.Label htmlFor="fieldType">Select Field Name</Form.Label>
       <Form.Select
+        id="fieldType"
         value={rows.fieldTypeId}
         name="fieldTypeId"
         onChange={(e) => onChange(e)}
+        className="mb-3"
       >
         <option value="">Select Field</option>
         {field.map((eachField) => (
@@ -64,11 +65,13 @@ function SnippetTable({ rows, onChange }) {
                 <option value="4">React</option>
                 <option value="5">C#</option> */}
       </Form.Select>
-
+      <Form.Label htmlFor="langName">Select language Name</Form.Label>
       <Form.Select
+        id="langName"
         value={rows.languageId}
         name="languageId"
         onChange={(e) => onChange(e)}
+        className="mb-3"
       >
         <option value="">Select Language</option>
         {language.map((eachLang) => (
@@ -77,23 +80,26 @@ function SnippetTable({ rows, onChange }) {
           </option>
         ))}
       </Form.Select>
-
+      <Form.Label htmlFor="snipName">Snippet Name</Form.Label>
       <Form.Control
+        id="snipName"
         type="text"
         value={rows.snippetName}
         name="snippetName"
         onChange={(e) => onChange(e)}
+        className="mb-3"
       />
-
+      <Form.Label htmlFor="snippet">Snippet</Form.Label>
       <Form.Control
+        id="snippet"
         as="textarea"
         placeholder="Enter Snippet"
         value={rows.snippet || ""}
         name="snippet"
         onChange={(e) => onChange(e)}
-        className="inactive-textarea"
+        className="mb-3"
       />
-    </Form>
+    </Form.Group>
   );
 }
 

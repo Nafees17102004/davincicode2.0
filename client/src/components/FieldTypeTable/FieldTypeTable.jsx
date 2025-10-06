@@ -6,7 +6,7 @@ function FieldTypeTable({ rows, onChange }) {
     <Table bordered hover className="table">
       <thead className="table-header">
         <tr className="table-field-row">
-          <th className="field-name">ID</th>
+          <th className="field-name">S.no</th>
           <th className="field-name">Field Name</th>
           <th className="field-name">Field Status</th>
           {rows.some((row) => row.fStatus === "inactive") && (
@@ -16,8 +16,8 @@ function FieldTypeTable({ rows, onChange }) {
       </thead>
       <tbody className="table-body">
         {rows.map((row, index) => (
-          <tr key={row.id}>
-            <td>{row.id}</td>
+          <tr key={row.sNO}>
+            <td>{row.sNO}</td>
             <td>
               <Form.Control
                 type="text"

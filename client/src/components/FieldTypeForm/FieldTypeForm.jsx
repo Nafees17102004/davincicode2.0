@@ -13,7 +13,7 @@ function FieldTypeForm() {
     setRows([
       ...rows,
       {
-        id: idCounter,
+        sNO: idCounter,
         fieldName: "",
         fStatus: "active",
         fInactiveReason: null,
@@ -45,8 +45,8 @@ function FieldTypeForm() {
       });
     setRows([]);
   };
-  const handleViewLanguage = () => {
-    navigate("/view-languages");
+  const handleViewField = () => {
+    navigate("/view-field");
   };
   return (
     <div className="project-form-container mt-4">
@@ -65,7 +65,7 @@ function FieldTypeForm() {
         </Button>
         <Button
           className="view-project-btn"
-          onClick={() => handleViewLanguage()}
+          onClick={() => handleViewField()}
         >
           View Stored Data
         </Button>
