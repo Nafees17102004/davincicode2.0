@@ -32,6 +32,7 @@ const insertLanguage = async (lName, lStatus, lInactiveReason) => {
     return result[0];
   } catch (err) {
     console.error(err);
+    throw err;
   }
 };
 

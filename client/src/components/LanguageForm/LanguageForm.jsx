@@ -14,9 +14,9 @@ function LanguageForm() {
     setRows([
       ...rows,
       {
-        id: idCounter,
-        lName: '',
-        lStatus: 'active',
+        sNO: idCounter,
+        lName: "",
+        lStatus: "active",
         lInactiveReason: null,
       },
     ]);

@@ -14,20 +14,20 @@ function SnippetTable({ rows, onChange }) {
   const fetchLanguages = async () => {
     try {
       await projectAPI.getLangauge().then((response) => {
-        const formattedLangiages = response.data.map((lang) => ({
+        const formattedLanguages = response.data.map((lang) => ({
           lId: lang.id,
           lName: lang.name,
           lStatus: lang.status,
           lInactiveReason: lang.inactive_reason,
         }));
-        setLanguage(formattedLangiages);
+        setLanguage(formattedLanguages);
       });
     } catch (err) {
       console.error("Error fetching languages:", err);
     }
   };
 
-   const fetchFieldTypes = async () => {
+  const fetchFieldTypes = async () => {
     try {
       await projectAPI.getFieldTypes().then((response) => {
         const formattedFields = response.data.map((field) => ({
@@ -43,107 +43,63 @@ function SnippetTable({ rows, onChange }) {
     }
   };
 
-  console.log(field);
-
   return (
-    <Table bordered hover className="table">
-      <thead className="table-header">
-        <tr className="table-field-row">
-          <th className="field-name">ID</th>
-          <th className="field-name">Field Name</th>
-          <th className="field-name">Language Name</th>
-          <th className="field-name">Snippet Name</th>
-          <th className="field-name">Snippet</th>
-        </tr>
-      </thead>
-      <tbody className="table-body">
-        {rows.map((row, index) => (
-          <tr key={row.id}>
-            <td>{row.id}</td>
-            <td>
-              <Form.Select
-                value={row.fieldTypeId}
-                name="fieldTypeId"
-                onChange={(e) => onChange(index, "fieldTypeId", e.target.value)}
-              >
-                <option value="">Select Field</option>
-                {field.map((eachField) => (
-                  <option key={eachField.fId} value={eachField.fId}>
-                    {eachField.fName}
-                  </option>
-                ))}
-                {/* <option value="1">Node JS</option>
+    <Form.Group className="p-2">
+      <Form.Label htmlFor="fieldType">Select Field Name</Form.Label>
+      <Form.Select
+        id="fieldType"
+        value={rows.fieldTypeId}
+        name="fieldTypeId"
+        onChange={(e) => onChange(e)}
+        className="mb-3"
+      >
+        <option value="">Select Field</option>
+        {field.map((eachField) => (
+          <option key={eachField.fId} value={eachField.fId}>
+            {eachField.fName}
+          </option>
+        ))}
+        {/* <option value="1">Node JS</option>
                 <option value="2">Python</option>
                 <option value="3">Java</option>
                 <option value="4">React</option>
                 <option value="5">C#</option> */}
-              </Form.Select>
-            </td>
-            <td>
-              <Form.Select
-                value={row.languageId}
-                name="languageId"
-                onChange={(e) => onChange(index, "languageId", e.target.value)}
-              >
-                <option value="">Select Language</option>
-                {language.map((eachLang) => (
-                  <option key={eachLang.lId} value={eachLang.lId}>
-                    {eachLang.lName}
-                  </option>
-                ))}
-              </Form.Select>
-            </td>
-            {/* <td>
-              <Form.Check
-                type="switch"
-                id={`status-switch-${index}`}
-                label={row.pStatus === "active" ? "active" : "inactive"}
-                checked={row.pStatus === "active"}
-                onChange={(e) =>
-                  onChange(
-                    index,
-                    "pStatus",
-                    e.target.checked ? "active" : "inactive"
-                  )
-                }
-              />
-            </td> */}
-            {/* {row.pStatus === "inactive" && (
-              <td>
-                <Form.Control
-                  as="textarea"
-                  placeholder="Enter inactive reason"
-                  value={row.inactiveReason || ""}
-                  name="inactiveReason"
-                  onChange={(e) =>
-                    onChange(index, "inactiveReason", e.target.value)
-                  }
-                  className="inactive-textarea"
-                />
-              </td>
-            )} */}
-            <td>
-               <Form.Control
-                              type="text"
-                              value={row.snippetName}
-                              name="snippetName"
-                              onChange={(e) => onChange(index, "snippetName", e.target.value)}
-                            />
-            </td>
-            <td>
-              <Form.Control
-                as="textarea"
-                placeholder="Enter Snippet"
-                value={row.snippet || ""}
-                name="snippet"
-                onChange={(e) => onChange(index, "snippet", e.target.value)}
-                className="inactive-textarea"
-              />
-            </td>
-          </tr>
+      </Form.Select>
+      <Form.Label htmlFor="langName">Select language Name</Form.Label>
+      <Form.Select
+        id="langName"
+        value={rows.languageId}
+        name="languageId"
+        onChange={(e) => onChange(e)}
+        className="mb-3"
+      >
+        <option value="">Select Language</option>
+        {language.map((eachLang) => (
+          <option key={eachLang.lId} value={eachLang.lId}>
+            {eachLang.lName}
+          </option>
         ))}
-      </tbody>
-    </Table>
+      </Form.Select>
+      <Form.Label htmlFor="snipName">Snippet Name</Form.Label>
+      <Form.Control
+        id="snipName"
+        type="text"
+        value={rows.snippetName}
+        name="snippetName"
+        onChange={(e) => onChange(e)}
+        className="mb-3"
+      />
+      <Form.Label htmlFor="snippet">Snippet</Form.Label>
+      <Form.Control
+        id="snippet"
+        as="textarea"
+        placeholder="Enter Snippet"
+        value={rows.snippet || ""}
+        name="snippet"
+        onChange={(e) => onChange(e)}
+        className="mb-3"
+      />
+    </Form.Group>
   );
 }
 
