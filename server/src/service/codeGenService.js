@@ -31,4 +31,15 @@ const insertSnippet=async(fieldTypeId,languageId,snippetName,snippet)=>{
   }
 }
 
-module.exports = { insertModule ,getProjectDetails, insertSnippet};
+// Add after existing exports and functions:
+const insertFormGen = async (formName, formConfig) => {
+  try {
+    return await repo.insertFormGen(formName, formConfig);
+  } catch (err) {
+    console.error("err in service", err);
+    throw err;
+  }
+};
+
+// Add to module.exports:
+module.exports = { insertModule ,getProjectDetails, insertSnippet, insertFormGen };
