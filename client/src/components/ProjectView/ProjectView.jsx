@@ -23,7 +23,7 @@ const ProjectView = () => {
     return <div>Loading projects...</div>;
   }
 
-  return (
+  return ( 
     <div className="project-view-container">
       <h2>Projects</h2>
       <ul className="project-list">
