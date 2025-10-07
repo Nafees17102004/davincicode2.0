@@ -86,4 +86,19 @@ const insertSnippet = async (req, res) => {
   }
 };
 
-module.exports = { insertModule ,getProjectDetails,insertSnippet};
+// Add after existing exports and functions:
+const insertFormGen = async (req, res) => {
+  try {
+    const { formName, formConfig } = req.body;
+    if (!formName || !formConfig) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const result = await service.insertFormGen(formName, formConfig);
+    res.status(201).json({ success: true, result });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Add to module.exports:
+module.exports = { insertModule ,getProjectDetails,insertSnippet,insertFormGen};
