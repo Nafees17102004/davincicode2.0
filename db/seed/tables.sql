@@ -229,7 +229,3 @@ VALUES
 (4, 'India', 'Country code: IN', 'admin'),
 (4, 'United States', 'Country code: US', 'admin'),
 (4, 'Singapore', 'Country code: SG', 'admin');
-
-
-
-
