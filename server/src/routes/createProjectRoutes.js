@@ -13,7 +13,6 @@ router.get("/getSnippetById/:s_id", createProjectController.getSnippetById);
 router.get("/getProjectDetails/:p_code", controller.getProjectDetails);
 router.get("/getLovs", listOfValuesController.getLov);
 router.get("/getLov/:l_id", listOfValuesController.getLov);
-
 router.get("/getListOfValuesDetails", controller.getListOfValuesDetails);
 router.get("/getListOfValuesDetail/:id", controller.getListOfValuesDetails);
 // Post request
