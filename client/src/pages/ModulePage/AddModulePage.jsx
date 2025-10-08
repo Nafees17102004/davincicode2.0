@@ -5,9 +5,9 @@ import projectAPI from "../../api/Api";
 
 const AddModulePage = () => {
   const [modules, setModules] = useState([
-    { m_name: "", m_desc: "", status: "active", inactive_reason: null},
+    { m_name: "", m_desc: "", status: "active", inactive_reason: null },
   ]);
-  const {pCode} = useParams();
+  const { pCode } = useParams();
 
   const navigate = useNavigate();
 
@@ -44,6 +44,7 @@ const AddModulePage = () => {
         m_desc: m.m_desc,
         status: m.status,
         inactive_reason: m.status === "inactive" ? m.inactive_reason : null,
+        error: m.error,
       }));
 
       const res = await projectAPI.insertModule(pCode, formatted);
@@ -61,7 +62,6 @@ const AddModulePage = () => {
       } else {
         navigate(`/module/${pCode}`);
       }
-
     } catch (err) {
       console.error("Error submitting modules:", err.response || err);
     }

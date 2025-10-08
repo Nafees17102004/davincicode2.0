@@ -225,3 +225,81 @@ END $$
 DELIMITER ;
 
 CALL GetFieldTypes();
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_INSERT_LIST_OF_VALUES (
+    IN p_LOV_NAME VARCHAR(200),
+    IN p_LOV_DESCRIPTION TEXT,
+    IN p_LOV_STATUS ENUM('active','inactive'),
+    IN p_INACTIVE_REASON VARCHAR(255),
+    IN p_CUSER VARCHAR(100),
+    OUT p_RESULT_MSG VARCHAR(255),
+    OUT p_NEW_ID INT
+)
+proc_exit: BEGIN
+    DECLARE v_error_message TEXT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1
+            v_error_message = MESSAGE_TEXT;
+
+        IF v_error_message LIKE '%Duplicate entry%' THEN
+            -- Extract duplicate value from MySQL error text
+            SET p_RESULT_MSG = CONCAT(
+                'Error: Duplicate entry ',
+                SUBSTRING_INDEX(SUBSTRING_INDEX(v_error_message, "'", 2), "'", -1),
+                ' already exists.'
+            );
+        ELSE
+            SET p_RESULT_MSG = CONCAT('SQL Error: ', v_error_message);
+        END IF;
+
+        SET p_NEW_ID = NULL;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO list_of_values (
+        lov_name,
+        lov_description,
+        lov_status,
+        inactive_reason,
+        cDate,
+        cUser
+    )
+    VALUES (
+        p_LOV_NAME,
+        p_LOV_DESCRIPTION,
+        COALESCE(p_LOV_STATUS, 'active'),
+        p_INACTIVE_REASON,
+        NOW(),
+        p_CUSER
+    );
+
+    SET p_NEW_ID = LAST_INSERT_ID();
+    COMMIT;
+
+    SET p_RESULT_MSG = CONCAT('LOV inserted successfully with ID: ', p_NEW_ID);
+END$$
+
+DELIMITER ;
+
+
+SET @msg = '';
+SET @new_id = 0;
+
+CALL SP_INSERT_LIST_OF_VALUES(
+    'Planets',                      -- p_LOV_NAME
+    'List of planet options',      -- p_LOV_DESCRIPTION
+    'active',                      -- p_LOV_STATUS
+    NULL,                          -- p_INACTIVE_REASON
+    'admin',                  -- p_CUSER
+    @msg,                          -- OUT p_RESULT_MSG
+    @new_id                        -- OUT p_NEW_ID
+);
+
+-- View result
+SELECT @msg AS ResultMessage, @new_id AS NewLOVID;
