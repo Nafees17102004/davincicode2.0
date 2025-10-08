@@ -34,16 +34,22 @@ const getSnippetById = (s_id) => {
 };
 
 const getFieldTypes = () => {
-  return api.get('/getFieldTypes');
-}
+  return api.get("/getFieldTypes");
+};
 
 const insertFieldTypes = (fieldData) => {
   return api.post("/add-field-type", fieldData);
 };
 
-const insertSnippet =(snippetData)=>{
-  return api.post("/insertSnippet",snippetData);
-}
+const insertSnippet = (snippetData) => {
+  return api.post("/insertSnippet", snippetData);
+};
+
+// Lov API's
+const insertLov = (lovData) => {
+  return api.post("/insert-lov", lovData);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -54,7 +60,8 @@ const projectAPI = {
   getSnippetById,
   insertFieldTypes,
   insertSnippet,
-  getFieldTypes
+  getFieldTypes,
+  insertLov,
 };
 
 export default projectAPI;
