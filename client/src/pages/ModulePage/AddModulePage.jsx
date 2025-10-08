@@ -138,7 +138,7 @@ const AddModulePage = () => {
             </Table>
             <div className="d-flex justify-content-between mt-3">
               <Button variant="outline-primary" onClick={handleAddMore}>
-                ➕ Add More
+                ➕ Add More  
               </Button>
               <Button variant="success" type="submit">
                 ✅ Submit All Modules

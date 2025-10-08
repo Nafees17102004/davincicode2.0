@@ -83,7 +83,7 @@ const insertLanguage = async (req, res) => {
           lInactiveReason
         );
         if (!result || result.affectedRows == 0) {
-          errors.push({
+          errors.push({  
             index,
             error: "Duplicate Error",
             language: lang,
