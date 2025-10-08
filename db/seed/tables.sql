@@ -9,7 +9,7 @@ CREATE TABLE languages (
     C2C_Cdate DATETIME NULL,
     C2C_Cuser VARCHAR(100) NULL,
     C2C_Udate DATETIME NULL,
-    C2C_Uuser INT NULL;
+    C2C_Uuser INT NULL
 );
 
 CREATE TABLE projects (
@@ -23,7 +23,7 @@ CREATE TABLE projects (
     C2C_Cdate DATETIME NULL,
     C2C_Cuser VARCHAR(100) NULL,
     C2C_Udate DATETIME NULL,
-    C2C_Uuser INT NULL;
+    C2C_Uuser INT NULL
 );
 
 CREATE TABLE modules (
@@ -38,7 +38,7 @@ CREATE TABLE modules (
     C2C_Cdate DATETIME NULL,
     C2C_Cuser VARCHAR(100) NULL,
     C2C_Udate DATETIME NULL,
-    C2C_Uuser INT NULL;
+    C2C_Uuser INT NULL
 );
 
 
@@ -72,7 +72,11 @@ create table FIELD_TYPE(
 FIELD_TYPE_ID int auto_increment primary key,
 FIELD_NAME varchar(30) unique not null,
 status ENUM('active','inactive') DEFAULT 'active',
-inactive_reason VARCHAR(255) NULL
+inactive_reason VARCHAR(255) NULL,
+C2C_Cdate DATETIME NULL,
+C2C_Cuser VARCHAR(100) NULL,
+C2C_Udate DATETIME NULL,
+C2C_Uuser INT NULL
 );
 
 INSERT INTO FIELD_TYPE (FIELD_NAME, status) VALUES
@@ -88,7 +92,11 @@ CREATE TABLE CODE_SNIPPET (
     Snippet_Name VARCHAR(100) unique  NOT NULL,   -- e.g., "CRUD", "Model", "Validation"
     Snippet TEXT NOT NULL,                -- actual code snippet
     status ENUM('active','inactive') DEFAULT 'active',
-	inactive_reason VARCHAR(255) NULL
+	inactive_reason VARCHAR(255) NULL,
+    C2C_Cdate DATETIME NULL,
+    C2C_Cuser VARCHAR(100) NULL,
+    C2C_Udate DATETIME NULL,
+    C2C_Uuser INT NULL
 );
 
 <<<<<<< HEAD
@@ -221,4 +229,3 @@ VALUES
 (4, 'India', 'Country code: IN', 'admin'),
 (4, 'United States', 'Country code: US', 'admin'),
 (4, 'Singapore', 'Country code: SG', 'admin');
-
