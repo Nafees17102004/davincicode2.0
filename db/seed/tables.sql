@@ -5,7 +5,11 @@ CREATE TABLE languages (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) UNIQUE NOT NULL,
     status ENUM('active','inactive') DEFAULT 'active',
-    inactive_reason VARCHAR(255) NULL
+    inactive_reason VARCHAR(255) NULL,
+    C2C_Cdate DATETIME NULL,
+    C2C_Cuser VARCHAR(100) NULL,
+    C2C_Udate DATETIME NULL,
+    C2C_Uuser INT NULL;
 );
 
 CREATE TABLE projects (
@@ -15,7 +19,11 @@ CREATE TABLE projects (
     language_id INT NOT NULL,
     status ENUM('active','inactive') DEFAULT 'active',
     inactive_reason VARCHAR(255) NULL,
-    FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE
+    FOREIGN KEY (language_id) REFERENCES languages(id) ON DELETE CASCADE,
+    C2C_Cdate DATETIME NULL,
+    C2C_Cuser VARCHAR(100) NULL,
+    C2C_Udate DATETIME NULL,
+    C2C_Uuser INT NULL;
 );
 
 CREATE TABLE modules (
@@ -26,7 +34,11 @@ CREATE TABLE modules (
     status ENUM('active','inactive') DEFAULT 'active',
     inactive_reason VARCHAR(255) NULL,
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
-    UNIQUE (project_id, name) -- module name unique within project
+    UNIQUE (project_id, name),
+    C2C_Cdate DATETIME NULL,
+    C2C_Cuser VARCHAR(100) NULL,
+    C2C_Udate DATETIME NULL,
+    C2C_Uuser INT NULL;
 );
 
 
@@ -103,6 +115,10 @@ CREATE TABLE FIELD_SNIPPET_MAP (
     LANGUAGE_ID INT NOT NULL,
     status ENUM('active','inactive') DEFAULT 'active',
     inactive_reason VARCHAR(255) NULL,
+    C2C_Cdate DATETIME NULL,
+    C2C_Cuser VARCHAR(100) NULL,
+    C2C_Udate DATETIME NULL,
+    C2C_Uuser INT NULL,
     FOREIGN KEY (FIELD_TYPE_ID) REFERENCES FIELD_TYPE(FIELD_TYPE_ID) ON DELETE CASCADE,
     FOREIGN KEY (SNIPPET_ID) REFERENCES CODE_SNIPPET(Snippet_ID) ON DELETE CASCADE,
     FOREIGN KEY (LANGUAGE_ID) REFERENCES languages(id) ON DELETE CASCADE,
@@ -129,3 +145,18 @@ INSERT INTO FIELD_SNIPPET_MAP (FIELD_TYPE_ID, SNIPPET_ID, language_id, status) V
 (5, 9, 4, 'active');
 =======
 >>>>>>> f7790b03f55000638e67639ab79e5a1f26076afd
+
+CREATE TABLE PAGE (
+    PAGE_ID INT AUTO_INCREMENT PRIMARY KEY,
+    PROJECT_ID INT NOT NULL,                         -- 🔗 Linked to projects.id
+    PAGE_NAME VARCHAR(100) UNIQUE NOT NULL,          -- e.g. 'Employee Registration'
+    PAGE_CODE VARCHAR(50) UNIQUE NOT NULL,           -- e.g. 'EMP_REG'
+    DESCRIPTION TEXT NULL,
+    STATUS ENUM('active', 'inactive') DEFAULT 'active',
+    INACTIVE_REASON VARCHAR(255) NULL,
+    cDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    cUser VARCHAR(100),
+    uDate DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    uUser VARCHAR(100),
+    FOREIGN KEY (PROJECT_ID) REFERENCES projects(id) ON DELETE CASCADE
+);
