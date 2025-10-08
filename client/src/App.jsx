@@ -11,19 +11,23 @@ import FieldTypePage from "./pages/FieldTypePage/FieldTypePage";
 import SnippetPage from "./pages/SnippetPage/SnippetPage";
 import ViewFieldPage from "./pages/ViewFieldPage/ViewFieldPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
+import LovPage from "./pages/LovPage/LovPage";
 
 function App() {
   return (
     <Routes>
+      {/* Main Pages */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<LanguagePage />} />
       <Route path="/project" element={<ProjectPage />} />
       <Route path="/module/:pCode" element={<ModulePage />} />
+      <Route path="/lov" element={<LovPage />} />
+      <Route path="/field" element={<FieldTypePage />} />
+      <Route path="/snippet" element={<SnippetPage />} />
+      {/* View Page */}
       <Route path="/view-languages" element={<ViewLanguagePage />} />
       <Route path="/view-Projects" element={<ViewProjectsPage />} />
       <Route path="/add-module/:pCode" element={<AddModulePage />} />
-      <Route path="/snippet" element={<SnippetPage />} />
-      <Route path="/field" element={<FieldTypePage />} />
       <Route path="/view-field" element={<ViewFieldPage />} />
     </Routes>
   );
