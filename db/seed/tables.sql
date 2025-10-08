@@ -160,3 +160,65 @@ CREATE TABLE PAGE (
     uUser VARCHAR(100),
     FOREIGN KEY (PROJECT_ID) REFERENCES projects(id) ON DELETE CASCADE
 );
+
+CREATE TABLE LIST_OF_VALUES (
+    LOV_ID INT AUTO_INCREMENT PRIMARY KEY,
+    LOV_NAME VARCHAR(200) UNIQUE NOT NULL,            -- e.g., 'Gender', 'User Role'
+    LOV_DESCRIPTION VARCHAR(255) NULL,                -- e.g., 'Defines all gender types'
+    LOV_STATUS ENUM('active','inactive') DEFAULT 'active',
+    INACTIVE_REASON VARCHAR(255) NULL,
+    cDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    cUser VARCHAR(100),
+    uDate DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    uUser VARCHAR(100)
+);
+
+CREATE TABLE LIST_OF_VALUES_DETAILS (
+    LOV_DET_ID INT AUTO_INCREMENT PRIMARY KEY,
+    LOV_ID INT NOT NULL,                              -- 🔗 FK → LIST_OF_VALUES
+    LOV_DET_NAME VARCHAR(200) NOT NULL,               -- e.g., 'Male', 'Female'
+    LOV_DET_DESCP VARCHAR(255) NULL,                  -- Optional description
+    LOV_DET_STATUS ENUM('active','inactive') DEFAULT 'active',
+    INACTIVE_REASON VARCHAR(255) NULL,
+    cDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    cUser VARCHAR(100),
+    uDate DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    uUser VARCHAR(100),
+    FOREIGN KEY (LOV_ID) REFERENCES LIST_OF_VALUES(LOV_ID) ON DELETE CASCADE
+);
+
+INSERT INTO LIST_OF_VALUES (LOV_NAME, LOV_DESCRIPTION, cUser)
+VALUES
+('Gender', 'Defines available gender options', 'admin'),
+('User Role', 'Defines roles available in the system', 'admin'),
+('Account Status', 'Indicates whether a user account is active or suspended', 'admin'),
+('Country', 'List of supported countries', 'admin');
+
+-- Gender
+INSERT INTO LIST_OF_VALUES_DETAILS (LOV_ID, LOV_DET_NAME, LOV_DET_DESCP, cUser)
+VALUES
+(1, 'Male', 'Male gender', 'admin'),
+(1, 'Female', 'Female gender', 'admin'),
+(1, 'Other', 'Other gender identity', 'admin');
+
+-- User Role
+INSERT INTO LIST_OF_VALUES_DETAILS (LOV_ID, LOV_DET_NAME, LOV_DET_DESCP, cUser)
+VALUES
+(2, 'Admin', 'Has full access to the system', 'admin'),
+(2, 'Manager', 'Can manage team and reports', 'admin'),
+(2, 'Employee', 'Regular user access', 'admin');
+
+-- Account Status
+INSERT INTO LIST_OF_VALUES_DETAILS (LOV_ID, LOV_DET_NAME, LOV_DET_DESCP, cUser)
+VALUES
+(3, 'Active', 'User account is active', 'admin'),
+(3, 'Suspended', 'User account is temporarily disabled', 'admin'),
+(3, 'Deactivated', 'User account is permanently disabled', 'admin');
+
+-- Country
+INSERT INTO LIST_OF_VALUES_DETAILS (LOV_ID, LOV_DET_NAME, LOV_DET_DESCP, cUser)
+VALUES
+(4, 'India', 'Country code: IN', 'admin'),
+(4, 'United States', 'Country code: US', 'admin'),
+(4, 'Singapore', 'Country code: SG', 'admin');
+
