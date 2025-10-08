@@ -1,30 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Table, Form } from "react-bootstrap";
-import projectAPI from "../../../api/Api";
 
 function LovFormDataGrid({ rows, onChange }) {
-  const [language, setLanguage] = useState([]);
-
-  useEffect(() => {
-    fetchLanguages();
-  }, []);
-
-  const fetchLanguages = async () => {
-    try {
-      await projectAPI.getLangauge().then((response) => {
-        const formattedLangiages = response.data.map((lang) => ({
-          lId: lang.id,
-          lName: lang.name,
-          lStatus: lang.status,
-          lInactiveReason: lang.inactive_reason,
-        }));
-        setLanguage(formattedLangiages);
-      });
-    } catch (err) {
-      console.error("Error fetching languages:", err);
-    }
-  };
-
   return (
     <Table bordered hover className="table">
       <thead className="table-header">
