@@ -1,6 +1,6 @@
-import React from 'react'
-import {Link} from 'react-router-dom';
-import './LeftTabMenu.css'
+import React from "react";
+import { Link } from "react-router-dom";
+import "./LeftTabMenu.css";
 
 function LeftTabMenu() {
   return (
@@ -26,9 +26,14 @@ function LeftTabMenu() {
             Snippet
           </Link>
         </li>
+        <li className="menu-item">
+          <Link to="/lov" className="nav-link">
+            List of values
+          </Link>
+        </li>
       </ul>
     </div>
   );
 }
 
-export default LeftTabMenu
+export default LeftTabMenu;
