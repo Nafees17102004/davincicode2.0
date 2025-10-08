@@ -12,6 +12,7 @@ import SnippetPage from "./pages/SnippetPage/SnippetPage";
 import ViewFieldPage from "./pages/ViewFieldPage/ViewFieldPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import LovPage from "./pages/LovPage/LovPage";
+import ViewLovPage from "./pages/ViewLovPage/ViewLovPage";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
       <Route path="/view-Projects" element={<ViewProjectsPage />} />
       <Route path="/add-module/:pCode" element={<AddModulePage />} />
       <Route path="/view-field" element={<ViewFieldPage />} />
+      <Route path="/view-lov" element={<ViewLovPage />} />
     </Routes>
   );
 }

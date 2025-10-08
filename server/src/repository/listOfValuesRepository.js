@@ -82,7 +82,7 @@ const updateLov = async (
       updatedUser,
     ]);
     const [rows] = await pool.query("SELECT @msg AS resultMsg;");
-    console.log(rows)
+    console.log(rows);
     const output = rows[0];
 
     if (output.resultMsg && output.resultMsg.toLowerCase().includes("error")) {
@@ -124,14 +124,14 @@ const getLov = async (l_id) => {
   try {
     const query = "CALL SP_GET_LIST_OF_VALUES(?);";
     const [rows] = await pool.query(query, [l_id]);
-    return rows;
+    return rows[0];
   } catch (error) {
-    console.error("Repo error: ",error)
+    console.error("Repo error: ", error);
   }
-}
+};
 
 module.exports = {
   insertLov,
   updateLov,
-  getLov
+  getLov,
 };
