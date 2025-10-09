@@ -54,8 +54,16 @@ const viewLovs = () => {
   return api.get("/getLovs");
 };
 
+const viewLovById = (lovId) => {
+  return api.get(`/getLov/${lovId}`);
+};
+
 const insertLovDet = (lovDetData) => {
   return api.post("/insertListOfValuesDetails", lovDetData);
+};
+
+const viewLovDets = (lovId) => {
+  return api.get(`/getSnippetById/${lovId}`);
 };
 
 const projectAPI = {
@@ -72,6 +80,8 @@ const projectAPI = {
   insertLov,
   viewLovs,
   insertLovDet,
+  viewLovDets,
+  viewLovById,
 };
 
 export default projectAPI;
