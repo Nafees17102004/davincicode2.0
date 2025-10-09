@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 function ViewLovStaticGrid({ rows }) {
   const navigate = useNavigate();
 
+  const handleHyperLinkClick = (lovId) => {
+    navigate(`/LovDet/${lovId}`);
+  };
+
   return (
     <Table bordered hover className="table">
       <thead className="table-header">
@@ -19,7 +23,14 @@ function ViewLovStaticGrid({ rows }) {
       <tbody className="table-body">
         {rows.map((row, index) => (
           <tr key={index} className="table-row">
-            <td className="row-item">{row.lovName}</td>
+            <td className="row-item">
+              <a
+                className="project-link"
+                onClick={() => handleHyperLinkClick(row.lovId)}
+              >
+                {row.lovName}
+              </a>
+            </td>
             <td className="row-item">{row.lovDescp}</td>
             <td className="row-item">{row.lovStatus.toUpperCase()}</td>
             <td className="row-item">{row.lovInactiveReason}</td>

@@ -116,7 +116,7 @@ const insertFormGen = async (req, res) => {
 
 const getListOfValuesDetails = async (req, res) => {
   try {
-    const lovId = req.params.id ? parseInt(req.params.id) : null;
+    const lovId = req.params.lovId ? parseInt(req.params.lovId) : null;
 
     const result = await service.getListOfValuesDetails(lovId);
     res.status(200).json({ sucess: true, result });
