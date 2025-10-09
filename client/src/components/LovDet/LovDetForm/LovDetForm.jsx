@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import LovDetFormDataGrid from "../LovDetFormDataGrid/LovDetFormDataGrid";
 import projectAPI from "../../../api/Api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 function LovDetForm() {
+  const lovId = useParams();
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
   const navigate = useNavigate();
@@ -14,7 +15,6 @@ function LovDetForm() {
       ...rows,
       {
         sNO: idCounter,
-        lovId: 0,
         lovDetName: "",
         lovDetDescp: "",
         lovDetStatus: "active",
@@ -63,14 +63,15 @@ function LovDetForm() {
       <LovDetFormDataGrid rows={rows} onChange={handleChange} />
 
       <div className="project-btn-container">
+        {/* <Button
+          className="view-project-btn"
+          variant="danger"
+          onClick={() => navigate(`/lovDet/${lovId}`)}
+        >
+          Back
+        </Button> */}
         <Button onClick={handleSubmit} className="submit-btn">
           Submit
-        </Button>
-        <Button
-          className="view-project-btn"
-          onClick={() => navigate("/view-projects")}
-        >
-          View Stored Data
         </Button>
       </div>
     </div>

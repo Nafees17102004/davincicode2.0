@@ -130,8 +130,19 @@ const getLov = async (l_id) => {
   }
 };
 
+const getLovWithDet = async (lovId) => {
+  try {
+    const query = "CALL SP_GET_LIST_OF_VALUES_WITH_DETAILS(?);";
+    const [rows] = await pool.query(query, [lovId]);
+    return rows[0];
+  } catch (error) {
+    console.error("Error in Repo: ", error);
+  }
+};
+
 module.exports = {
   insertLov,
   updateLov,
   getLov,
+  getLovWithDet,
 };

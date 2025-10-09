@@ -150,4 +150,24 @@ const getLov = async (req, res) => {
   }
 };
 
-module.exports = { insertLov, updateLov, getLov };
+const getLovWithDet = async (req, res) => {
+  try {
+    const lovId = req.params.lovId;
+    if (!lovId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "lovId is required" });
+    }
+    const result = await listOfValuesService.getLovWithDet(lovId);
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    console.error("getLovWithDet error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error occurred",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { insertLov, updateLov, getLov, getLovWithDet };

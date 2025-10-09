@@ -15,27 +15,40 @@ import LeftTabMenu from "../../components/LeftTabMenu/LeftTabMenu";
 
 const LovDetViewpage = () => {
   const { lovId } = useParams();
-  const [lovs, setLovs] = useState(null);
+  const [lovs, setLovs] = useState({});
   const [lovDet, setLovDet] = useState([]);
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProject = async () => {
+    const fetchLov = async () => {
       try {
-        const res = await projectAPI.viewLovById(lovId);
-        console.log(res);
-        setLovs(res.data.result.project[0]);
-        setLovDet(res.data.result.module || []);
+        const res = await projectAPI.getLovWithDet(lovId);
+        const formattedLovDetData = res.data.result.map((eachItem) => ({
+          lovDetName: eachItem.LOV_DET_NAME,
+          lovDetDescp: eachItem.LOV_DET_DESCP,
+          lovDetStatus: eachItem.LOV_DET_STATUS,
+          lovDetInactiveReason: eachItem.DET_INACTIVE_REASON,
+          lovDetCUser: eachItem.DET_CREATED_USER,
+        }));
+        const formattedLovData = res.data.result.map((eachItem) => ({
+          lovName: eachItem.LOV_NAME,
+          lovDescp: eachItem.LOV_DESCRIPTION,
+          lovStatus: eachItem.LOV_STATUS,
+          lovCUser: eachItem.LOV_CREATED_USER,
+        }));
+        setLovDet(formattedLovDetData);
+        setLovs(formattedLovData[0]);
       } catch (err) {
         setError("Failed to fetch project details");
         console.error(err);
       }
     };
-    fetchProject();
+    fetchLov();
   }, []);
 
+  console.log(lovs);
   const handleAddModule = (lovId) => {
     navigate(`/add-lovDet/${lovId}`); // go to Add Module Page
   };
@@ -61,20 +74,20 @@ const LovDetViewpage = () => {
               <Card.Body>
                 <Row>
                   <Col>
-                    <strong>Lov Name:</strong> {lovs.project_code}
+                    <strong>Lov Name:</strong> {lovs.lovName}
                   </Col>
                   <Col>
-                    <strong>Name:</strong> {lovs.project_name}
+                    <strong>Description:</strong> {lovs.lovDescp}
                   </Col>
                   <Col>
-                    <strong>Language:</strong> {lovs.language_name}
+                    <strong>Created User:</strong> {lovs.lovCUser}
                   </Col>
                   <Col>
                     <strong>Status:</strong>{" "}
                     <Badge
-                      bg={lovs.status === "active" ? "success" : "secondary"}
+                      bg={lovs.lovStatus === "active" ? "success" : "secondary"}
                     >
-                      {lovs.status}
+                      {lovs.lovStatus}
                     </Badge>
                   </Col>
                 </Row>
@@ -102,9 +115,11 @@ const LovDetViewpage = () => {
                     lovDet.map((l, i) => (
                       <tr key={i}>
                         <td>{i + 1}</td>
-                        <td>{l.module_name}</td>
-                        <td>{l.module_desc}</td>
-                        <td>{l.status}</td>
+                        <td>{l.lovDetName}</td>
+                        <td>{l.lovDetDescp}</td>
+                        <td>{l.lovDetStatus}</td>
+                        <td>{l.lovDetInactiveReason}</td>
+                        <td>{l.lovDetCUser}</td>
                       </tr>
                     ))
                   ) : (

@@ -15,6 +15,7 @@ router.get("/getLovs", listOfValuesController.getLov);
 router.get("/getLov/:l_id", listOfValuesController.getLov);
 router.get("/getListOfValuesDetails", controller.getListOfValuesDetails);
 router.get("/getListOfValuesDetail/:lovId", controller.getListOfValuesDetails);
+router.get("/get-lov-with-det/:lovId", listOfValuesController.getLovWithDet)
 // Post request
 router.post("/add-project", createProjectController.insertProject);
 router.post("/insertModule/:project_id", controller.insertModule);
