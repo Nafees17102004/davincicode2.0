@@ -50,6 +50,10 @@ const insertLov = (lovData) => {
   return api.post("/insert-lov", lovData);
 };
 
+const viewLovs = () => {
+  return api.get("/getLovs");
+};
+
 const insertLovDet = (lovDetData) => {
   return api.post("/insertListOfValuesDetails", lovDetData);
 };
@@ -66,6 +70,7 @@ const projectAPI = {
   insertSnippet,
   getFieldTypes,
   insertLov,
+  viewLovs,
   insertLovDet,
 };
 
