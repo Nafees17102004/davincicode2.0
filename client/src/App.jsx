@@ -12,6 +12,7 @@ import SnippetPage from "./pages/SnippetPage/SnippetPage";
 import ViewFieldPage from "./pages/ViewFieldPage/ViewFieldPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import LovPage from "./pages/LovPage/LovPage";
+import LovDetPage from "./pages/LovDetPage/LovDetPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
       <Route path="/project" element={<ProjectPage />} />
       <Route path="/module/:pCode" element={<ModulePage />} />
       <Route path="/lov" element={<LovPage />} />
+      <Route path="/lovDet" element={<LovDetPage />} />
       <Route path="/field" element={<FieldTypePage />} />
       <Route path="/snippet" element={<SnippetPage />} />
       {/* View Page */}

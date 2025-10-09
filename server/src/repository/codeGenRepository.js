@@ -129,7 +129,7 @@ const updateListOfValuesDetail = async (
       uUser,
     ]);
 
-    const [result] = await pool.query("SELECT p_RESULT_MSG as resultMsg;");
+    const [result] = await pool.query("SELECT @p_RESULT_MSG as resultMsg;");
     return result;
   } catch (err) {
     console.log("err in repo", err);
