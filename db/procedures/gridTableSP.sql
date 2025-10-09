@@ -306,6 +306,34 @@ SELECT @msg AS ResultMessage, @new_id AS NewLOVID;
 
 DELIMITER $$
 
+CREATE PROCEDURE SP_GET_LIST_OF_VALUES(
+    IN p_LOV_ID INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Handle the error, e.g., log it
+        SELECT 'An error occurred while fetching data.' AS error_message;
+    END;
+
+    IF p_LOV_ID IS NULL THEN
+        SELECT * 
+        FROM LIST_OF_VALUES
+        WHERE LOV_STATUS = 'active'
+        ORDER BY LOV_NAME;
+    ELSE
+        SELECT * 
+        FROM LIST_OF_VALUES
+        WHERE LOV_ID = p_LOV_ID;
+    END IF;
+END $$
+
+DELIMITER ;
+
+CALL SP_GET_LIST_OF_VALUES(1);
+
+DELIMITER $$
+
 CREATE PROCEDURE SP_UPDATE_LIST_OF_VALUES (
     IN p_LOV_ID INT,
     IN p_LOV_NAME VARCHAR(200),

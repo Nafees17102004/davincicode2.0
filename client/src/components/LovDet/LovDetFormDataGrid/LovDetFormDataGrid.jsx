@@ -3,25 +3,23 @@ import { Table, Form } from "react-bootstrap";
 import projectAPI from "../../../api/Api";
 
 function LovDetFormDataGrid({ rows, onChange }) {
-  const [language, setLanguage] = useState([]);
+  const [lov, setLov] = useState([]);
 
   useEffect(() => {
-    fetchLanguages();
+    fetchLov();
   }, []);
 
-  const fetchLanguages = async () => {
+  const fetchLov = async () => {
     try {
-      await projectAPI.getLangauge().then((response) => {
-        const formattedLangiages = response.data.map((lang) => ({
-          lId: lang.id,
-          lName: lang.name,
-          lStatus: lang.status,
-          lInactiveReason: lang.inactive_reason,
+      await projectAPI.viewLovs().then((response) => {
+        const formattedLovs = response.data.result[0].map((lov) => ({
+          lId: lov.LOV_ID,
+          lName: lov.LOV_NAME,
         }));
-        setLanguage(formattedLangiages);
+        setLov(formattedLovs);
       });
     } catch (err) {
-      console.error("Error fetching languages:", err);
+      console.error("Error fetching lov:", err);
     }
   };
 
@@ -51,7 +49,7 @@ function LovDetFormDataGrid({ rows, onChange }) {
                 onChange={(e) => onChange(index, "lovId", e.target.value)}
               >
                 <option value="">Select Lov</option>
-                {language.map((eachLov) => (
+                {lov.map((eachLov) => (
                   <option key={eachLov.lId} value={eachLov.lId}>
                     {eachLov.lName}
                   </option>
