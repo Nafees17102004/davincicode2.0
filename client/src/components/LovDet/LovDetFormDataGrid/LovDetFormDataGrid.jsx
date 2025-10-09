@@ -12,7 +12,7 @@ function LovDetFormDataGrid({ rows, onChange }) {
   const fetchLov = async () => {
     try {
       await projectAPI.viewLovs().then((response) => {
-        const formattedLovs = response.data.result[0].map((lov) => ({
+        const formattedLovs = response.data.result.map((lov) => ({
           lId: lov.LOV_ID,
           lName: lov.LOV_NAME,
         }));
@@ -44,7 +44,7 @@ function LovDetFormDataGrid({ rows, onChange }) {
             <td>{row.sNO}</td>
             <td>
               <Form.Select
-                value={row.pLanguageId}
+                value={row.lovId}
                 name="lovId"
                 onChange={(e) => onChange(index, "lovId", e.target.value)}
               >
@@ -66,7 +66,7 @@ function LovDetFormDataGrid({ rows, onChange }) {
                 type="text"
                 value={row.lovDetName}
                 name="lovDetName"
-                onChange={(e) => onChange(index, "lovName", e.target.value)}
+                onChange={(e) => onChange(index, "lovDetName", e.target.value)}
               />
             </td>
             <td>
@@ -74,25 +74,25 @@ function LovDetFormDataGrid({ rows, onChange }) {
                 type="text"
                 value={row.lovDetDescp}
                 name="lovDetDescp"
-                onChange={(e) => onChange(index, "lovDescp", e.target.value)}
+                onChange={(e) => onChange(index, "lovDetDescp", e.target.value)}
               />
             </td>
             <td>
               <Form.Check
                 type="switch"
                 id={`status-switch-${index}`}
-                label={row.lovStatus === "active" ? "active" : "inactive"}
-                checked={row.lovStatus === "active"}
+                label={row.lovDetStatus === "active" ? "active" : "inactive"}
+                checked={row.lovDetStatus === "active"}
                 onChange={(e) =>
                   onChange(
                     index,
-                    "lovStatus",
+                    "lovDetStatus",
                     e.target.checked ? "active" : "inactive"
                   )
                 }
               />
             </td>
-            {row.lovStatus === "inactive" && (
+            {row.lovDetStatus === "inactive" && (
               <td>
                 <Form.Control
                   as="textarea"
@@ -109,9 +109,9 @@ function LovDetFormDataGrid({ rows, onChange }) {
             <td>
               <Form.Control
                 type="text"
-                value={row.createdUser}
-                name="createdUser"
-                onChange={(e) => onChange(index, "createdUser", e.target.value)}
+                value={row.cUser}
+                name="cUser"
+                onChange={(e) => onChange(index, "cUser", e.target.value)}
               />
             </td>
           </tr>
