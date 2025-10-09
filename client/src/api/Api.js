@@ -62,6 +62,10 @@ const insertLovDet = (lovDetData) => {
   return api.post("/insertListOfValuesDetails", lovDetData);
 };
 
+const getLovWithDet = (lovId) => {
+  return api.get(`/get-lov-with-det/${lovId}`);
+};
+
 const viewLovDets = (lovId) => {
   return api.get(`/getSnippetById/${lovId}`);
 };
@@ -82,6 +86,7 @@ const projectAPI = {
   insertLovDet,
   viewLovDets,
   viewLovById,
+  getLovWithDet,
 };
 
 export default projectAPI;

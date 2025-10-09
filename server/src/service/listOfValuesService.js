@@ -90,4 +90,13 @@ const getLov = async (l_id) => {
   }
 };
 
-module.exports = { insertLov, updateLov, getLov };
+const getLovWithDet = async (lovId) => {
+  try {
+    const result = await listOfValuesRepository.getLovWithDet(lovId);
+    return result;
+  } catch (error) {
+    console.error("Error in service layer: ", error);
+  }
+};
+
+module.exports = { insertLov, updateLov, getLov, getLovWithDet };
