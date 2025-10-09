@@ -38,8 +38,13 @@ function LovForm() {
       .insertLov(rows)
       .then((response) => {
         console.log("Response:", response.data);
-        // Projects added: ${response.data.summary.inserted}, Failed: ${response.data.summary.failed}
-        alert(`${response.data.errors.map((eachItem) => eachItem.error)}`);
+        if (!response.data.errors) {
+          alert(
+            `Projects added: ${response.data.summary.inserted}, Failed: ${response.data.summary.failed}`
+          );
+        } else {
+          alert(`${response.data.errors.map((eachItem) => eachItem.error)}`);
+        }
       })
       .catch((error) => {
         console.error("There was an error!", error);
