@@ -194,7 +194,7 @@ const insertListOfValuesDetails = async (req, res) => {
 
 const updateListOfValuesDetail = async (req, res) => {
   try {
-    const { lovId,lovDetId } = req.params;
+    const { lovId, lovDetId } = req.params;
     const { lovDetName, lovDetDescp, lovDetStatus, inActiveReason, uUser } =
       req.body;
 
@@ -211,7 +211,7 @@ const updateListOfValuesDetail = async (req, res) => {
       inActiveReason,
       uUser
     );
-
+    console.log(result);
     res.status(200).json({ success: true, result });
   } catch (err) {
     console.log("err in controller", err);

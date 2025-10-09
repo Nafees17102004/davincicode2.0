@@ -54,6 +54,10 @@ const viewLovs = () => {
   return api.get("/getLovs");
 };
 
+const insertLovDet = (lovDetData) => {
+  return api.post("/insertListOfValuesDetails", lovDetData);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -67,6 +71,7 @@ const projectAPI = {
   getFieldTypes,
   insertLov,
   viewLovs,
+  insertLovDet,
 };
 
 export default projectAPI;
