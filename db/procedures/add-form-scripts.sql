@@ -218,3 +218,21 @@ CALL SP_INSERT_ADD_FORM_TABLE(
     11,                 -- p_FIELD_ORDER_LOV_DET_ID
     'admin'          -- p_C2C_CUSER
 );
+
+CREATE TABLE TAB_IMAGE_TABLE (
+    TAB_IMAGE_ID INT AUTO_INCREMENT PRIMARY KEY,
+    IMAGE_NAME VARCHAR(150) NOT NULL,         -- e.g. 'User Tab Icon'
+    IMAGE_PATH VARCHAR(255) NOT NULL,         -- e.g. '/assets/icons/user.png'
+    STATUS ENUM('active','inactive') DEFAULT 'active',
+    INACTIVE_REASON VARCHAR(255) NULL,
+    C2C_CDATE DATETIME DEFAULT CURRENT_TIMESTAMP,
+    C2C_CUSER VARCHAR(100),
+    C2C_UDATE DATETIME ON UPDATE CURRENT_TIMESTAMP,
+    C2C_UUSER VARCHAR(100)
+);
+
+INSERT INTO TAB_IMAGE_TABLE (IMAGE_NAME, IMAGE_PATH, C2C_CUSER)
+VALUES
+('User Info', '/assets/icons/user.png', 'admin'),
+('Job Details', '/assets/icons/job.png', 'admin'),
+('Settings', '/assets/icons/settings.png', 'admin');
