@@ -125,7 +125,7 @@ export default function ColumnEditor({ column, index, updateColumn, removeColumn
         <Col md={4}>
           <Form.Label>Validation</Form.Label>
           <Form.Select onChange={handleValidationSelect}>
-            <option  value="">Select Validation</option>
+            <option value="">Select Validation</option>
             {validationOptions.map((v) => (
               <option key={v}>{v}</option>
             ))}
