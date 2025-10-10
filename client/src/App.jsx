@@ -11,7 +11,7 @@ import FieldTypePage from "./pages/FieldTypePage/FieldTypePage";
 import SnippetPage from "./pages/SnippetPage/SnippetPage";
 import ViewFieldPage from "./pages/ViewFieldPage/ViewFieldPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
-
+import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
 function App() {
   return (
     <Routes>
@@ -25,6 +25,7 @@ function App() {
       <Route path="/snippet" element={<SnippetPage />} />
       <Route path="/field" element={<FieldTypePage />} />
       <Route path="/view-field" element={<ViewFieldPage />} />
+      <Route path="/dynamic-form" element={<DynamicFormPage />} />
     </Routes>
   );
 }

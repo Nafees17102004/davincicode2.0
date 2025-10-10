@@ -26,6 +26,11 @@ function LeftTabMenu() {
             Snippet
           </Link>
         </li>
+        <li classname="menu-item">
+          <Link to="/dynamic-form" className="nav-link">
+            FORM
+          </Link>
+        </li>
       </ul>
     </div>
   );
