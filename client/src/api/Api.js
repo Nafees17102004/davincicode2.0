@@ -70,6 +70,10 @@ const viewLovDets = (lovId) => {
   return api.get(`/getSnippetById/${lovId}`);
 };
 
+const getLovDropdown = (listName, lovName) => {
+  return api.get(`/lov-det-drop-down/${listName}/${lovName}`);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -87,6 +91,7 @@ const projectAPI = {
   viewLovDets,
   viewLovById,
   getLovWithDet,
+  getLovDropdown,
 };
 
 export default projectAPI;
