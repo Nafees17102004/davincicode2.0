@@ -236,3 +236,104 @@ VALUES
 ('User Info', '/assets/icons/user.png', 'admin'),
 ('Job Details', '/assets/icons/job.png', 'admin'),
 ('Settings', '/assets/icons/settings.png', 'admin');
+
+DELIMITER $$
+CREATE PROCEDURE SP_GET_FIELD_SOURCE(IN l_lov_id int)
+BEGIN 
+  SELECT 
+    ld.LOV_DET_ID,
+    ld.LOV_DET_NAME
+  FROM 
+    list_of_values_details AS ld
+  LEFT JOIN 
+    list_of_values AS l 
+  ON 
+    ld.LOV_ID = l.LOV_ID
+  WHERE 
+    l.LOV_ID = l_lov_id;
+END $$
+DELIMITER ;
+
+
+CALL SP_GET_FIELD_SOURCE(1);
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_BIND_DROPDOWN(
+    IN p_List_Name VARCHAR(100),
+    IN p_LOV_Name VARCHAR(100)
+)
+BEGIN
+    DECLARE v_LOV_ID INT;
+    DECLARE v_ActiveStatus ENUM('active','inactive') DEFAULT 'active';
+
+    -- Validate input
+    IF p_List_Name IS NULL OR TRIM(p_List_Name) = '' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'List_Name cannot be null or empty';
+    END IF;
+
+    -- Dynamically handle dropdown source
+    IF p_List_Name = 'LIST_OF_VALUES_DETAILS' THEN
+
+        -- Check if LOV_Name is provided
+        IF p_LOV_Name IS NULL OR TRIM(p_LOV_Name) = '' THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'LOV_Name must be provided for LIST_OF_VALUES_DETAILS';
+        END IF;
+
+        -- Find corresponding LOV_ID
+        SELECT LOV_ID INTO v_LOV_ID
+        FROM LIST_OF_VALUES
+        WHERE LOV_NAME = p_LOV_Name
+        AND LOV_STATUS = v_ActiveStatus
+        LIMIT 1;
+
+        -- Validate LOV_ID existence
+        IF v_LOV_ID IS NULL THEN
+            SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Invalid LOV_NAME provided or inactive LOV';
+        END IF;
+
+        -- Return dropdown options
+        SELECT 0 AS Id, '-- Select --' AS Name
+        UNION
+        SELECT LOV_DET_ID AS Id, LOV_DET_NAME AS Name
+        FROM LIST_OF_VALUES_DETAILS
+        WHERE LOV_ID = v_LOV_ID
+        AND LOV_DET_STATUS = v_ActiveStatus
+        ORDER BY Name;
+
+    ELSEIF p_List_Name = 'TAB_TABLE' THEN
+        SELECT 0 AS Id, '-- Select --' AS Name
+        UNION
+        SELECT TAB_ID AS Id, TAB_NAME AS Name
+        FROM TAB_TABLE
+        WHERE STATUS = v_ActiveStatus
+        ORDER BY Name;
+
+    ELSEIF p_List_Name = 'TAB_IMAGE_TABLE' THEN
+        SELECT 0 AS Id, '-- Select --' AS Name
+        UNION
+        SELECT TAB_IMAGE_ID AS Id, TAB_IMAGE_NAME AS Name
+        FROM TAB_IMAGE_TABLE
+        WHERE STATUS = v_ActiveStatus
+        ORDER BY Name;
+
+    ELSEIF p_List_Name = 'ADD_FORM_TABLE' THEN
+        SELECT 0 AS Id, '-- Select --' AS Name
+        UNION
+        SELECT ADD_FORM_ID AS Id, FIELD_NAME AS Name
+        FROM ADD_FORM_TABLE
+        WHERE STATUS = v_ActiveStatus
+        ORDER BY Name;
+
+    ELSE
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid List_Name provided';
+    END IF;
+END $$
+
+DELIMITER ;
+
+CALL SP_BIND_DROPDOWN("LIST_OF_VALUES_DETAILS", "field_source");
