@@ -28,7 +28,7 @@ function LeftTabMenu() {
         </li>
         <li classname="menu-item">
           <Link to="/dynamic-form" className="nav-link">
-            FORM
+           form
           </Link>
         </li>
       </ul>
