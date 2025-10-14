@@ -11,21 +11,30 @@ import FieldTypePage from "./pages/FieldTypePage/FieldTypePage";
 import SnippetPage from "./pages/SnippetPage/SnippetPage";
 import ViewFieldPage from "./pages/ViewFieldPage/ViewFieldPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
-import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
+import LovPage from "./pages/LovPage/LovPage";
+import ViewLovPage from "./pages/ViewLovPage/ViewLovPage";
+import LovDetViewpage from "./pages/LovDetViewpage/LovDetViewpage";
+import LovDetpage from "./pages/LovDetpage/LovDetpage";
+
 function App() {
   return (
     <Routes>
+      {/* Main Pages */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<LanguagePage />} />
       <Route path="/project" element={<ProjectPage />} />
       <Route path="/module/:pCode" element={<ModulePage />} />
+      <Route path="/lovDet/:lovId" element={<LovDetViewpage />} />
+      <Route path="/lov" element={<LovPage />} />
+      <Route path="/field" element={<FieldTypePage />} />
+      <Route path="/snippet" element={<SnippetPage />} />
+      {/* View Page */}
       <Route path="/view-languages" element={<ViewLanguagePage />} />
       <Route path="/view-Projects" element={<ViewProjectsPage />} />
       <Route path="/add-module/:pCode" element={<AddModulePage />} />
-      <Route path="/snippet" element={<SnippetPage />} />
-      <Route path="/field" element={<FieldTypePage />} />
       <Route path="/view-field" element={<ViewFieldPage />} />
-      <Route path="/dynamic-form" element={<DynamicFormPage />} />
+      <Route path="/view-lov" element={<ViewLovPage />} />
+      <Route path="/add-lovDet/:lovId" element={<LovDetpage />} />
     </Routes>
   );
 }

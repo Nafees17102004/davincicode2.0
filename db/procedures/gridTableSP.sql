@@ -306,6 +306,147 @@ SELECT @msg AS ResultMessage, @new_id AS NewLOVID;
 
 DELIMITER $$
 
+CREATE PROCEDURE SP_GET_LIST_OF_VALUES(
+    IN p_LOV_ID INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Handle the error, e.g., log it
+        SELECT 'An error occurred while fetching data.' AS error_message;
+    END;
+
+    IF p_LOV_ID IS NULL THEN
+        SELECT * 
+        FROM LIST_OF_VALUES
+        WHERE LOV_STATUS = 'active'
+        ORDER BY LOV_NAME;
+    ELSE
+        SELECT * 
+        FROM LIST_OF_VALUES
+        WHERE LOV_ID = p_LOV_ID;
+    END IF;
+END $$
+
+DELIMITER ;
+
+CALL SP_GET_LIST_OF_VALUES(1);
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_UPDATE_LIST_OF_VALUES (
+    IN p_LOV_ID INT,
+    IN p_LOV_NAME VARCHAR(200),
+    IN p_LOV_DESCRIPTION VARCHAR(255),
+    IN p_LOV_STATUS ENUM('active','inactive'),
+    IN p_INACTIVE_REASON VARCHAR(255),
+    IN p_UUSER VARCHAR(100),
+    OUT p_RESULT_MSG VARCHAR(255)
+)
+proc_exit: BEGIN
+    DECLARE v_error_message TEXT;
+
+    -- ✅ Exception Handler
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_message = MESSAGE_TEXT;
+        IF v_error_message LIKE '%Duplicate entry%' THEN
+            SET p_RESULT_MSG = CONCAT(
+                'Error: Duplicate entry ',
+                SUBSTRING_INDEX(SUBSTRING_INDEX(v_error_message, "'", 2), "'", -1),
+                ' already exists.'
+            );
+        ELSE
+            SET p_RESULT_MSG = CONCAT('SQL Error: ', v_error_message);
+        END IF;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- ✅ Check if record exists
+    IF NOT EXISTS (SELECT 1 FROM LIST_OF_VALUES WHERE LOV_ID = p_LOV_ID) THEN
+        SET p_RESULT_MSG = CONCAT('Error: LOV ID ', p_LOV_ID, ' not found.');
+        ROLLBACK;
+        LEAVE proc_exit;
+    END IF;
+
+    -- ✅ Perform Update
+    UPDATE LIST_OF_VALUES
+    SET 
+        LOV_NAME = p_LOV_NAME,
+        LOV_DESCRIPTION = p_LOV_DESCRIPTION,
+        LOV_STATUS = COALESCE(p_LOV_STATUS, 'active'),
+        INACTIVE_REASON = p_INACTIVE_REASON,
+        uDate = NOW(),
+        uUser = p_UUSER
+    WHERE LOV_ID = p_LOV_ID;
+
+    COMMIT;
+    SET p_RESULT_MSG = CONCAT('LOV with ID ', p_LOV_ID, ' updated successfully.');
+END$$
+
+DELIMITER ;
+
+CALL SP_UPDATE_LIST_OF_VALUES(
+  5,
+  'Gender',
+  'Updated description',
+  'active',
+  NULL,
+  'admin',
+  @msg
+);
+
+SELECT @msg;
+
+DELIMITER $$
+
+CREATE PROCEDURE SP_DELETE_LIST_OF_VALUES (
+    IN p_LOV_ID INT,
+    -- IN p_UUSER VARCHAR(100),
+    OUT p_RESULT_MSG VARCHAR(255)
+)
+proc_exit: BEGIN
+    DECLARE v_error_message TEXT;
+
+    -- ✅ Exception Handler
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        GET DIAGNOSTICS CONDITION 1 v_error_message = MESSAGE_TEXT;
+        SET p_RESULT_MSG = CONCAT('SQL Error: ', v_error_message);
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- ✅ Check if record exists
+    IF NOT EXISTS (SELECT 1 FROM LIST_OF_VALUES WHERE LOV_ID = p_LOV_ID) THEN
+        SET p_RESULT_MSG = CONCAT('Error: LOV ID ', p_LOV_ID, ' not found.');
+        ROLLBACK;
+        LEAVE proc_exit;
+    END IF;
+
+    -- ✅ Option 1: Hard Delete (completely remove)
+    DELETE FROM LIST_OF_VALUES WHERE LOV_ID = p_LOV_ID;
+
+    -- ✅ Option 2: Soft Delete (mark inactive instead)
+    -- UPDATE LIST_OF_VALUES 
+    -- SET LOV_STATUS = 'inactive', INACTIVE_REASON = 'Deleted by user', uUser = p_UUSER, uDate = NOW()
+    -- WHERE LOV_ID = p_LOV_ID;
+
+    COMMIT;
+    SET p_RESULT_MSG = CONCAT('LOV with ID ', p_LOV_ID, ' deleted successfully.');
+END$$
+
+DELIMITER ;
+
+CALL SP_DELETE_LIST_OF_VALUES(5, @msg);
+SELECT @msg;
+
+
+DELIMITER $$
+
 CREATE PROCEDURE SP_GET_LIST_OF_VALUES_DETAILS (
     IN p_LOV_ID INT
 )

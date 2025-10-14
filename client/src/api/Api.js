@@ -34,16 +34,46 @@ const getSnippetById = (s_id) => {
 };
 
 const getFieldTypes = () => {
-  return api.get('/getFieldTypes');
-}
+  return api.get("/getFieldTypes");
+};
 
 const insertFieldTypes = (fieldData) => {
   return api.post("/add-field-type", fieldData);
 };
 
-const insertSnippet =(snippetData)=>{
-  return api.post("/insertSnippet",snippetData);
-}
+const insertSnippet = (snippetData) => {
+  return api.post("/insertSnippet", snippetData);
+};
+
+// Lov API's
+const insertLov = (lovData) => {
+  return api.post("/insert-lov", lovData);
+};
+
+const viewLovs = () => {
+  return api.get("/getLovs");
+};
+
+const viewLovById = (lovId) => {
+  return api.get(`/getLov/${lovId}`);
+};
+
+const insertLovDet = (lovDetData) => {
+  return api.post("/insertListOfValuesDetails", lovDetData);
+};
+
+const getLovWithDet = (lovId) => {
+  return api.get(`/get-lov-with-det/${lovId}`);
+};
+
+const viewLovDets = (lovId) => {
+  return api.get(`/getSnippetById/${lovId}`);
+};
+
+const getLovDropdown = (listName, lovName) => {
+  return api.get(`/lov-det-drop-down/${listName}/${lovName}`);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -54,7 +84,14 @@ const projectAPI = {
   getSnippetById,
   insertFieldTypes,
   insertSnippet,
-  getFieldTypes
+  getFieldTypes,
+  insertLov,
+  viewLovs,
+  insertLovDet,
+  viewLovDets,
+  viewLovById,
+  getLovWithDet,
+  getLovDropdown,
 };
 
 export default projectAPI;

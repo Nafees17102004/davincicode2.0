@@ -97,4 +97,77 @@ const insertLov = async (req, res) => {
   }
 };
 
-module.exports = { insertLov };
+const updateLov = async (req, res) => {
+  try {
+    const id = req.params.l_id;
+    const { lovName, lovDescp, lovStatus, inactiveReason, updatedUser } =
+      req.body;
+    if (!lovName || !lovDescp || !updatedUser) {
+      res.status(400).json({
+        success: false,
+        message: "All fields are required!",
+      });
+    }
+    const result = await listOfValuesService.updateLov(
+      id,
+      lovName,
+      lovDescp,
+      lovStatus,
+      inactiveReason,
+      updatedUser
+    );
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: result.error });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: result.message || result.error,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({
+      success: false,
+      message: "Server error occured",
+      error: error.message,
+    });
+  }
+};
+
+const getLov = async (req, res) => {
+  try {
+    const l_id = req.params.l_id ? req.params.l_id : null;
+
+    const result = await listOfValuesService.getLov(l_id);
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
+    });
+  }
+};
+
+const getLovWithDet = async (req, res) => {
+  try {
+    const lovId = req.params.lovId;
+    if (!lovId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "lovId is required" });
+    }
+    const result = await listOfValuesService.getLovWithDet(lovId);
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    console.error("getLovWithDet error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error occurred",
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { insertLov, updateLov, getLov, getLovWithDet };
