@@ -38,8 +38,29 @@ const getLovDropdown = async (listName, lovName) => {
     throw new error();
   }
 };
+const insertTabDetails = async (
+  projectId,
+  pageId,
+  tabName,
+  tabImageId,
+  CUser
+) => {
+  try {
+    const result = await addFormRepo.insertTabDetails(
+      projectId,
+      pageId,
+      tabName,
+      tabImageId,
+      CUser
+    );
+    return result;
+  } catch (error) {
+    throw error;
+  }
+};
 
 module.exports = {
   insertFormDetails,
   getLovDropdown,
+  insertTabDetails,
 };
