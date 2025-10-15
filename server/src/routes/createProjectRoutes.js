@@ -5,6 +5,7 @@ const createProjectController = require("../controller/createProjectController")
 const controller = require("../controller/codeGenController");
 const listOfValuesController = require("../controller/listOfValuesController");
 const addFormController = require("../controller/addFormController");
+const tabController = require("../controller/tabController");
 
 // Get request
 router.get("/projects", createProjectController.viewProjectDetails);
@@ -22,6 +23,9 @@ router.get(
   addFormController.getLovDropdown
 );
 
+router.get("/get-lov-with-det/:lovId", listOfValuesController.getLovWithDet);
+router.get("/getTabImgs", tabController.getTabImg);
+router.get("/getTabImg/:tabId", tabController.getTabImg);
 // Post request
 router.post("/add-project", createProjectController.insertProject);
 router.post("/insertModule/:project_id", controller.insertModule);
@@ -29,6 +33,7 @@ router.post("/add-lang", createProjectController.insertLanguage);
 router.post("/add-field-type", createProjectController.insertFieldTypes);
 router.post("/insertSnippet", controller.insertSnippet);
 router.post("/insert-lov", listOfValuesController.insertLov);
+router.post("/insert-tab", tabController.insertTab);
 
 // Put Request
 router.put("/update-lov/:l_id", listOfValuesController.updateLov);

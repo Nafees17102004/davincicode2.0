@@ -337,3 +337,93 @@ END $$
 DELIMITER ;
 
 CALL SP_BIND_DROPDOWN("LIST_OF_VALUES_DETAILS", "field_source");
+
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERT_UPDATE_TAB_TABLE`(
+    IN p_TAB_ID INT,               -- NULL for insert, value for update
+    IN p_PROJECT_ID INT,
+    IN p_PAGE_ID INT,
+    IN p_TAB_NAME VARCHAR(150),
+    IN p_TAB_IMAGE_ID INT,
+    IN p_CUSER VARCHAR(100)
+)
+BEGIN
+    DECLARE v_exists INT DEFAULT 0;
+    DECLARE v_project_exists INT DEFAULT 0;
+    DECLARE v_page_exists INT DEFAULT 0;
+    DECLARE v_image_exists INT DEFAULT 0;
+    DECLARE v_tab_exists INT DEFAULT 0;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SELECT 'Unexpected Error: Please contact administrator.' AS message;
+    END;
+
+    -- ✅ Basic Validations
+    IF p_PROJECT_ID IS NULL OR p_PAGE_ID IS NULL OR p_TAB_NAME IS NULL OR p_TAB_NAME = '' THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Project ID, Page ID, and Tab Name are required.';
+    END IF;
+
+    -- ✅ Check if Project Exists
+    SELECT COUNT(*) INTO v_project_exists FROM PROJECT_TABLE WHERE PROJECT_ID = p_PROJECT_ID;
+    IF v_project_exists = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid PROJECT_ID — project not found.';
+    END IF;
+
+    -- ✅ Check if Page Exists
+    SELECT COUNT(*) INTO v_page_exists FROM PAGE_TABLE WHERE PAGE_ID = p_PAGE_ID;
+    IF v_page_exists = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid PAGE_ID — page not found.';
+    END IF;
+
+    -- ✅ Validate Image if Provided
+    IF p_TAB_IMAGE_ID IS NOT NULL THEN
+        SELECT COUNT(*) INTO v_image_exists FROM TAB_IMAGE_TABLE WHERE TAB_IMAGE_ID = p_TAB_IMAGE_ID;
+        IF v_image_exists = 0 THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid TAB_IMAGE_ID — image not found.';
+        END IF;
+    END IF;
+
+    -- ✅ Check if UPDATE operation is valid (only if TAB_ID is passed)
+    IF p_TAB_ID IS NOT NULL THEN
+        SELECT COUNT(*) INTO v_tab_exists FROM TAB_TABLE WHERE TAB_ID = p_TAB_ID;
+        IF v_tab_exists = 0 THEN
+            SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid TAB_ID — no record found to update.';
+        END IF;
+    END IF;
+
+    -- ✅ Check Duplicate Tab Name within same PAGE for INSERT & UPDATE
+    SELECT COUNT(*) INTO v_exists
+    FROM TAB_TABLE
+    WHERE PAGE_ID = p_PAGE_ID AND TAB_NAME = p_TAB_NAME
+        AND (p_TAB_ID IS NULL OR TAB_ID <> p_TAB_ID); -- Exclude self on update
+
+    IF v_exists > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A tab with this name already exists on this page.';
+    END IF;
+
+    -- ✅ START Transaction
+    START TRANSACTION;
+
+    IF p_TAB_ID IS NULL THEN
+        -- INSERT BLOCK
+        INSERT INTO TAB_TABLE (PROJECT_ID, PAGE_ID, TAB_NAME, TAB_IMAGE_ID, C2C_CUSER)
+        VALUES (p_PROJECT_ID, p_PAGE_ID, p_TAB_NAME, p_TAB_IMAGE_ID, p_CUSER);
+        COMMIT;
+        SELECT 'Tab inserted successfully!' AS message;
+
+    ELSE
+        -- UPDATE BLOCK
+        UPDATE TAB_TABLE
+        SET PROJECT_ID = p_PROJECT_ID,
+            PAGE_ID = p_PAGE_ID,
+            TAB_NAME = p_TAB_NAME,
+            TAB_IMAGE_ID = p_TAB_IMAGE_ID,
+            C2C_CUSER = p_CUSER
+        WHERE TAB_ID = p_TAB_ID;
+        COMMIT;
+        SELECT 'Tab updated successfully!' AS message;
+
+    END IF;
+END
