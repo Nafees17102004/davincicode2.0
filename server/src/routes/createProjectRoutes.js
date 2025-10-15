@@ -4,6 +4,7 @@ const router = express.Router();
 const createProjectController = require("../controller/createProjectController");
 const controller = require("../controller/codeGenController");
 const listOfValuesController = require("../controller/listOfValuesController");
+const addFormController = require("../controller/addFormController");
 const tabController = require("../controller/tabController");
 
 // Get request
@@ -16,6 +17,12 @@ router.get("/getLovs", listOfValuesController.getLov);
 router.get("/getLov/:l_id", listOfValuesController.getLov);
 router.get("/getListOfValuesDetails", controller.getListOfValuesDetails);
 router.get("/getListOfValuesDetail/:lovId", controller.getListOfValuesDetails);
+router.get("/get-lov-with-det/:lovId", listOfValuesController.getLovWithDet);
+router.get(
+  "/lov-det-drop-down/:listName/:lovName",
+  addFormController.getLovDropdown
+);
+
 router.get("/get-lov-with-det/:lovId", listOfValuesController.getLovWithDet);
 router.get("/getTabImgs", tabController.getTabImg);
 router.get("/getTabImg/:tabId", tabController.getTabImg);
@@ -36,4 +43,12 @@ router.put(
   "/updateListOfValuesDetail/:lovId/:lovDetId",
   controller.updateListOfValuesDetail
 );
+
+// Add Form API's
+
+//Get
+
+// Post
+router.post("/add-form-det", addFormController.insertFormDetails);
+
 module.exports = router;

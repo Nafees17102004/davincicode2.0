@@ -31,6 +31,11 @@ function LeftTabMenu() {
             List of values
           </Link>
         </li>
+        <li className="menu-item">
+          <Link to="/dynamic-form" className="nav-link">
+            Dynamic Form
+          </Link>
+        </li>
       </ul>
     </div>
   );
