@@ -69,8 +69,24 @@ const getLovDropdown = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const insertTabDetails = async (req, res) => {
+  try {
+    const { projectId, pageId, tabName, tabImageId, CUser } = req.body;
+    const result = await addFormService.insertTabDetails(
+      projectId,
+      pageId,
+      tabName,
+      tabImageId,
+      CUser
+    );
+    res.status(200).json({ success: true, result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
 
 module.exports = {
   insertFormDetails,
   getLovDropdown,
+  insertTabDetails,
 };

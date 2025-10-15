@@ -45,5 +45,6 @@ router.put(
 
 // Post
 router.post("/add-form-det", addFormController.insertFormDetails);
+router.post("/add-tab", addFormController.insertTabDetails);
 
 module.exports = router;
