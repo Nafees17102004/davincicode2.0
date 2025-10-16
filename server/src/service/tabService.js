@@ -1,9 +1,17 @@
 const tabRepository = require("../repository/tabRepository");
 
 const tabService = {
-  insertTab: async (projectId, pageId, tabName, tabImageId, createdUser) => {
+  insertTab: async (
+    tabId,
+    projectId,
+    pageId,
+    tabName,
+    tabImageId,
+    createdUser
+  ) => {
     try {
       const result = await tabRepository.insertTab(
+        tabId,
         projectId,
         pageId,
         tabName,

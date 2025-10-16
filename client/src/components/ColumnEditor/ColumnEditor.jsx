@@ -2,9 +2,25 @@ import React from "react";
 import { Card, Row, Col, Form, Button } from "react-bootstrap";
 import "./ColumnEditor.css";
 
-export default function ColumnEditor({ column, index, updateColumn, removeColumn, submitColumn, lists }) {
-  const { spList, tableList, customList, fieldNames, validationOptions, icons, storedProcedures } = lists;
-  const fieldOrders = ["1", "2", "3", "4", "5"];
+export default function ColumnEditor({
+  column,
+  index,
+  updateColumn,
+  removeColumn,
+  submitColumn,
+  lists,
+  fieldSource,
+  fieldSize,
+  fieldIcon,
+  fieldOrder,
+  jsVal,
+}) {
+  const {
+    spList,
+    tableList,
+    fieldNames,
+    storedProcedures,
+  } = lists;
 
   const handleChange = (field, value) => {
     updateColumn(index, { [field]: value });
@@ -18,7 +34,9 @@ export default function ColumnEditor({ column, index, updateColumn, removeColumn
   };
 
   const removeValidation = (v) => {
-    updateColumn(index, { validation: column.validation.filter(x => x !== v) });
+    updateColumn(index, {
+      validation: column.validation.filter((x) => x !== v),
+    });
   };
 
   return (
@@ -31,10 +49,15 @@ export default function ColumnEditor({ column, index, updateColumn, removeColumn
             value={column.fieldSource}
             onChange={(e) => handleChange("fieldSource", e.target.value)}
           >
-            <option value="">Select</option>
+            {fieldSource.map((eachItem) => (
+              <option key={eachItem.id} value={eachItem.id}>
+                {eachItem.name}
+              </option>
+            ))}
+            {/* <option value="">Select</option>
             <option value="sp">SP</option>
             <option value="table">Table</option>
-            <option value="custom">Custom</option>
+            <option value="custom">Custom</option> */}
           </Form.Select>
         </Col>
 
@@ -125,11 +148,11 @@ export default function ColumnEditor({ column, index, updateColumn, removeColumn
         <Col md={4}>
           <Form.Label>Validation</Form.Label>
           <Form.Select onChange={handleValidationSelect}>
-            <option value="">Select Validation</option>
-            {validationOptions.map((v) => (
-              <option key={v}>{v}</option>
+            {jsVal.map((eachJs) => (
+              <option key={eachJs.id} value={eachJs.name}>
+                {eachJs.name}
+              </option>
             ))}
-            <option value="mandatory">Mandatory</option>
           </Form.Select>
           <div className="mt-1 ">
             {column.validation.map((v) => (
@@ -151,9 +174,10 @@ export default function ColumnEditor({ column, index, updateColumn, removeColumn
             value={column.fieldIcon}
             onChange={(e) => handleChange("fieldIcon", e.target.value)}
           >
-            <option value="">Select Icon</option>
-            {icons.map((ic) => (
-              <option key={ic}>{ic}</option>
+            {fieldIcon.map((eachIcon) => (
+              <option key={eachIcon.id} value={eachIcon.name}>
+                {eachIcon.name}
+              </option>
             ))}
           </Form.Select>
         </Col>
@@ -176,9 +200,10 @@ export default function ColumnEditor({ column, index, updateColumn, removeColumn
             value={column.fieldOrder}
             onChange={(e) => handleChange("fieldOrder", e.target.value)}
           >
-            <option value="">Select Field Order</option>
-            {fieldOrders.map((o) => (
-              <option key={o}>{o}</option>
+            {fieldOrder.map((eachOrder) => (
+              <option key={eachOrder.id} value={eachOrder.name}>
+                {eachOrder.name}
+              </option>
             ))}
           </Form.Select>
         </Col>
