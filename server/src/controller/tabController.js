@@ -8,7 +8,8 @@ const tabController = {
       const errors = [];
 
       for (const [index, tab] of tabs.entries()) {
-        const { projectId, pageId, tabName, tabImageId, createdUser } = tab;
+        const { tabId, projectId, pageId, tabName, tabImageId, createdUser } =
+          tab;
 
         if (!projectId || !pageId || !tabName || !createdUser) {
           errors.push({
@@ -20,6 +21,7 @@ const tabController = {
         }
         try {
           const result = await tabService.insertTab(
+            tabId,
             projectId,
             pageId,
             tabName,

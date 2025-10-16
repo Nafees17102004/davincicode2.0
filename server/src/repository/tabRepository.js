@@ -1,7 +1,14 @@
 const pool = require("../config/dbConfig");
 
 const tabRepository = {
-  insertTab: async (projectId, pageId, tabName, tabImageId, createdUser) => {
+  insertTab: async (
+    tabId,
+    projectId,
+    pageId,
+    tabName,
+    tabImageId,
+    createdUser
+  ) => {
     try {
       const query = "CALL SP_INSERT_UPDATE_TAB_TABLE(?,?, ?, ?, ?, ?)";
       const [rows] = await pool.query(query, [

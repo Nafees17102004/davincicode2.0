@@ -339,6 +339,8 @@ DELIMITER ;
 CALL SP_BIND_DROPDOWN("LIST_OF_VALUES_DETAILS", "field_source");
 
 
+--updated procedure
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERT_UPDATE_TAB_TABLE`(
     IN p_TAB_ID INT,               -- NULL for insert, value for update
     IN p_PROJECT_ID INT,
@@ -354,25 +356,35 @@ BEGIN
     DECLARE v_image_exists INT DEFAULT 0;
     DECLARE v_tab_exists INT DEFAULT 0;
 
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+	
+    -- ✅ Specific Error Handler for Foreign Key Constraint (Error Code 1452)
+    DECLARE EXIT HANDLER FOR 1452
     BEGIN
         ROLLBACK;
-        SELECT 'Unexpected Error: Please contact administrator.' AS message;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Foreign key constraint failed — check PROJECT_ID, PAGE_ID, or IMAGE_ID.';
     END;
 
+    -- ✅ Specific Error Handler for Duplicate Key (Error Code 1062)
+    DECLARE EXIT HANDLER FOR 1062
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Duplicate entry — unique constraint violated.';
+    END;
+	
+    
     -- ✅ Basic Validations
     IF p_PROJECT_ID IS NULL OR p_PAGE_ID IS NULL OR p_TAB_NAME IS NULL OR p_TAB_NAME = '' THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Project ID, Page ID, and Tab Name are required.';
     END IF;
-
+	
     -- ✅ Check if Project Exists
-    SELECT COUNT(*) INTO v_project_exists FROM PROJECT_TABLE WHERE PROJECT_ID = p_PROJECT_ID;
+    SELECT COUNT(*) INTO v_project_exists FROM PROJECTS WHERE id = p_PROJECT_ID; 
     IF v_project_exists = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid PROJECT_ID — project not found.';
     END IF;
 
     -- ✅ Check if Page Exists
-    SELECT COUNT(*) INTO v_page_exists FROM PAGE_TABLE WHERE PAGE_ID = p_PAGE_ID;
+    SELECT COUNT(*) INTO v_page_exists FROM PAGE WHERE PAGE_ID = p_PAGE_ID;
     IF v_page_exists = 0 THEN
         SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid PAGE_ID — page not found.';
     END IF;
@@ -392,15 +404,19 @@ BEGIN
             SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Invalid TAB_ID — no record found to update.';
         END IF;
     END IF;
+    
+     
 
-    -- ✅ Check Duplicate Tab Name within same PAGE for INSERT & UPDATE
+    -- ✅ Check Duplicate Tab Name within SAME PROJECT + SAME PAGE
     SELECT COUNT(*) INTO v_exists
     FROM TAB_TABLE
-    WHERE PAGE_ID = p_PAGE_ID AND TAB_NAME = p_TAB_NAME
-        AND (p_TAB_ID IS NULL OR TAB_ID <> p_TAB_ID); -- Exclude self on update
+    WHERE PROJECT_ID = p_PROJECT_ID       -- ✅ Added this condition
+      AND PAGE_ID = p_PAGE_ID 
+      AND TAB_NAME = p_TAB_NAME
+      AND (p_TAB_ID IS NULL OR TAB_ID <> p_TAB_ID); -- Exclude self on update
 
     IF v_exists > 0 THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A tab with this name already exists on this page.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'A tab with this name already exists on this page in the same project.';
     END IF;
 
     -- ✅ START Transaction
@@ -412,7 +428,6 @@ BEGIN
         VALUES (p_PROJECT_ID, p_PAGE_ID, p_TAB_NAME, p_TAB_IMAGE_ID, p_CUSER);
         COMMIT;
         SELECT 'Tab inserted successfully!' AS message;
-
     ELSE
         -- UPDATE BLOCK
         UPDATE TAB_TABLE
@@ -424,6 +439,5 @@ BEGIN
         WHERE TAB_ID = p_TAB_ID;
         COMMIT;
         SELECT 'Tab updated successfully!' AS message;
-
     END IF;
 END
