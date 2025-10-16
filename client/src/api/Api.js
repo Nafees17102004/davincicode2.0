@@ -74,6 +74,10 @@ const getLovDropdown = (listName, lovName) => {
   return api.get(`/lov-det-drop-down/${listName}/${lovName}`);
 };
 
+const insertAddFormDet = (addFormData) => {
+  return api.post(`/insert-tab`, addFormData);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -92,6 +96,7 @@ const projectAPI = {
   viewLovById,
   getLovWithDet,
   getLovDropdown,
+  insertAddFormDet,
 };
 
 export default projectAPI;
