@@ -54,11 +54,34 @@ const getLovDropdown = async (listName, lovName) => {
     const [rows] = await pool.query(query, [listName, lovName]);
     return rows[0];
   } catch (error) {
-    throw new error;
+    throw new error();
+  }
+};
+const insertTabDetails = async (
+  projectId,
+  pageId,
+  tabName,
+  tabImageId,
+  CUser
+) => {
+  try {
+    const query = "CALL SP_INSERT_TAB_TABLE(?,?,?,?,?);";
+    const [result] = await pool.query(query, [
+      projectId,
+      pageId,
+      tabName,
+      tabImageId,
+      CUser,
+    ]);
+    const outputMsg = result[0][0];
+    return { outputMsg };
+  } catch (error) {
+    throw error;
   }
 };
 
 module.exports = {
   insertFormDetails,
   getLovDropdown,
+  insertTabDetails,
 };
