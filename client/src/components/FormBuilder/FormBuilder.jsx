@@ -13,7 +13,9 @@ import "./FormBuilder.css";
 import projectAPI from "../../api/Api";
 
 export default function FormBuilder() {
+  const [idCounter, setIdCounter] = useState(1);
   const [columns, setColumns] = useState([]);
+  // Dropdown Bind List
   const [fieldSource, setFieldSource] = useState([]);
   const [fieldSize, setFieldSize] = useState([]);
   const [fieldIcon, setFieldIcon] = useState([]);
@@ -23,6 +25,7 @@ export default function FormBuilder() {
   const [pageData, setPageData] = useState([]);
   const [iconData, setIconData] = useState([]);
 
+  // Dummy
   const spList = ["sp_get_users", "sp_get_products"];
   const tableList = ["users", "orders"];
   const customList = ["custom_json_1", "custom_json_2"];
@@ -38,14 +41,27 @@ export default function FormBuilder() {
   const storedProcedures = ["sp_save", "sp_update"];
 
   const [showTabForm, setShowTabForm] = useState(false);
+
+  // Post Data
   const [tabData, setTabData] = useState({
     tabId: null,
     projectId: 0,
     pageId: 0,
-    name: "",
-    icon: "",
+    tabName: "",
+    tabImageId: 0,
     createdUser: "",
   });
+  const [columnData, setColumnData] = useState({
+    tabId: 0,
+    fieldSourceId: 0,
+    FieldName: "",
+    fieldSizeId: 0,
+    fieldIconId: 0,
+    placeholder: "",
+    fieldOrderId: 0,
+    cUser: "",
+  });
+  console.log(columnData.tabId);
   const [tabs, setTabs] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [tabSubmitClicked, setTabSubmitClicked] = useState(false);
@@ -59,6 +75,7 @@ export default function FormBuilder() {
     fetchProjectData();
     fetchPageData();
     fetchIconData();
+    fetchTabData();
   }, []);
 
   const fetchFieldSrcData = async () => {
@@ -174,70 +191,108 @@ export default function FormBuilder() {
       console.error(error);
     }
   };
-  console.log(iconData);
+  const fetchTabData = async () => {
+    try {
+      await projectAPI.getLovDropdown("TAB_TABLE", null).then((res) => {
+        const formattedData = res.data.result.map((eachSize) => ({
+          id: eachSize.Id,
+          name: eachSize.Name,
+        }));
+        setTabs(formattedData);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleAddTabClick = () => setShowTabForm(true);
 
   const handleSubmitTab = async () => {
     setTabSubmitClicked(true);
     await projectAPI
-      .insertAddFormDet(tabData)
+      .insertTabDet(tabData)
       .then((res) => {
-        console.log(res.data);
+        const err = res.data.failedTab.map((eachItem) => eachItem.err);
+        const successMsg = res.data.message;
+        if (err[0]) {
+          alert(`Error: ${err}`);
+        }
+        alert(`Success: ${successMsg}`);
       })
       .catch((error) => {
         console.error(error);
       });
-    if (!tabData.name.trim()) return;
+    if (!tabData.tabName.trim()) return;
     const newTab = {
       id: Date.now(),
-      name: tabData.name,
-      icon: tabData.icon,
+      tabName: tabData.tabName,
+      tabImageId: tabData.tabImageId,
       columns: [],
       submittedColumns: [],
     };
     // await projectAPI.insertLanguage();
     setTabs([...tabs, newTab]);
-    setTabData({ name: "", icon: "" });
+    setTabData({ tabName: "", tabImageId: "" });
     setShowTabForm(false);
     setTabSubmitClicked(false);
     setActiveTab(tabs.length);
   };
 
-  const handleRemoveTab = (id) => {
-    setTabs(tabs.filter((t) => t.id !== id));
-    setActiveTab(null);
-  };
+  // const handleRemoveTab = (id) => {
+  //   setTabs(tabs.filter((t) => t.id !== id));
+  //   setActiveTab(null);
+  // };
 
   const addColumn = () => {
-    const newCol = {
-      id: Date.now(),
-      fieldSource: "",
-      spName: "",
-      spParameter: "",
-      tableName: "",
-      tableColumn: "",
-      customName: "",
-      customText: "",
-      fieldName: "",
-      validation: [],
-      fieldIcon: "",
-      placeholder: "",
-      fieldOrder: "",
-      storedProcedure: "",
-    };
-    const updated = [...tabs];
-    console.log(updated);
-    updated[activeTab].columns.push(newCol);
-    setTabs(updated);
+    setColumns([
+      ...columns,
+      {
+        sNo: idCounter,
+        tabId: 0,
+        fieldSourceId: 0,
+        FieldName: "",
+        fieldSizeId: 0,
+        fieldIconId: 0,
+        placeholder: "",
+        fieldOrderId: 0,
+        cUser: "",
+      },
+    ]);
+    setIdCounter(idCounter + 1);
+    // const newCol = {
+    //   id: Date.now(),
+    //   fieldSource: "",
+    //   spName: "",
+    //   spParameter: "",
+    //   tableName: "",
+    //   tableColumn: "",
+    //   customName: "",
+    //   customText: "",
+    //   fieldName: "",
+    //   validation: [],
+    //   fieldIcon: "",
+    //   placeholder: "",
+    //   fieldOrder: "",
+    //   storedProcedure: "",
+    // };
+    // const updated = [...tabs];
+    // console.log(updated);
+    // updated[activeTab].columns.push(newCol);
+    // setTabs(updated);
   };
+  console.log(columns);
+  const handleChange = (index, field, value) => {
+    const updatedColumns = [...columns];
+    updatedColumns[index][field] = value;
+    setColumns(updatedColumns);
+  };
+
   const updateColumn = (index, updates) => {
     const updated = [...tabs];
     updated[activeTab].columns[index] = {
       ...updated[activeTab].columns[index],
       ...updates,
     };
-    console.log("Updated Column:", updated[activeTab].columns[index]);
     setTabs(updated);
   };
   const removeColumn = (index) => {
@@ -263,6 +318,26 @@ export default function FormBuilder() {
     setTabs(updated);
   };
 
+  // Tab dropdown click
+  const handleTabClick = (e) => {
+    setTabSubmitClicked(true);
+    setColumnData({ ...columnData, tabId: e.target.value });
+    if (!tabData.tabName.trim()) return;
+    const newTab = {
+      id: Date.now(),
+      tabName: tabData.tabName,
+      tabImageId: tabData.tabImageId,
+      columns: [],
+      submittedColumns: [],
+    };
+
+    // await projectAPI.insertLanguage();
+    setTabs([...tabs, newTab]);
+    setTabData({ tabName: "", tabImageId: "" });
+    setShowTabForm(false);
+    setTabSubmitClicked(false);
+    setActiveTab(tabs.length);
+  };
   return (
     <Container className="py-4">
       {!showTabForm && (
@@ -284,7 +359,9 @@ export default function FormBuilder() {
                   }
                 >
                   {projectData.map((eachProject) => (
-                    <option value={eachProject.id} key={eachProject.id}>{eachProject.name}</option>
+                    <option value={eachProject.id} key={eachProject.id}>
+                      {eachProject.name}
+                    </option>
                   ))}
                 </Form.Select>
               </Form.Group>
@@ -298,7 +375,6 @@ export default function FormBuilder() {
                     setTabData({ ...tabData, pageId: e.target.value })
                   }
                 >
-                  <option value="">Select Page</option>
                   {pageData.map((eachPage) => (
                     <option value={eachPage.id} key={eachPage.id}>
                       {eachPage.name}
@@ -313,12 +389,12 @@ export default function FormBuilder() {
                 <Form.Control
                   type="text"
                   placeholder="Enter Tab Name"
-                  value={tabData.name}
+                  value={tabData.tabName}
                   onChange={(e) =>
-                    setTabData({ ...tabData, name: e.target.value })
+                    setTabData({ ...tabData, tabName: e.target.value })
                   }
                 />
-                {tabSubmitClicked && !tabData.name.trim() && (
+                {tabSubmitClicked && !tabData.tabName.trim() && (
                   <div style={{ color: "red", fontSize: "0.85rem" }}>
                     * Tab Name is required
                   </div>
@@ -329,9 +405,9 @@ export default function FormBuilder() {
               <Form.Group>
                 <Form.Label>Tab Icon</Form.Label>
                 <Form.Select
-                  value={tabData.icon}
+                  value={tabData.tabImageId}
                   onChange={(e) =>
-                    setTabData({ ...tabData, icon: e.target.value })
+                    setTabData({ ...tabData, tabImageId: e.target.value })
                   }
                 >
                   {iconData.map((eachIcon) => (
@@ -355,7 +431,7 @@ export default function FormBuilder() {
                 />
                 {tabSubmitClicked && !tabData.createdUser.trim() && (
                   <div style={{ color: "red", fontSize: "0.85rem" }}>
-                    * createdUser is required
+                    * Created User is required
                   </div>
                 )}
               </Form.Group>
@@ -372,7 +448,23 @@ export default function FormBuilder() {
       <Row>
         {/* Tabs List */}
         <Col md={3}>
-          {tabs.map((tab, i) => (
+          <Form.Group>
+            <Form.Label>Tab Name</Form.Label>
+            <Form.Select
+              value={columnData.tabId}
+              onChange={
+                (e) => handleTabClick(e)
+                // setTabData({ ...tabData, tabImageId: e.target.value })
+              }
+            >
+              {tabs.map((eachTab) => (
+                <option value={eachTab.id} key={eachTab.id}>
+                  {eachTab.name}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+          {/* {tabs.slice(1, tabs.length).map((tab, i) => (
             <Card
               key={tab.id}
               className={`p-3 mb-3 shadow-sm ${
@@ -398,87 +490,41 @@ export default function FormBuilder() {
                 </Button>
               </div>
             </Card>
-          ))}
+          ))} */}
         </Col>
 
         {/* Active Tab Columns */}
         <Col md={9}>
-          {activeTab !== null && tabs[activeTab] && (
-            <>
-              <Card className="p-3 mb-3 shadow-sm d-flex flex-row justify-content-between align-items-center">
-                <h5 className="m-0">{tabs[activeTab].name} Columns</h5>
-                <Button variant="success" size="sm" onClick={addColumn}>
-                  + Add Column
-                </Button>
-              </Card>
+          <Card className="p-3 mb-3 shadow-sm d-flex flex-column justify-content-between align-items-center">
+            <Card className="container-fluid border-0 d-flex flex-row justify-content-between align-items-center">
+              <h5 className="m-0">Columns</h5>
+              <Button variant="success" size="sm" onClick={addColumn}>
+                + Add Column
+              </Button>
+            </Card>
 
-              {tabs[activeTab].columns.map((col, idx) => (
-                <ColumnEditor
-                  key={col.id}
-                  fieldSource={fieldSource}
-                  fieldSize={fieldSize}
-                  fieldOrder={fieldOrder}
-                  fieldIcon={fieldIcon}
-                  jsVal={jsVal}
-                  column={col}
-                  index={idx}
-                  updateColumn={updateColumn}
-                  removeColumn={removeColumn}
-                  submitColumn={submitColumn} // ✅ Pass submit function
-                  lists={{
-                    spList,
-                    tableList,
-                    customList,
-                    fieldNames,
-                    validationOptions,
-                    icons,
-                    storedProcedures,
-                  }}
-                />
-              ))}
-
-              {/* Submitted Columns Table */}
-              {tabs[activeTab].submittedColumns.length > 0 && (
-                <Card className="p-3 shadow-sm mt-4">
-                  <h5>Entered Data</h5>
-                  <Table bordered hover responsive className="mt-2">
-                    <thead>
-                      <tr>
-                        <th>S.No</th>
-                        <th>Field Source</th>
-                        <th>Field Name</th>
-                        <th>Validation</th>
-                        <th>Placeholder</th>
-                        <th>Stored Procedure</th>
-                        <th>Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {tabs[activeTab].submittedColumns.map((c, i) => (
-                        <tr key={c.id}>
-                          <td>{i + 1}</td>
-                          <td>{c.fieldSource}</td>
-                          <td>{c.fieldName}</td>
-                          <td>{c.validation.join(", ")}</td>
-                          <td>{c.placeholder}</td>
-                          <td>{c.storedProcedure}</td>
-                          <td>
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              onClick={() => backToEdit(i)}
-                            >
-                              Back
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </Table>
-                </Card>
-              )}
-            </>
-          )}
+            <ColumnEditor
+              columns={columns}
+              onChange={handleChange}
+              fieldSource={fieldSource}
+              fieldSize={fieldSize}
+              fieldOrder={fieldOrder}
+              fieldIcon={fieldIcon}
+              jsVal={jsVal}
+              updateColumn={updateColumn}
+              removeColumn={removeColumn}
+              submitColumn={submitColumn} // ✅ Pass submit function
+              lists={{
+                spList,
+                tableList,
+                customList,
+                fieldNames,
+                validationOptions,
+                icons,
+                storedProcedures,
+              }}
+            />
+          </Card>
         </Col>
       </Row>
     </Container>
