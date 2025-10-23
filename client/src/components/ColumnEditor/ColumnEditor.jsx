@@ -4,22 +4,22 @@ import "./ColumnEditor.css";
 
 export default function ColumnEditor({
   columns,
+  onChange,
   index,
   updateColumn,
   removeColumn,
   submitColumn,
   lists,
+  fieldType,
   fieldSource,
   fieldSize,
   fieldIcon,
   fieldOrder,
   jsVal,
+  spParamData,
+  tableCol,
 }) {
-  const { spList, tableList, fieldNames, storedProcedures } = lists;
-
-  // const handleChange = (field, value) => {
-  //   updateColumn(index, { [field]: value });
-  // };
+  const { spList, tableList, storedProcedures, eventHandler } = lists;
 
   // const handleValidationSelect = (e) => {
   //   const val = e.target.value;
@@ -33,97 +33,116 @@ export default function ColumnEditor({
   //     validation: column.validation.filter((x) => x !== v),
   //   });
   // };
-
   return (
-    <Card className="container-fluid p-3 mb-4 shadow-sm column-card">
+    <Card className="container-fluid mt-3 p-3 mb-4 shadow-sm column-card">
       {/* Row 1 */}
-      {columns.map((column, idx) => (
-        <div key={idx}>
+      {columns.map((column, index) => (
+        <div key={index}>
           {/* Render column details here, for example: */}
+          <Row className="p-3 mb-2">Column {column.sNo}</Row>
           <Row className="g-3 mb-2">
+            <Col md={4}>
+              <Form.Label>Field Type</Form.Label>
+              <Form.Select
+                value={column.fieldTypeId}
+                onChange={(e) =>
+                  onChange(index, "fieldTypeId", Number(e.target.value))
+                }
+              >
+                {fieldType.map((eachItem) => (
+                  <option key={eachItem.id} value={eachItem.id}>
+                    {eachItem.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Col>
             <Col md={4}>
               <Form.Label>Field Source</Form.Label>
               <Form.Select
-                value={column.fieldSource}
-                onChange={(e) => handleChange("fieldSource", e.target.value)}
+                value={column.fieldSourceId}
+                onChange={(e) =>
+                  onChange(index, "fieldSourceId", Number(e.target.value))
+                }
               >
                 {fieldSource.map((eachItem) => (
                   <option key={eachItem.id} value={eachItem.id}>
                     {eachItem.name}
                   </option>
                 ))}
-                {/* <option value="">Select</option>
-            <option value="sp">SP</option>
-            <option value="table">Table</option>
-            <option value="custom">Custom</option> */}
               </Form.Select>
             </Col>
 
             <Col md={4}>
-              <Form.Label>Name</Form.Label>
-              {column.fieldSource === "sp" && (
+              <Form.Label>
+                {column.fieldSourceId === 1
+                  ? "Stored Procedure"
+                  : column.fieldSourceId === 2
+                  ? "Table"
+                  : column.fieldSourceId === 3
+                  ? "Custom Name"
+                  : "Select Source First"}
+              </Form.Label>
+              {column.fieldSourceId === 1 && (
                 <Form.Select
                   value={column.spName}
-                  onChange={(e) => handleChange("spName", e.target.value)}
+                  onChange={(e) => onChange(index, "spName", e.target.value)}
                 >
-                  <option value="">Select SP</option>
                   {spList.map((sp) => (
-                    <option key={sp}>{sp}</option>
+                    <option value={sp.name} key={sp.id}>
+                      {sp.name}
+                    </option>
                   ))}
                 </Form.Select>
               )}
-              {column.fieldSource === "table" && (
+              {column.fieldSourceId === 2 && (
                 <Form.Select
                   value={column.tableName}
-                  onChange={(e) => handleChange("tableName", e.target.value)}
+                  onChange={(e) => onChange(index, "tableName", e.target.value)}
                 >
-                  <option value="">Select Table</option>
                   {tableList.map((t) => (
-                    <option key={t}>{t}</option>
+                    <option value={t.name} key={t.id}>
+                      {t.name}
+                    </option>
                   ))}
                 </Form.Select>
               )}
-              {column.fieldSource === "custom" && (
+              {column.fieldSourceId === 3 && (
                 <Form.Control
                   type="text"
                   placeholder="Custom Name"
                   value={column.customName}
-                  onChange={(e) => handleChange("customName", e.target.value)}
+                  onChange={(e) =>
+                    onChange(index, "customName", e.target.value)
+                  }
                 />
               )}
             </Col>
 
             <Col md={4}>
               <Form.Label>Parameter / Column / Custom</Form.Label>
-              {column.fieldSource === "sp" && (
+              {column.fieldSourceId === 1 && (
                 <Form.Select
-                  value={column.spParameter}
-                  onChange={(e) => handleChange("spParameter", e.target.value)}
+                  value={column.spParam}
+                  onChange={(e) => onChange(index, "spParam", e.target.value)}
                 >
-                  <option value="">Select Parameter</option>
-                  {["param1", "param2", "param3"].map((p) => (
-                    <option key={p}>{p}</option>
+                  {(spParamData[index] || []).map((p) => (
+                    <option value={p.name} key={p.id}>
+                      {p.name}
+                    </option>
                   ))}
                 </Form.Select>
               )}
-              {column.fieldSource === "table" && (
+              {column.fieldSourceId === 2 && (
                 <Form.Select
-                  value={column.tableColumn}
-                  onChange={(e) => handleChange("tableColumn", e.target.value)}
+                  value={column.tableCol}
+                  onChange={(e) => onChange(index, "tableCol", e.target.value)}
                 >
-                  <option value="">Select Column</option>
-                  {["col1", "col2", "col3"].map((c) => (
-                    <option key={c}>{c}</option>
+                  {(tableCol[index] || []).map((c) => (
+                    <option value={c.name} key={c.id}>
+                      {c.name}
+                    </option>
                   ))}
                 </Form.Select>
-              )}
-              {column.fieldSource === "custom" && (
-                <Form.Control
-                  type="text"
-                  placeholder="Custom Text"
-                  value={column.customText}
-                  onChange={(e) => handleChange("customText", e.target.value)}
-                />
               )}
             </Col>
           </Row>
@@ -132,45 +151,74 @@ export default function ColumnEditor({
           <Row className="g-3 mb-2">
             <Col md={4}>
               <Form.Label>Field Name</Form.Label>
-              <Form.Select
+              <Form.Control
+                type="text"
                 value={column.fieldName}
-                onChange={(e) => handleChange("fieldName", e.target.value)}
-              >
-                <option value="">Select Field</option>
-                {fieldNames.map((f) => (
-                  <option key={f}>{f}</option>
-                ))}
-              </Form.Select>
+                onChange={(e) => onChange(index, "fieldName", e.target.value)}
+              ></Form.Control>
             </Col>
+            {column ? (
+              <Col md={4} key={index}>
+                <Form.Label>Validation</Form.Label>
+                <Form.Select
+                  value=""
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val && !column.validation?.includes(val)) {
+                      onChange(index, "validation", [
+                        ...(column.validation || []),
+                        val,
+                      ]);
+                    }
+                  }}
+                >
+                  {jsVal.map((eachJs) => (
+                    <option key={eachJs.id} value={eachJs.name}>
+                      {eachJs.name}
+                    </option>
+                  ))}
+                </Form.Select>
 
-            {/* <Col md={4}>
-              <Form.Label>Validation</Form.Label>
-              <Form.Select onChange={handleValidationSelect}>
-                {jsVal.map((eachJs) => (
-                  <option key={eachJs.id} value={eachJs.name}>
-                    {eachJs.name}
+                <div className="mt-1">
+                  {(column.validation || []).map((v) => (
+                    <span
+                      key={v}
+                      className="badge bg-secondary me-1"
+                      style={{ cursor: "pointer" }}
+                      onClick={() =>
+                        onChange(
+                          index,
+                          "validation",
+                          (column.validation || []).filter((item) => item !== v)
+                        )
+                      }
+                    >
+                      {v} ✖
+                    </span>
+                  ))}
+                </div>
+              </Col>
+            ) : null}
+            <Col md={4}>
+              <Form.Label>Event Handler</Form.Label>
+              <Form.Select
+                value={column.eventHandler}
+                onChange={(e) =>
+                  onChange(index, "eventHandler", Number(e.target.value))
+                }
+              >
+                {eventHandler.map((eachItem) => (
+                  <option key={eachItem.id} value={eachItem.id}>
+                    {eachItem.name}
                   </option>
                 ))}
               </Form.Select>
-              <div className="mt-1 ">
-                {column.validation.map((v) => (
-                  <span
-                    key={v}
-                    className="badge bg-secondary me-1"
-                    style={{ cursor: "pointer" }}
-                    onClick={() => removeValidation(v)}
-                  >
-                    {v} ✖
-                  </span>
-                ))}
-              </div>
-            </Col> */}
-
+            </Col>
             <Col md={4}>
               <Form.Label>Field Icon</Form.Label>
               <Form.Select
-                value={column.fieldIcon}
-                onChange={(e) => handleChange("fieldIcon", e.target.value)}
+                value={column.fieldIconId}
+                onChange={(e) => onChange(index, "fieldIconId", e.target.value)}
               >
                 {fieldIcon.map((eachIcon) => (
                   <option key={eachIcon.id} value={eachIcon.name}>
@@ -188,18 +236,20 @@ export default function ColumnEditor({
               <Form.Control
                 placeholder="Placeholder"
                 value={column.placeholder}
-                onChange={(e) => handleChange("placeholder", e.target.value)}
+                onChange={(e) => onChange(index, "placeholder", e.target.value)}
               />
             </Col>
 
             <Col md={4}>
               <Form.Label>Field Order</Form.Label>
               <Form.Select
-                value={column.fieldOrder}
-                onChange={(e) => handleChange("fieldOrder", e.target.value)}
+                value={column.fieldOrderId}
+                onChange={(e) =>
+                  onChange(index, "fieldOrderId", e.target.value)
+                }
               >
                 {fieldOrder.map((eachOrder) => (
-                  <option key={eachOrder.id} value={eachOrder.name}>
+                  <option key={eachOrder.id} value={eachOrder.id}>
                     {eachOrder.name}
                   </option>
                 ))}
@@ -207,16 +257,17 @@ export default function ColumnEditor({
             </Col>
 
             <Col md={3}>
-              <Form.Label>Stored Procedure</Form.Label>
+              <Form.Label>Saving SP's</Form.Label>
               <Form.Select
                 value={column.storedProcedure}
                 onChange={(e) =>
                   handleChange("storedProcedure", e.target.value)
                 }
               >
-                <option value="">Select SP</option>
                 {storedProcedures.map((sp) => (
-                  <option key={sp}>{sp}</option>
+                  <option value={sp.name} key={sp.id}>
+                    {sp.name}
+                  </option>
                 ))}
               </Form.Select>
             </Col>
@@ -227,9 +278,9 @@ export default function ColumnEditor({
               <Button variant="danger" size="md" className="mt-3">
                 Remove
               </Button>
-              <Button variant="primary" size="md" className="mt-3">
+              {/* <Button variant="primary" size="md" className="mt-3">
                 Submit
-              </Button>
+              </Button> */}
             </Col>
           </Row>
         </div>

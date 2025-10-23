@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Form,
-  Button,
-  Table,
-} from "react-bootstrap";
+import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import ColumnEditor from "../ColumnEditor/ColumnEditor";
 import "./FormBuilder.css";
 import projectAPI from "../../api/Api";
@@ -15,6 +7,11 @@ import projectAPI from "../../api/Api";
 export default function FormBuilder() {
   const [idCounter, setIdCounter] = useState(1);
   const [columns, setColumns] = useState([]);
+  console.log(columns);
+  // Tab UseState
+  const [activeTabId, setActiveTabId] = useState(0);
+  const [activeTabName, setActiveTabName] = useState("");
+  const [activeTabState, setActiveTabState] = useState(true);
   // Dropdown Bind List
   const [fieldSource, setFieldSource] = useState([]);
   const [fieldSize, setFieldSize] = useState([]);
@@ -24,21 +21,13 @@ export default function FormBuilder() {
   const [projectData, setProjectData] = useState([]);
   const [pageData, setPageData] = useState([]);
   const [iconData, setIconData] = useState([]);
-
-  // Dummy
-  const spList = ["sp_get_users", "sp_get_products"];
-  const tableList = ["users", "orders"];
-  const customList = ["custom_json_1", "custom_json_2"];
-  const fieldNames = ["id", "name", "email", "amount"];
-  const validationOptions = [
-    "required",
-    "email",
-    "number",
-    "minLength",
-    "maxLength",
-  ];
-  const icons = ["fa-user", "fa-database", "fa-table", "fa-cog"];
-  const storedProcedures = ["sp_save", "sp_update"];
+  const [spList, setSpList] = useState([]);
+  const [spParamData, setSpParamData] = useState([]);
+  const [tableList, setTableList] = useState([]);
+  const [tableCol, setTableCol] = useState([]);
+  const [fieldType, setFieldType] = useState([]);
+  const [storedProcedures, setStoredProcedures] = useState([]);
+  const [eventHandler, setEventHandler] = useState([]);
 
   const [showTabForm, setShowTabForm] = useState(false);
 
@@ -54,19 +43,36 @@ export default function FormBuilder() {
   const [columnData, setColumnData] = useState({
     tabId: 0,
     fieldSourceId: 0,
-    FieldName: "",
+    fieldTypeId: 0,
+    spName: null,
+    spParam: null,
+    tableName: null,
+    tableColumns: null,
+    customName: null,
+    fieldName: "",
     fieldSizeId: 0,
     fieldIconId: 0,
     placeholder: "",
     fieldOrderId: 0,
+    storedProcedure: "",
+    validation: [],
+    eventHandler: "",
     cUser: "",
   });
-  console.log(columnData.tabId);
   const [tabs, setTabs] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [tabSubmitClicked, setTabSubmitClicked] = useState(false);
 
   useEffect(() => {
+    // Update all existing columns with new tabId
+    if (activeTabId) {
+      setColumns((prev) =>
+        prev.map((col) => ({
+          ...col,
+          tabId: activeTabId,
+        }))
+      );
+    }
     fetchFieldSrcData();
     fetchFieldSizeData();
     fetchFieldIconData();
@@ -76,7 +82,12 @@ export default function FormBuilder() {
     fetchPageData();
     fetchIconData();
     fetchTabData();
-  }, []);
+    fetchSpListData();
+    fetchTableListData();
+    fetchFieldTypeData();
+    fetchStoringSPData();
+    fetchEventHandlerData();
+  }, [activeTabId]);
 
   const fetchFieldSrcData = async () => {
     try {
@@ -204,6 +215,73 @@ export default function FormBuilder() {
       console.error(error);
     }
   };
+  const fetchSpListData = async () => {
+    try {
+      await projectAPI.getLovDropdown("SP_LIST", null).then((res) => {
+        const formattedData = res.data.result.map((eachSize) => ({
+          id: eachSize.Id,
+          name: eachSize.Name,
+        }));
+        setSpList(formattedData);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const fetchTableListData = async () => {
+    try {
+      await projectAPI.getLovDropdown("TABLE_LIST", null).then((res) => {
+        const formattedData = res.data.result.map((eachSize) => ({
+          id: eachSize.Id,
+          name: eachSize.Name,
+        }));
+        setTableList(formattedData);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const fetchFieldTypeData = async () => {
+    try {
+      await projectAPI.getLovDropdown("FIELD_TYPE", null).then((res) => {
+        const formattedData = res.data.result.map((eachSize) => ({
+          id: eachSize.Id,
+          name: eachSize.Name,
+        }));
+        setFieldType(formattedData);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const fetchStoringSPData = async () => {
+    try {
+      await projectAPI.getLovDropdown("STORING_SP", null).then((res) => {
+        const formattedData = res.data.result.map((eachSrc) => ({
+          id: eachSrc.Id,
+          name: eachSrc.Name,
+        }));
+        setStoredProcedures(formattedData);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  const fetchEventHandlerData = async () => {
+    try {
+      await projectAPI
+        .getLovDropdown("FORM_EVENT_HANDLER", null)
+        .then((res) => {
+          const formattedData = res.data.result.map((eachSrc) => ({
+            id: eachSrc.Id,
+            name: eachSrc.Name,
+          }));
+          setEventHandler(formattedData);
+        });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const handleAddTabClick = () => setShowTabForm(true);
 
@@ -244,17 +322,29 @@ export default function FormBuilder() {
   // };
 
   const addColumn = () => {
-    setColumns([
-      ...columns,
+    if (!activeTabId) {
+      setActiveTabState(false)
+    }
+    setColumns((prev) => [
+      ...prev,
       {
         sNo: idCounter,
-        tabId: 0,
+        tabId: activeTabId,
         fieldSourceId: 0,
-        FieldName: "",
+        fieldTypeId: 0,
+        spName: null,
+        spParam: null,
+        tableName: null,
+        tableColumns: null,
+        customName: null,
+        fieldName: "",
         fieldSizeId: 0,
         fieldIconId: 0,
         placeholder: "",
         fieldOrderId: 0,
+        storedProcedure: "",
+        validation: [],
+        eventHandler: "",
         cUser: "",
       },
     ]);
@@ -280,10 +370,51 @@ export default function FormBuilder() {
     // updated[activeTab].columns.push(newCol);
     // setTabs(updated);
   };
-  console.log(columns);
-  const handleChange = (index, field, value) => {
+  const handleChange = async (index, field, value) => {
     const updatedColumns = [...columns];
     updatedColumns[index][field] = value;
+    if (field === "spName") {
+      try {
+        const res = await projectAPI.getLovDropdown("SP_PARAMS", value);
+        const formattedParams = res.data.result.map((each) => ({
+          id: each.Id,
+          name: each.Name,
+        }));
+        setSpParamData((prev) => ({
+          ...prev,
+          [index]: formattedParams, // store params for that column only
+        }));
+
+        updatedColumns[index].spParam = ""; // reset old param
+        updatedColumns[index].tableName = null;
+        updatedColumns[index].tableCol = null;
+        updatedColumns[index].customName = null;
+      } catch (error) {
+        console.error("Error fetching SP Params:", error);
+        setSpParamData((prev) => ({ ...prev, [index]: [] }));
+      }
+    } else if (field === "tableName") {
+      try {
+        const res = await projectAPI.getLovDropdown("TABLE_COLS", value);
+        const formattedParams = res.data.result.map((each) => ({
+          id: each.Id,
+          name: each.Name,
+        }));
+        setTableCol((prev) => ({
+          ...prev,
+          [index]: formattedParams, // store params for that column only
+        }));
+
+        updatedColumns[index].tableCol = null;
+        updatedColumns[index].spName = null;
+        updatedColumns[index].spParam = null;
+        updatedColumns[index].customName = null; // reset old param
+      } catch (error) {
+        console.error("Error fetching Table Columns:", error);
+        setTableCol((prev) => ({ ...prev, [index]: [] }));
+      }
+    }
+
     setColumns(updatedColumns);
   };
 
@@ -321,7 +452,12 @@ export default function FormBuilder() {
   // Tab dropdown click
   const handleTabClick = (e) => {
     setTabSubmitClicked(true);
-    setColumnData({ ...columnData, tabId: e.target.value });
+    const tabId = parseInt(e.target.value);
+    setActiveTabId(tabId);
+    const selectedIndex = e.target.selectedIndex;
+    const tabName = e.target.options[selectedIndex].text;
+    setActiveTabName(tabName);
+    // setColumnData({ ...columnData, tabId: e.target.value });
     if (!tabData.tabName.trim()) return;
     const newTab = {
       id: Date.now(),
@@ -444,14 +580,14 @@ export default function FormBuilder() {
           </Row>
         </Card>
       )}
-
+      <Row>{activeTabState ? null : <h6 className="text-danger">*Tab Should Be Selected</h6>}</Row>
       <Row>
         {/* Tabs List */}
         <Col md={3}>
           <Form.Group>
             <Form.Label>Tab Name</Form.Label>
             <Form.Select
-              value={columnData.tabId}
+              value={activeTabId || 0}
               onChange={
                 (e) => handleTabClick(e)
                 // setTabData({ ...tabData, tabImageId: e.target.value })
@@ -502,28 +638,40 @@ export default function FormBuilder() {
                 + Add Column
               </Button>
             </Card>
+            <Card className="container-fluid mt-3 mb-3 border-0">
+              <h5 className="text-secondary">Selected Tab: {activeTabName}</h5>
+            </Card>
 
-            <ColumnEditor
-              columns={columns}
-              onChange={handleChange}
-              fieldSource={fieldSource}
-              fieldSize={fieldSize}
-              fieldOrder={fieldOrder}
-              fieldIcon={fieldIcon}
-              jsVal={jsVal}
-              updateColumn={updateColumn}
-              removeColumn={removeColumn}
-              submitColumn={submitColumn} // ✅ Pass submit function
-              lists={{
-                spList,
-                tableList,
-                customList,
-                fieldNames,
-                validationOptions,
-                icons,
-                storedProcedures,
-              }}
-            />
+            {columns.length === 0 ? null : (
+              <ColumnEditor
+                columns={columns}
+                onChange={handleChange}
+                fieldType={fieldType}
+                fieldSource={fieldSource}
+                fieldSize={fieldSize}
+                fieldOrder={fieldOrder}
+                fieldIcon={fieldIcon}
+                jsVal={jsVal}
+                spParamData={spParamData}
+                tableCol={tableCol}
+                updateColumn={updateColumn}
+                removeColumn={removeColumn}
+                submitColumn={submitColumn} // ✅ Pass submit function
+                lists={{
+                  spList,
+                  tableList,
+                  storedProcedures,
+                  eventHandler,
+                }}
+              />
+            )}
+            <Button
+              variant="primary"
+              size="md"
+              className="container-fluid mt-3"
+            >
+              Submit
+            </Button>
           </Card>
         </Col>
       </Row>
