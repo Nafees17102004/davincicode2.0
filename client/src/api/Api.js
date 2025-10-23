@@ -78,6 +78,10 @@ const insertTabDet = (tabData) => {
   return api.post(`/insert-tab`, tabData);
 };
 
+const insertAddFormDet = (addFormData) => {
+  return api.post(`/add-form-det`, addFormData);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -97,6 +101,7 @@ const projectAPI = {
   getLovWithDet,
   getLovDropdown,
   insertTabDet,
+  insertAddFormDet,
 };
 
 export default projectAPI;

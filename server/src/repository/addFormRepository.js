@@ -11,15 +11,25 @@ const insertFormDetails = async (
   cUser
 ) => {
   try {
-    const query = "CALL SP_INSERT_ADD_FORM_TABLE(?,?,?,?,?,?,?,?);";
+    const query =
+      "CALL SP_INSERT_FORM_FIELD_WITH_VALIDATIONS(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
     const [rows] = await pool.query(query, [
       tabId,
       fieldSourceId || null,
+      fieldTypeId,
+      spName || null,
+      spParam || null,
+      tableName ||null,
+      tableColumns || null,
+      customName || null,
       FieldName,
       fieldSizeId || null,
       fieldIconId || null,
       placeholder || null,
       fieldOrderId || null,
+      storedProcedure,
+      validationIds,
+      eventHandler,
       cUser,
     ]);
 
