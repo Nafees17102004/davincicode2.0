@@ -442,51 +442,201 @@ BEGIN
     END IF;
 END
 
-DELIMITER $$
-
-CREATE PROCEDURE SP_INSERT_FORM_FIELD_WITH_VALIDATIONS (
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERT_FORM_FIELD_WITH_VALIDATIONS`(
     IN p_TAB_ID INT,
-    IN p_FIELD_NAME VARCHAR(100),
-    IN p_FIELD_SOURCE_LOV_DET_ID INT,
+    IN p_FIELD_SOURCE_ID INT,
     IN p_FIELD_TYPE_ID INT,
-    IN p_FIELD_SIZE_LOV_DET_ID INT,
-    IN p_FIELD_ICON_LOV_DET_ID INT,
+    IN p_SP_NAME VARCHAR(255),
+    IN p_SP_PARAM VARCHAR(255),
+    IN p_TABLE_NAME VARCHAR(255),
+    IN p_TABLE_COLUMNS VARCHAR(255),
+    IN p_CUSTOM_NAME VARCHAR(255),
+    IN p_FIELD_NAME VARCHAR(100),
+    IN p_FIELD_SIZE_ID INT,
+    IN p_FIELD_ICON_ID INT,
     IN p_PLACEHOLDER VARCHAR(255),
-    IN p_FIELD_ORDER_LOV_DET_ID INT,
-    IN p_STORING_SP VARCHAR(100),
-    IN p_C2C_CUSER VARCHAR(100),
-    IN p_VALIDATION_IDS JSON        -- e.g., '[1,4,6]'
+    IN p_FIELD_ORDER_ID INT,
+    IN p_STORED_PROCEDURE VARCHAR(255),
+    IN p_VALIDATION_IDS JSON,       -- e.g. '[1,4,6]'
+    IN p_EVENT_HANDLER VARCHAR(255),
+    IN p_CUSER VARCHAR(100)
 )
 BEGIN
-    DECLARE v_FORM_FIELD_ID INT;
+    DECLARE v_err_msg TEXT DEFAULT '';
+    DECLARE v_tab_exists INT DEFAULT 0;
+    DECLARE v_field_exists INT DEFAULT 0;
+    DECLARE v_FORM_FIELD_ID INT DEFAULT 0;
 
-    -- Insert the form field
+    -- Error handler
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        SET v_err_msg = CONCAT('SQL Exception occurred while inserting form field. Details: ', COALESCE(v_err_msg, 'Unknown error'));
+        SELECT FALSE AS success, v_err_msg AS message;
+    END;
+
+    START TRANSACTION;
+
+    -- ===================================================
+    -- 1. Validate Required Fields
+    -- ===================================================
+    IF p_TAB_ID IS NULL OR p_TAB_ID = 0 THEN
+        SET v_err_msg = 'TAB_ID cannot be NULL or 0.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_SOURCE_ID IS NULL OR p_FIELD_SOURCE_ID = 0 THEN
+        SET v_err_msg = 'FIELD_SOURCE_ID cannot be NULL or 0.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_TYPE_ID IS NULL OR p_FIELD_TYPE_ID = 0 THEN
+        SET v_err_msg = 'FIELD_TYPE_ID cannot be NULL or 0.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_NAME IS NULL OR TRIM(p_FIELD_NAME) = '' THEN
+        SET v_err_msg = 'FIELD_NAME cannot be empty.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_CUSER IS NULL OR TRIM(p_CUSER) = '' THEN
+        SET v_err_msg = 'Created user (CUSER) cannot be empty.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 2. Existence Checks
+    -- ===================================================
+    SELECT COUNT(*) INTO v_tab_exists FROM TAB_TABLE WHERE TAB_ID = p_TAB_ID;
+    IF v_tab_exists = 0 THEN
+        SET v_err_msg = CONCAT('TAB_ID ', p_TAB_ID, ' does not exist in TAB_TABLE.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    SELECT COUNT(*) INTO v_field_exists 
+    FROM ADD_FORM_TABLE 
+    WHERE FIELD_NAME = p_FIELD_NAME AND TAB_ID = p_TAB_ID;
+
+    IF v_field_exists > 0 THEN
+        SET v_err_msg = CONCAT('FIELD_NAME "', p_FIELD_NAME, '" already exists for this TAB_ID.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 3. Validate Foreign Keys (if not null)
+    -- ===================================================
+    IF p_FIELD_SOURCE_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_SOURCE_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_SIZE_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_SIZE_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_ICON_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_ICON_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_ORDER_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_ORDER_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 4. Logical and JSON Validations
+    -- ===================================================
+    IF p_SP_NAME IS NOT NULL AND TRIM(p_SP_NAME) != '' AND (p_SP_PARAM IS NULL OR TRIM(p_SP_PARAM) = '') THEN
+        SET v_err_msg = 'If SP_NAME is provided, SP_PARAM must also be specified.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_TABLE_NAME IS NOT NULL AND TRIM(p_TABLE_NAME) != '' AND (p_TABLE_COLUMNS IS NULL OR TRIM(p_TABLE_COLUMNS) = '') THEN
+        SET v_err_msg = 'If TABLE_NAME is provided, TABLE_COLUMNS must also be specified.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_VALIDATION_IDS IS NOT NULL AND JSON_VALID(p_VALIDATION_IDS) = 0 THEN
+        SET v_err_msg = 'Invalid JSON format in VALIDATION_IDS.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 5. Insert into ADD_FORM_TABLE
+    -- ===================================================
     INSERT INTO ADD_FORM_TABLE (
-        TAB_ID, FIELD_SOURCE_LOV_DET_ID, FIELD_TYPE_ID, FIELD_NAME,
-        FIELD_SIZE_LOV_DET_ID, FIELD_ICON_LOV_DET_ID, PLACEHOLDER,
-        FIELD_ORDER_LOV_DET_ID, STORING_SP, C2C_CUSER
+        TAB_ID,
+        FIELD_SOURCE_LOV_DET_ID,
+        FIELD_TYPE_ID,
+        SP_NAME,
+        SP_PARAM,
+        TABLE_NAME,
+        TABLE_COLUMNS,
+        CUSTOM_NAME,
+        FIELD_NAME,
+        FIELD_SIZE_LOV_DET_ID,
+        FIELD_ICON_LOV_DET_ID,
+        PLACEHOLDER,
+        FIELD_ORDER_LOV_DET_ID,
+        STORING_SP,
+        EVENT_HANDLER,
+        STATUS,
+        C2C_CUSER,
+        C2C_CDATE
     )
     VALUES (
-        p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_TYPE_ID, p_FIELD_NAME,
-        p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER,
-        p_FIELD_ORDER_LOV_DET_ID, p_STORING_SP, p_C2C_CUSER
+        p_TAB_ID,
+        p_FIELD_SOURCE_ID,
+        p_FIELD_TYPE_ID,
+        p_SP_NAME,
+        p_SP_PARAM,
+        p_TABLE_NAME,
+        p_TABLE_COLUMNS,
+        p_CUSTOM_NAME,
+        p_FIELD_NAME,
+        p_FIELD_SIZE_ID,
+        p_FIELD_ICON_ID,
+        p_PLACEHOLDER,
+        p_FIELD_ORDER_ID,
+        p_STORED_PROCEDURE,
+        p_EVENT_HANDLER,
+        'active',
+        p_CUSER,
+        NOW()
     );
 
     SET v_FORM_FIELD_ID = LAST_INSERT_ID();
 
-    -- Insert multiple validations using JSON_TABLE (No Loop)
-    IF p_VALIDATION_IDS IS NOT NULL THEN
-        INSERT INTO FORM_VALIDATION_TABLE (FORM_FIELD_ID, JS_SCRIPT_ID, C2C_CUSER)
+    -- ===================================================
+    -- 6. Insert into FORM_VALIDATION_TABLE
+    -- ===================================================
+    IF p_VALIDATION_IDS IS NOT NULL AND JSON_LENGTH(p_VALIDATION_IDS) > 0 THEN
+        INSERT INTO FORM_VALIDATION_TABLE (
+            FORM_FIELD_ID,
+            JS_SCRIPT_ID,
+            C2C_CUSER,
+            C2C_CDATE
+        )
         SELECT 
-            v_FORM_FIELD_ID, 
-            JSON_UNQUOTE(js.id), 
-            p_C2C_CUSER
+            v_FORM_FIELD_ID,
+            JSON_UNQUOTE(js.id),
+            p_CUSER,
+            NOW()
         FROM JSON_TABLE(
             p_VALIDATION_IDS,
             '$[*]' COLUMNS (id VARCHAR(10) PATH '$')
         ) AS js;
     END IF;
 
-END$$
+    COMMIT;
 
-DELIMITER ;
+    -- ===================================================
+    -- Success Message
+    -- ===================================================
+    SELECT TRUE AS success,
+           CONCAT('Field "', p_FIELD_NAME, '" successfully added to TAB_ID ', p_TAB_ID, '.') AS message,
+           v_FORM_FIELD_ID AS inserted_id;
+END

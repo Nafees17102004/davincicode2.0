@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  Button,
+  Toast,
+  ToastContainer,
+} from "react-bootstrap";
+import Toaster from "../Toaster/Toaster";
 import ColumnEditor from "../ColumnEditor/ColumnEditor";
 import "./FormBuilder.css";
 import projectAPI from "../../api/Api";
@@ -12,6 +22,13 @@ export default function FormBuilder() {
   const [activeTabId, setActiveTabId] = useState(0);
   const [activeTabName, setActiveTabName] = useState("");
   const [activeTabState, setActiveTabState] = useState(true);
+  // Toaster
+  const [toastQueue, setToastQueue] = useState([]);
+  const [currentToast, setCurrentToast] = useState(null);
+  const [showToast, setShowToast] = useState(false);
+  console.log(toastQueue);
+  console.log(currentToast);
+  console.log(showToast);
   // Dropdown Bind List
   const [fieldSource, setFieldSource] = useState([]);
   const [fieldSize, setFieldSize] = useState([]);
@@ -63,6 +80,21 @@ export default function FormBuilder() {
   const [activeTab, setActiveTab] = useState(null);
   const [tabSubmitClicked, setTabSubmitClicked] = useState(false);
 
+  // useEffect(() => {
+  //   if (!showToast && toastQueue.length > 0) {
+  //     const nextToast = toastQueue[0];
+  //     setCurrentToast(nextToast);
+  //     setShowToast(true);
+
+  //     const timer = setTimeout(() => {
+  //       setShowToast(false);
+  //       setToastQueue((prev) => prev.slice(1));
+  //     }, 2500);
+
+  //     return () => clearTimeout(timer);
+  //   }
+  // }, [toastQueue, showToast]);
+
   useEffect(() => {
     // Update all existing columns with new tabId
     if (activeTabId) {
@@ -73,6 +105,8 @@ export default function FormBuilder() {
         }))
       );
     }
+
+    // Dropdown bind SP's
     fetchFieldSrcData();
     fetchFieldSizeData();
     fetchFieldIconData();
@@ -88,6 +122,16 @@ export default function FormBuilder() {
     fetchStoringSPData();
     fetchEventHandlerData();
   }, [activeTabId]);
+
+  const pushToast = (messages, variant = "danger") => {
+    const formatted = Array.isArray(messages)
+      ? messages.map((m) => ({ text: m, variant }))
+      : [{ text: messages, variant }];
+    if (toastQueue.length > 2) {
+      setToastQueue((prev) => prev.slice(1));
+    }
+    setToastQueue((prev) => [...prev, ...formatted]);
+  };
 
   const fetchFieldSrcData = async () => {
     try {
@@ -323,7 +367,7 @@ export default function FormBuilder() {
 
   const addColumn = () => {
     if (!activeTabId) {
-      setActiveTabState(false)
+      setActiveTabState(false);
     }
     setColumns((prev) => [
       ...prev,
@@ -427,19 +471,8 @@ export default function FormBuilder() {
     setTabs(updated);
   };
   const removeColumn = (index) => {
-    const updated = [...tabs];
-    updated[activeTab].columns.splice(index, 1);
-    setTabs(updated);
+    setColumns((prevColumns) => prevColumns.filter((_, idx) => idx !== index));
   };
-
-  const submitColumn = (index) => {
-    const updated = [...tabs];
-    const col = updated[activeTab].columns[index];
-    updated[activeTab].submittedColumns.push(col);
-    updated[activeTab].columns.splice(index, 1);
-    setTabs(updated);
-  };
-
   // ✅ Move submitted column back to edit
   const backToEdit = (index) => {
     const updated = [...tabs];
@@ -473,6 +506,36 @@ export default function FormBuilder() {
     setShowTabForm(false);
     setTabSubmitClicked(false);
     setActiveTab(tabs.length);
+  };
+  const handleSubmitAddForm = async (e) => {
+    e.preventDefault();
+    const payload = columns.map((col) => ({
+      ...col,
+      validationIds:
+        col.validationIds && col.validationIds.length > 0
+          ? JSON.stringify(col.validationIds) // ✅ stringify ONLY this field
+          : null,
+    }));
+
+    try {
+      const res = await projectAPI.insertAddFormDet(payload);
+      if (res.data.failedCount > 0) {
+        const failedItems = res.data.failedArray.map((item) => item.error); // Mapping error messages from API response
+        pushToast(failedItems, "danger"); // 🔥 show API errors one by one
+      } else {
+        const addedItems = res.data.addedArray.map((item) => item.message);
+        pushToast(addedItems, "success"); // 🔥 show success messages one by one
+      }
+
+      console.log(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth", // Optional: for smooth scrolling
+    });
+    setShowToast(true);
   };
   return (
     <Container className="py-4">
@@ -580,7 +643,11 @@ export default function FormBuilder() {
           </Row>
         </Card>
       )}
-      <Row>{activeTabState ? null : <h6 className="text-danger">*Tab Should Be Selected</h6>}</Row>
+      <Row>
+        {activeTabState ? null : (
+          <h6 className="text-danger">*Tab Should Be Selected</h6>
+        )}
+      </Row>
       <Row>
         {/* Tabs List */}
         <Col md={3}>
@@ -656,7 +723,7 @@ export default function FormBuilder() {
                 tableCol={tableCol}
                 updateColumn={updateColumn}
                 removeColumn={removeColumn}
-                submitColumn={submitColumn} // ✅ Pass submit function
+                // submitColumn={submitColumn} ✅ Pass submit function
                 lists={{
                   spList,
                   tableList,
@@ -669,12 +736,18 @@ export default function FormBuilder() {
               variant="primary"
               size="md"
               className="container-fluid mt-3"
+              onClick={(e) => handleSubmitAddForm(e)}
             >
               Submit
             </Button>
           </Card>
         </Col>
       </Row>
+      <Toaster
+        toastData={toastQueue}
+        showToast={showToast}
+        setShowToast={setShowToast}
+      />
     </Container>
   );
 }

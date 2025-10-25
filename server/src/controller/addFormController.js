@@ -9,22 +9,40 @@ const insertFormDetails = async (req, res) => {
       const {
         tabId,
         fieldSourceId,
-        FieldName,
+        fieldTypeId,
+        spName,
+        spParam,
+        tableName,
+        tableColumns,
+        customName,
+        fieldName,
         fieldSizeId,
         fieldIconId,
         placeholder,
         fieldOrderId,
+        storedProcedure,
+        validationIds,
+        eventHandler,
         cUser,
       } = form;
       try {
         const result = await addFormService.insertFormDetails(
           tabId,
           fieldSourceId,
-          FieldName,
+          fieldTypeId,
+          spName,
+          spParam,
+          tableName,
+          tableColumns,
+          customName,
+          fieldName,
           fieldSizeId,
           fieldIconId,
           placeholder,
           fieldOrderId,
+          storedProcedure,
+          validationIds,
+          eventHandler,
           cUser
         );
         if (result.success === 0) {

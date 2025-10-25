@@ -3,11 +3,20 @@ const pool = require("../config/dbConfig");
 const insertFormDetails = async (
   tabId,
   fieldSourceId,
-  FieldName,
+  fieldTypeId,
+  spName,
+  spParam,
+  tableName,
+  tableColumns,
+  customName,
+  fieldName,
   fieldSizeId,
   fieldIconId,
   placeholder,
   fieldOrderId,
+  storedProcedure,
+  validationIds,
+  eventHandler,
   cUser
 ) => {
   try {
@@ -19,10 +28,10 @@ const insertFormDetails = async (
       fieldTypeId,
       spName || null,
       spParam || null,
-      tableName ||null,
+      tableName || null,
       tableColumns || null,
       customName || null,
-      FieldName,
+      fieldName,
       fieldSizeId || null,
       fieldIconId || null,
       placeholder || null,
@@ -30,7 +39,7 @@ const insertFormDetails = async (
       storedProcedure,
       validationIds,
       eventHandler,
-      cUser,
+      cUser || null,
     ]);
 
     // ✅ Your stored procedure should end with:
