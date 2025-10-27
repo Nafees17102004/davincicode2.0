@@ -45,6 +45,7 @@ const insertFormDetails = async (req, res) => {
           eventHandler,
           cUser
         );
+        console.log(result);
         if (result.success === 0) {
           errors.push({
             index,
@@ -58,7 +59,7 @@ const insertFormDetails = async (req, res) => {
           index,
           success: true,
           message: result.message,
-          formData: form,
+          formData: result.fieldData,
         });
       } catch (dbError) {
         console.error({ dbError });

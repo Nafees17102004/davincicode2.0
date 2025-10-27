@@ -26,9 +26,8 @@ export default function FormBuilder() {
   const [toastQueue, setToastQueue] = useState([]);
   const [currentToast, setCurrentToast] = useState(null);
   const [showToast, setShowToast] = useState(false);
-  console.log(toastQueue);
-  console.log(currentToast);
-  console.log(showToast);
+  const [successHighlightedRows, setSuccessHighlightedRows] = useState([]);
+  const [errorHighlightedRows, setErrorHighlightedRows] = useState([]);
   // Dropdown Bind List
   const [fieldSource, setFieldSource] = useState([]);
   const [fieldSize, setFieldSize] = useState([]);
@@ -57,25 +56,25 @@ export default function FormBuilder() {
     tabImageId: 0,
     createdUser: "",
   });
-  const [columnData, setColumnData] = useState({
-    tabId: 0,
-    fieldSourceId: 0,
-    fieldTypeId: 0,
-    spName: null,
-    spParam: null,
-    tableName: null,
-    tableColumns: null,
-    customName: null,
-    fieldName: "",
-    fieldSizeId: 0,
-    fieldIconId: 0,
-    placeholder: "",
-    fieldOrderId: 0,
-    storedProcedure: "",
-    validation: [],
-    eventHandler: "",
-    cUser: "",
-  });
+  // const [columnData, setColumnData] = useState({
+  //   tabId: 0,
+  //   fieldSourceId: 0,
+  //   fieldTypeId: 0,
+  //   spName: null,
+  //   spParam: null,
+  //   tableName: null,
+  //   tableColumns: null,
+  //   customName: null,
+  //   fieldName: "",
+  //   fieldSizeId: 0,
+  //   fieldIconId: 0,
+  //   placeholder: "",
+  //   fieldOrderId: 0,
+  //   storedProcedure: "",
+  //   validation: [],
+  //   eventHandler: 0,
+  //   cUser: "",
+  // });
   const [tabs, setTabs] = useState([]);
   const [activeTab, setActiveTab] = useState(null);
   const [tabSubmitClicked, setTabSubmitClicked] = useState(false);
@@ -388,7 +387,7 @@ export default function FormBuilder() {
         fieldOrderId: 0,
         storedProcedure: "",
         validation: [],
-        eventHandler: "",
+        eventHandler: 0,
         cUser: "",
       },
     ]);
@@ -519,12 +518,44 @@ export default function FormBuilder() {
 
     try {
       const res = await projectAPI.insertAddFormDet(payload);
-      if (res.data.failedCount > 0) {
-        const failedItems = res.data.failedArray.map((item) => item.error); // Mapping error messages from API response
-        pushToast(failedItems, "danger"); // 🔥 show API errors one by one
-      } else {
-        const addedItems = res.data.addedArray.map((item) => item.message);
-        pushToast(addedItems, "success"); // 🔥 show success messages one by one
+      const { addedArray = [], failedArray = [] } = res.data;
+
+      // 🌿 Success rows
+      if (addedArray.length > 0) {
+        const successIndexes = addedArray.map((item) => item.index);
+        setSuccessHighlightedRows((prev) => [...prev, ...successIndexes]);
+        pushToast(
+          addedArray.map(
+            (item) => item.message || "Column added successfully ✅"
+          ),
+          "success"
+        );
+
+        // remove success highlight after animation
+        setTimeout(() => {
+          setSuccessHighlightedRows((prev) =>
+            prev.filter((i) => !successIndexes.includes(i))
+          );
+        }, 1000);
+      }
+
+      // ❌ Failed rows
+      if (failedArray.length > 0) {
+        const failedIndexes = failedArray.map((item) => item.index);
+        setErrorHighlightedRows((prev) => [...prev, ...failedIndexes]);
+        pushToast(
+          failedArray.map(
+            (item) => item.error || "Failed to save this field ❌"
+          ),
+          "danger"
+        );
+
+        // remove failure highlight after animation
+        setTimeout(() => {
+          setErrorHighlightedRows((prev) =>
+            prev.filter((i) => !failedIndexes.includes(i))
+          );
+        }, 1500);
       }
 
       console.log(res.data);
@@ -723,7 +754,8 @@ export default function FormBuilder() {
                 tableCol={tableCol}
                 updateColumn={updateColumn}
                 removeColumn={removeColumn}
-                // submitColumn={submitColumn} ✅ Pass submit function
+                successHighlightedRows={successHighlightedRows}
+                errorHighlightedRows={errorHighlightedRows}
                 lists={{
                   spList,
                   tableList,

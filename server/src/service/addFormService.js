@@ -39,7 +39,20 @@ const insertFormDetails = async (
       eventHandler,
       cUser
     );
-    return result;
+    if (result?.success && result?.insertedId) {
+      const fieldData = await addFormRepo.getFormFieldById(result.insertedId);
+      return {
+        success: 1,
+        message: result.message,
+        insertedId: result.insertedId,
+        tabId: result.tabId,
+        fieldData,
+      };
+    }
+    return {
+      success: 0,
+      message: result.message,
+    };
   } catch (error) {
     console.error({ success: false, message: error.message });
     return {

@@ -41,8 +41,13 @@ const insertFieldTypes = (fieldData) => {
   return api.post("/add-field-type", fieldData);
 };
 
+// Snippet API's
 const insertSnippet = (snippetData) => {
   return api.post("/insertSnippet", snippetData);
+};
+
+const getSnippet = () => {
+  return api.get("/snippet");
 };
 
 // Lov API's
@@ -92,6 +97,7 @@ const projectAPI = {
   getSnippetById,
   insertFieldTypes,
   insertSnippet,
+  getSnippet,
   getFieldTypes,
   insertLov,
   viewLovs,

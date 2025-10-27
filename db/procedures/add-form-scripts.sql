@@ -640,3 +640,117 @@ BEGIN
            CONCAT('Field "', p_FIELD_NAME, '" successfully added to TAB_ID ', p_TAB_ID, '.') AS message,
            v_FORM_FIELD_ID AS inserted_id;
 END
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_GET_FORM_FIELD_BY_TAB_ID`(
+    IN p_TAB_ID INT
+)
+BEGIN
+    DECLARE v_tab_exists INT DEFAULT 0;
+
+    -- ========================================
+    -- 1. Input Validation
+    -- ========================================
+    IF p_TAB_ID IS NULL OR p_TAB_ID = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid Tab ID provided.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_tab_exists FROM tab_table WHERE TAB_ID = p_TAB_ID;
+    IF v_tab_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Tab ID does not exist.';
+    END IF;
+
+    -- ========================================
+    -- 2. Fetch All Fields with Lookups
+    -- ========================================
+    SELECT 
+        aft.ADD_FORM_ID,
+        aft.TAB_ID,
+        aft.FIELD_NAME,
+        aft.CUSTOM_NAME,
+        aft.PLACEHOLDER,
+        aft.SP_NAME,
+        aft.SP_PARAM,
+        aft.TABLE_NAME,
+        aft.TABLE_COLUMNS,
+        aft.STORING_SP,
+        aft.STATUS,
+        aft.C2C_CDATE,
+        aft.C2C_CUSER,
+
+        -- =======================
+        -- FIELD TYPE
+        -- =======================
+        ft.FIELD_NAME AS FIELD_TYPE_NAME,
+
+        -- =======================
+        -- LOOKUPS (LOV DETAILS)
+        -- =======================
+        src.LOV_DET_NAME AS FIELD_SOURCE_NAME,
+        size.LOV_DET_NAME AS FIELD_SIZE_NAME,
+        icon.LOV_DET_NAME AS FIELD_ICON_NAME,
+        ord.LOV_DET_NAME AS FIELD_ORDER_NAME,
+
+        -- =======================
+        -- EVENT HANDLER
+        -- =======================
+        feh.FORM_EVENT_HANDLER_ID,
+        feh.EVENT_NAME AS EVENT_HANDLER_NAME,
+        feh.DESCRIPTION AS EVENT_HANDLER_DESCRIPTION,
+        feh.STATUS AS EVENT_HANDLER_STATUS,
+
+        -- =======================
+        -- FRONTEND HINTS
+        -- =======================
+        CASE 
+            WHEN ft.FIELD_NAME IN ('Textbox','Textarea') THEN 'input'
+            WHEN ft.FIELD_NAME = 'Dropdown' THEN 'select'
+            WHEN ft.FIELD_NAME = 'Checkbox' THEN 'checkbox'
+            WHEN ft.FIELD_NAME = 'Radio' THEN 'radio'
+            ELSE 'custom'
+        END AS RENDER_TYPE,
+
+        -- =======================
+        -- STATUS COLOR MAPPING
+        -- =======================
+        CASE 
+            WHEN aft.STATUS = 'active' THEN 'green'
+            WHEN aft.STATUS = 'inactive' THEN 'red'
+            ELSE 'gray'
+        END AS STATUS_COLOR,
+
+        -- =======================
+        -- VALIDATIONS (AS JSON)
+        -- =======================
+        (
+            SELECT 
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'validation_id', fv.FORM_FIELD_VALIDATION_ID,
+                        'rule', fv.VALIDATION_RULE,
+                        'js_id', fv.JS_SCRIPT_ID,
+                        'js_name', js.js_name,
+                        'js_script', js.js_script,
+                        'status', fv.STATUS
+                    )
+                )
+            FROM form_validation_table fv
+            LEFT JOIN js_script_library js ON js.js_id = fv.JS_SCRIPT_ID
+            WHERE fv.FORM_FIELD_ID = aft.ADD_FORM_ID
+              AND fv.STATUS = 'active'
+        ) AS VALIDATIONS_JSON
+
+    FROM add_form_table aft
+    LEFT JOIN field_type ft ON ft.FIELD_TYPE_ID = aft.FIELD_TYPE_ID
+    LEFT JOIN list_of_values_details src ON src.LOV_DET_ID = aft.FIELD_SOURCE_LOV_DET_ID
+    LEFT JOIN list_of_values_details size ON size.LOV_DET_ID = aft.FIELD_SIZE_LOV_DET_ID
+    LEFT JOIN list_of_values_details icon ON icon.LOV_DET_ID = aft.FIELD_ICON_LOV_DET_ID
+    LEFT JOIN list_of_values_details ord ON ord.LOV_DET_ID = aft.FIELD_ORDER_LOV_DET_ID
+    LEFT JOIN form_event_handler_master feh ON feh.FORM_EVENT_HANDLER_ID = aft.EVENT_HANDLER_ID
+
+    WHERE aft.TAB_ID = p_TAB_ID
+      AND aft.STATUS = 'active'
+
+    ORDER BY CAST(ord.LOV_DET_NAME AS UNSIGNED), aft.ADD_FORM_ID;
+END

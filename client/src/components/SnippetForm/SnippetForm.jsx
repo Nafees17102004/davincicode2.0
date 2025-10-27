@@ -49,7 +49,7 @@ function SnippetForm() {
         </Button>
         <Button
           className="view-project-btn"
-          onClick={() => navigate("/view-projects")}
+          onClick={() => navigate("/view-snippet")}
         >
           View Stored Data
         </Button>

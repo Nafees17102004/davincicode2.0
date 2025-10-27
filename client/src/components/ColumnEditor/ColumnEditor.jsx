@@ -18,6 +18,8 @@ export default function ColumnEditor({
   jsVal,
   spParamData,
   tableCol,
+  successHighlightedRows,
+  errorHighlightedRows,
 }) {
   const { spList, tableList, storedProcedures, eventHandler } = lists;
 
@@ -34,10 +36,16 @@ export default function ColumnEditor({
   //   });
   // };
   return (
-    <Card className="container-fluid mt-3 p-3 mb-4 shadow-sm column-card">
+    <Card className={`container-fluid mt-3 mb-4 shadow-sm column-card `}>
       {/* Row 1 */}
       {columns.map((column, index) => (
-        <div key={index}>
+        <div
+          key={index}
+          className={`p-4 mb-3 rounded ${
+            successHighlightedRows.includes(index) ? "success-highlight" : ""
+          }
+    ${errorHighlightedRows.includes(index) ? "error-highlight" : ""}`}
+        >
           {/* Render column details here, for example: */}
           <Row className="p-3 mb-2">Column {column.sNo}</Row>
           <Row className="g-3 mb-2">
