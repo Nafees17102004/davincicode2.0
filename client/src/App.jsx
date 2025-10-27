@@ -8,7 +8,11 @@ import ViewProjectsPage from "./pages/ViewProjectsPage/ViewProjectsPage";
 import ViewLanguagePage from "./pages/ViewLanguagePage/ViewLanguagePage";
 import AddModulePage from "./pages/ModulePage/AddModulePage";
 import FieldTypePage from "./pages/FieldTypePage/FieldTypePage";
+// Snippet
 import SnippetPage from "./pages/SnippetPage/SnippetPage";
+import ViewSnippetPage from "./pages/ViewSnippetPage/ViewSnippetPage";
+
+// Field Page
 import ViewFieldPage from "./pages/ViewFieldPage/ViewFieldPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
 import LovPage from "./pages/LovPage/LovPage";
@@ -35,6 +39,7 @@ function App() {
       <Route path="/view-Projects" element={<ViewProjectsPage />} />
       <Route path="/add-module/:pCode" element={<AddModulePage />} />
       <Route path="/view-field" element={<ViewFieldPage />} />
+      <Route path="/view-snippet" element={<ViewSnippetPage />} />
       <Route path="/view-lov" element={<ViewLovPage />} />
       <Route path="/add-lovDet/:lovId" element={<LovDetpage />} />
     </Routes>

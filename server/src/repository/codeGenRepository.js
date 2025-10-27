@@ -32,9 +32,10 @@ const insertModule = async (
 
 const insertSnippet = async (fieldTypeId, languageId, snippetName, snippet) => {
   try {
-    const query = "Call InsertSnippet(?,?,?,?)";
+    const query = "Call SP_INSERT_UPDATE_SNIPPET(?,?,?,?)";
     const data = [fieldTypeId, languageId, snippetName, snippet];
     const result = await pool.query(query, data);
+    console.log(result[0]);
     return result[0];
   } catch (err) {
     console.error("Error in Repository.insertSnippet:", err);

@@ -214,6 +214,60 @@ END$$
 
 DELIMITER ;
 
+DELIMITER $$
+
+CREATE PROCEDURE SP_GET_SNIPPET (
+    IN p_snippet_id INT
+)
+BEGIN
+    IF p_snippet_id IS NULL THEN
+        -- Fetch all snippets with their mappings
+        SELECT 
+            s.Snippet_ID,
+            s.Snippet_Name,
+            s.Snippet,
+            s.status AS Snippet_Status,
+            s.inactive_reason AS Snippet_Inactive_Reason,
+            s.C2C_Cdate AS Snippet_Created_Date,
+            s.C2C_Cuser AS Snippet_Created_User,
+            s.C2C_Udate AS Snippet_Updated_Date,
+            s.C2C_Uuser AS Snippet_Updated_User,
+            m.MAP_ID,
+            m.FIELD_TYPE_ID,
+            m.LANGUAGE_ID,
+            m.status AS Map_Status,
+            m.inactive_reason AS Map_Inactive_Reason
+        FROM CODE_SNIPPET s
+        LEFT JOIN FIELD_SNIPPET_MAP m 
+            ON s.Snippet_ID = m.SNIPPET_ID
+        ORDER BY s.Snippet_ID DESC;
+    ELSE
+        -- Fetch snippet by ID
+        SELECT 
+            s.Snippet_ID,
+            s.Snippet_Name,
+            s.Snippet,
+            s.status AS Snippet_Status,
+            s.inactive_reason AS Snippet_Inactive_Reason,
+            s.C2C_Cdate AS Snippet_Created_Date,
+            s.C2C_Cuser AS Snippet_Created_User,
+            s.C2C_Udate AS Snippet_Updated_Date,
+            s.C2C_Uuser AS Snippet_Updated_User,
+            m.MAP_ID,
+            m.FIELD_TYPE_ID,
+            m.LANGUAGE_ID,
+            m.status AS Map_Status,
+            m.inactive_reason AS Map_Inactive_Reason
+        FROM CODE_SNIPPET s
+        LEFT JOIN FIELD_SNIPPET_MAP m 
+            ON s.Snippet_ID = m.SNIPPET_ID
+        WHERE s.Snippet_ID = p_snippet_id;
+    END IF;
+END$$
+
+DELIMITER ;
+
+CALL SP_GET_SNIPPET(null);
 
 DELIMITER $$
 

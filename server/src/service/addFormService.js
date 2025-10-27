@@ -3,25 +3,56 @@ const addFormRepo = require("../repository/addFormRepository");
 const insertFormDetails = async (
   tabId,
   fieldSourceId,
-  FieldName,
+  fieldTypeId,
+  spName,
+  spParam,
+  tableName,
+  tableColumns,
+  customName,
+  fieldName,
   fieldSizeId,
   fieldIconId,
   placeholder,
   fieldOrderId,
+  storedProcedure,
+  validationIds,
+  eventHandler,
   cUser
 ) => {
   try {
     const result = await addFormRepo.insertFormDetails(
       tabId,
       fieldSourceId,
-      FieldName,
+      fieldTypeId,
+      spName,
+      spParam,
+      tableName,
+      tableColumns,
+      customName,
+      fieldName,
       fieldSizeId,
       fieldIconId,
       placeholder,
       fieldOrderId,
+      storedProcedure,
+      validationIds,
+      eventHandler,
       cUser
     );
-    return result;
+    if (result?.success && result?.insertedId) {
+      const fieldData = await addFormRepo.getFormFieldById(result.insertedId);
+      return {
+        success: 1,
+        message: result.message,
+        insertedId: result.insertedId,
+        tabId: result.tabId,
+        fieldData,
+      };
+    }
+    return {
+      success: 0,
+      message: result.message,
+    };
   } catch (error) {
     console.error({ success: false, message: error.message });
     return {

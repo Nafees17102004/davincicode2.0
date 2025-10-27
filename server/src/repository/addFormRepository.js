@@ -3,11 +3,20 @@ const pool = require("../config/dbConfig");
 const insertFormDetails = async (
   tabId,
   fieldSourceId,
-  FieldName,
+  fieldTypeId,
+  spName,
+  spParam,
+  tableName,
+  tableColumns,
+  customName,
+  fieldName,
   fieldSizeId,
   fieldIconId,
   placeholder,
   fieldOrderId,
+  storedProcedure,
+  validationIds,
+  eventHandler,
   cUser
 ) => {
   try {
@@ -19,10 +28,10 @@ const insertFormDetails = async (
       fieldTypeId,
       spName || null,
       spParam || null,
-      tableName ||null,
+      tableName || null,
       tableColumns || null,
       customName || null,
-      FieldName,
+      fieldName,
       fieldSizeId || null,
       fieldIconId || null,
       placeholder || null,
@@ -30,32 +39,53 @@ const insertFormDetails = async (
       storedProcedure,
       validationIds,
       eventHandler,
-      cUser,
+      cUser || null,
     ]);
 
     // ✅ Your stored procedure should end with:
     // SELECT 1 AS success, 'Inserted successfully' AS message;
 
-    const [result] = rows && rows[0] ? rows[0] : null;
+    const result = rows && rows[0] && rows[0][0];
     console.log(result);
 
-    if (result && result.success !== undefined) {
-      return {
-        success: result.success,
-        message: result.message,
-      };
-    } else {
-      return {
-        success: 0,
-        message: "Unexpected response from stored procedure.",
-      };
-    }
+    return {
+      success: result?.success ?? 0,
+      message: result?.message || "No response from SP",
+      insertedId: result?.inserted_id || null,
+      tabId: result?.tab_id || null,
+    };
+
+    // const [result] = rows && rows[0] ? rows[0] : null;
+
+    // if (result && result.success !== undefined) {
+    //   return {
+    //     success: result.success,
+    //     message: result.message,
+    //   };
+    // } else {
+    //   return {
+    //     success: 0,
+    //     message: "Unexpected response from stored procedure.",
+    //   };
+    // }
   } catch (error) {
     console.error("Repo Error:", error.sqlMessage || error.message);
     return {
       success: 0,
       message: error.sqlMessage || "Database error occurred.",
     };
+  }
+};
+const getFormFieldById = async (formFieldId) => {
+  try {
+    const [rows] = await pool.query(
+      "CALL SP_GET_FORM_FIELD_BY_FORM_FIELD_ID(?);",
+      [formFieldId]
+    );
+    return rows[0][0]; // First record from SP
+  } catch (error) {
+    console.error("Repo Error:", error.sqlMessage || error.message);
+    return null;
   }
 };
 const getLovDropdown = async (listName, lovName) => {
@@ -94,4 +124,5 @@ module.exports = {
   insertFormDetails,
   getLovDropdown,
   insertTabDetails,
+  getFormFieldById,
 };

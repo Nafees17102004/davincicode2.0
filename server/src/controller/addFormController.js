@@ -9,24 +9,43 @@ const insertFormDetails = async (req, res) => {
       const {
         tabId,
         fieldSourceId,
-        FieldName,
+        fieldTypeId,
+        spName,
+        spParam,
+        tableName,
+        tableColumns,
+        customName,
+        fieldName,
         fieldSizeId,
         fieldIconId,
         placeholder,
         fieldOrderId,
+        storedProcedure,
+        validationIds,
+        eventHandler,
         cUser,
       } = form;
       try {
         const result = await addFormService.insertFormDetails(
           tabId,
           fieldSourceId,
-          FieldName,
+          fieldTypeId,
+          spName,
+          spParam,
+          tableName,
+          tableColumns,
+          customName,
+          fieldName,
           fieldSizeId,
           fieldIconId,
           placeholder,
           fieldOrderId,
+          storedProcedure,
+          validationIds,
+          eventHandler,
           cUser
         );
+        console.log(result);
         if (result.success === 0) {
           errors.push({
             index,
@@ -40,7 +59,7 @@ const insertFormDetails = async (req, res) => {
           index,
           success: true,
           message: result.message,
-          formData: form,
+          formData: result.fieldData,
         });
       } catch (dbError) {
         console.error({ dbError });

@@ -74,3 +74,19 @@
     margin-bottom: 10px;
   }
 }
+/* Success highlight */
+.success-highlight {
+  background-color: #c2f0c2; /* green for success */
+  color: #000; /* text color */
+  padding: 5px 10px; /* optional styling */
+  border-radius: 4px; /* optional styling */
+}
+
+/* Error highlight */
+.error-highlight {
+  background-color: #ffcccc; /* red for error */
+  color: #000; /* text color */
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
