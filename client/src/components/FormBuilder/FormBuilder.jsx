@@ -518,6 +518,7 @@ export default function FormBuilder() {
 
     try {
       const res = await projectAPI.insertAddFormDet(payload);
+      console.log(res.data);
       const { addedArray = [], failedArray = [] } = res.data;
 
       // 🌿 Success rows
