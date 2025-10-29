@@ -1,4 +1,5 @@
 const pool = require("../config/dbConfig");
+const { generateFieldCode } = require("../service/fieldGenerator");
 
 const insertFormDetails = async (
   tabId,
@@ -82,7 +83,8 @@ const getFormFieldById = async (formFieldId) => {
       "CALL SP_GET_FORM_FIELD_BY_FORM_FIELD_ID(?);",
       [formFieldId]
     );
-    return rows[0][0]; // First record from SP
+    const field = rows[0][0]; // First record from SP
+    return field;
   } catch (error) {
     console.error("Repo Error:", error.sqlMessage || error.message);
     return null;
