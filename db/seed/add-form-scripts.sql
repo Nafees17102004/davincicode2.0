@@ -110,3 +110,85 @@ CREATE TABLE `form_field_event_handler` (
   CONSTRAINT `form_field_event_handler_ibfk_2` FOREIGN KEY (`FORM_EVENT_HANDLER_ID`) REFERENCES `form_event_handler_master` (`FORM_EVENT_HANDLER_ID`) ON DELETE CASCADE,
   CONSTRAINT `form_field_event_handler_ibfk_3` FOREIGN KEY (`JS_SCRIPT_ID`) REFERENCES `js_script_library` (`js_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `m_form_generation_details` (
+  `Form_Gen_Details_Id` int NOT NULL AUTO_INCREMENT,
+  `Project_ID` int DEFAULT NULL,
+  `Module_ID` int DEFAULT NULL,
+  `Layout_ID` int DEFAULT NULL,
+  `Product_ID` int DEFAULT NULL,
+  `Page_ID` int DEFAULT NULL,
+  `Purpose` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_STATUS` enum('active','inactive') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `C2C_INACTIVE_REASON` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`Form_Gen_Details_Id`),
+  KEY `fk_form_project` (`Project_ID`),
+  KEY `fk_form_product` (`Product_ID`),
+  KEY `fk_form_layout` (`Layout_ID`),
+  KEY `fk_module_id` (`Module_ID`),
+  KEY `fk_form_page` (`Page_ID`),
+  CONSTRAINT `fk_form_layout` FOREIGN KEY (`Layout_ID`) REFERENCES `m_layout` (`Layout_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_form_page` FOREIGN KEY (`Page_ID`) REFERENCES `page` (`PAGE_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_form_product` FOREIGN KEY (`Product_ID`) REFERENCES `m_product` (`Product_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_form_project` FOREIGN KEY (`Project_ID`) REFERENCES `projects` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_module_id` FOREIGN KEY (`Module_ID`) REFERENCES `modules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+CREATE TABLE `tab_table` (
+  `TAB_ID` int NOT NULL AUTO_INCREMENT,
+  `PROJECT_ID` int NOT NULL,
+  `PAGE_ID` int NOT NULL,
+  `TAB_NAME` varchar(150) NOT NULL,
+  `TAB_IMAGE_ID` int DEFAULT NULL,
+  `STATUS` enum('active','inactive') DEFAULT 'active',
+  `INACTIVE_REASON` varchar(255) DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`TAB_ID`),
+  KEY `PROJECT_ID` (`PROJECT_ID`),
+  KEY `PAGE_ID` (`PAGE_ID`),
+  KEY `TAB_IMAGE_ID` (`TAB_IMAGE_ID`),
+  CONSTRAINT `tab_table_ibfk_1` FOREIGN KEY (`PROJECT_ID`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `tab_table_ibfk_2` FOREIGN KEY (`PAGE_ID`) REFERENCES `page` (`PAGE_ID`) ON DELETE CASCADE,
+  CONSTRAINT `tab_table_ibfk_3` FOREIGN KEY (`TAB_IMAGE_ID`) REFERENCES `tab_image_table` (`TAB_IMAGE_ID`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `m_section` (
+  `Section_ID` int NOT NULL AUTO_INCREMENT,
+  `TAB_ID` int NOT NULL,
+  `Section_Name` varchar(150) NOT NULL,
+  `Section_Order` int DEFAULT '1',
+  `Section_Description` varchar(255) DEFAULT NULL,
+  `Status` enum('active','inactive') DEFAULT 'active',
+  `Inactive_Reason` varchar(255) DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`Section_ID`),
+  KEY `TAB_ID` (`TAB_ID`),
+  CONSTRAINT `m_section_ibfk_1` FOREIGN KEY (`TAB_ID`) REFERENCES `tab_table` (`TAB_ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `m_column` (
+  `Column_ID` int NOT NULL AUTO_INCREMENT,
+  `Section_ID` int NOT NULL,
+  `Column_Name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Column_Type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Column_Order` int DEFAULT '1',
+  `Is_Required` tinyint(1) DEFAULT '0',
+  `Status` enum('active','inactive') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `Inactive_Reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`Column_ID`),
+  KEY `Section_ID` (`Section_ID`),
+  CONSTRAINT `fk_section_column` FOREIGN KEY (`Section_ID`) REFERENCES `m_section` (`Section_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
