@@ -754,3 +754,190 @@ BEGIN
 
     ORDER BY CAST(ord.LOV_DET_NAME AS UNSIGNED), aft.ADD_FORM_ID;
 END
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `LT_DCS_SP_SAVE_FORM_GENERATION_DETAILS`(
+    IN p_Project_ID INT,
+    IN p_Product_ID INT,
+    IN p_Layout_ID INT,
+    IN p_Module_ID INT,
+    IN p_PageName VARCHAR(200),
+    IN p_Purpose VARCHAR(500),
+    IN p_TabStructure JSON,   -- Nested JSON for Tabs -> Sections -> Fields
+    IN p_EBMS_User VARCHAR(100),
+    IN p_EBMS_Status ENUM('active','inactive'),
+    IN p_EBMS_Inactive_Reason VARCHAR(250)
+)
+BEGIN
+    DECLARE v_Form_ID INT;
+    DECLARE i INT DEFAULT 0;
+    DECLARE tab_count INT;
+    DECLARE v_TabName VARCHAR(150);
+    DECLARE v_TabImageID INT;
+    DECLARE v_TabID INT;
+    DECLARE section_count INT;
+    DECLARE j INT DEFAULT 0;
+    DECLARE v_SectionOrder INT;
+    DECLARE v_SectionDesc VARCHAR(255);
+    DECLARE v_SectionID INT;
+    DECLARE field_count INT;
+    DECLARE k INT DEFAULT 0;
+    DECLARE v_ColumnName VARCHAR(255);
+    DECLARE v_LabelName VARCHAR(100);
+    DECLARE v_FieldType INT;
+    DECLARE v_FieldID INT;
+    DECLARE eh_count INT;
+    DECLARE l INT DEFAULT 0;
+    DECLARE v_EH_ID INT;
+    DECLARE v_TriggerCond VARCHAR(255);
+    DECLARE val_count INT;
+    DECLARE m INT DEFAULT 0;
+    DECLARE v_JS_ID INT;
+    DECLARE v_ValidationRule VARCHAR(255);
+
+    -- Insert form generation details
+    INSERT INTO m_form_generation_details
+    (Project_ID, Module_ID, Layout_ID, Product_ID, page_name, Purpose, C2C_CDATE, C2C_CUSER, C2C_STATUS, C2C_INACTIVE_REASON)
+    VALUES
+    (p_Project_ID, p_Module_ID, p_Layout_ID, p_Product_ID, p_PageName, p_Purpose, NOW(), p_EBMS_User, p_EBMS_Status, p_EBMS_Inactive_Reason);
+
+    SET v_Form_ID = LAST_INSERT_ID();
+
+    SET tab_count = JSON_LENGTH(p_TabStructure);
+
+    WHILE i < tab_count DO
+        SET v_TabName   = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].TabName')));
+        SET v_TabImageID = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Icon')));
+
+        -- Insert Tab
+        INSERT INTO tab_table
+        (Form_Gen_Details_Id, PROJECT_ID, TAB_NAME, TAB_IMAGE_ID, STATUS, INACTIVE_REASON, C2C_CDATE, C2C_CUSER)
+        VALUES
+        (v_Form_ID, p_Project_ID, v_TabName, v_TabImageID, p_EBMS_Status, p_EBMS_Inactive_Reason, NOW(), p_EBMS_User);
+
+        SET v_TabID = LAST_INSERT_ID();
+
+        -- Loop through Sections
+        SET section_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections')));
+        SET j = 0;
+
+        WHILE j < section_count DO
+            SET v_SectionOrder = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].SectionIndex')));
+            SET v_SectionDesc  = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].SectionType')));
+
+            -- Insert Section
+            INSERT INTO m_section
+            (TAB_ID, Section_Order, Section_Description, Status, Inactive_Reason, C2C_CDATE, C2C_CUSER)
+            VALUES
+            (v_TabID, v_SectionOrder, v_SectionDesc, p_EBMS_Status, p_EBMS_Inactive_Reason, NOW(), p_EBMS_User);
+
+            SET v_SectionID = LAST_INSERT_ID();
+
+            -- Loop through Fields
+            SET field_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields')));
+            SET k = 0;
+
+            WHILE k < field_count DO
+                SET v_ColumnName = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].ColumnName')));
+                SET v_LabelName  = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].LabelName')));
+                SET v_FieldType  = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].FieldType')));
+
+                -- Insert Field
+                INSERT INTO m_form_field_details
+                (SECTION_ID, FIELD_TYPE_ID, CUSTOM_NAME, LABEL_NAME, STATUS, INACTIVE_REASON, C2C_CDATE, C2C_CUSER)
+                VALUES
+                (v_SectionID, v_FieldType, v_ColumnName, v_LabelName, p_EBMS_Status, p_EBMS_Inactive_Reason, NOW(), p_EBMS_User);
+
+                SET v_FieldID = LAST_INSERT_ID();
+
+                -- Insert Event Handlers if exist
+                SET eh_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].EventHandlers')));
+                SET l = 0;
+                WHILE l < eh_count DO
+                    SET v_EH_ID = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].EventHandlers[', l, '].HandlerID')));
+                    SET v_TriggerCond = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].EventHandlers[', l, '].TriggerCondition')));
+
+                    INSERT INTO l_form_event_handler_field_details
+                    (FORM_EVENT_HANDLER_ID, FORM_GEN_FIELD_DETAILS_ID, TRIGGER_CONDITION, STATUS, C2C_CDATE, C2C_CUSER)
+                    VALUES
+                    (v_EH_ID, v_FieldID, v_TriggerCond, p_EBMS_Status, NOW(), p_EBMS_User);
+
+                    SET l = l + 1;
+                END WHILE;
+
+                -- Insert Validations if exist
+                SET val_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].Validations')));
+                SET m = 0;
+                WHILE m < val_count DO
+                    SET v_JS_ID = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].Validations[', m, '].JsID')));
+                    SET v_ValidationRule = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].Validations[', m, '].ValidationRule')));
+
+                    INSERT INTO form_validation_table
+                    (FORM_FIELD_ID, JS_SCRIPT_ID, VALIDATION_RULE, STATUS, C2C_CDATE, C2C_CUSER)
+                    VALUES
+                    (v_FieldID, v_JS_ID, v_ValidationRule, p_EBMS_Status, NOW(), p_EBMS_User);
+
+                    SET m = m + 1;
+                END WHILE;
+
+                SET k = k + 1;
+            END WHILE;
+
+            SET j = j + 1;
+        END WHILE;
+
+        SET i = i + 1;
+    END WHILE;
+
+END
+
+CALL LT_DCS_SP_SAVE_FORM_GENERATION_DETAILS(
+    1,                  -- p_Project_ID
+    2,                  -- p_Product_ID
+    3,                  -- p_Layout_ID
+    4,                  -- p_Module_ID
+    'Employee Form',    -- p_PageName
+    'Form to capture employee data', -- p_Purpose
+    '[
+        {
+            "TabIndex": 1,
+            "TabName": "General Info",
+            "Icon": 1,
+            "Sections": [
+                {
+                    "SectionIndex": 1,
+                    "SectionType": "Grid",
+                    "Fields": [
+                        {"ColumnName": "FirstName", "LabelName": "First Name", "FieldType": 1},
+                        {"ColumnName": "LastName", "LabelName": "Last Name", "FieldType": 1},
+                        {"ColumnName": "Email", "LabelName": "Email ID", "FieldType": 2}
+                    ]
+                },
+                {
+                    "SectionIndex": 2,
+                    "SectionType": "Static",
+                    "Fields": [
+                        {"ColumnName": "DOB", "LabelName": "Date of Birth", "FieldType": 3}
+                    ]
+                }
+            ]
+        },
+        {
+            "TabIndex": 2,
+            "TabName": "Job Details",
+            "Icon": 1,
+            "Sections": [
+                {
+                    "SectionIndex": 1,
+                    "SectionType": "Grid",
+                    "Fields": [
+                        {"ColumnName": "Department", "LabelName": "Department", "FieldType": 4},
+                        {"ColumnName": "Role", "LabelName": "Role", "FieldType": 5}
+                    ]
+                }
+            ]
+        }
+    ]',                  -- p_TabStructure: JSON string
+    101,                 -- p_EBMS_User
+    1,                   -- p_EBMS_Status (1 = active)
+    'Initial Creation'   -- p_EBMS_Inactive_Reason
+);
