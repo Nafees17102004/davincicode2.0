@@ -20,6 +20,7 @@ import ViewLovPage from "./pages/ViewLovPage/ViewLovPage";
 import LovDetViewpage from "./pages/LovDetViewpage/LovDetViewpage";
 import LovDetpage from "./pages/LovDetpage/LovDetpage";
 import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
+import FormPreviewPage from "./pages/FormPreviewPage/FormPreviewPage";
 
 function App() {
   return (
@@ -33,7 +34,7 @@ function App() {
       <Route path="/lov" element={<LovPage />} />
       <Route path="/field" element={<FieldTypePage />} />
       <Route path="/snippet" element={<SnippetPage />} />
-      <Route path="/dynamic-form" element={<DynamicFormPage />} />
+      <Route path="/dynamic-form" element={<FormPreviewPage />} />
       {/* View Page */}
       <Route path="/view-languages" element={<ViewLanguagePage />} />
       <Route path="/view-Projects" element={<ViewProjectsPage />} />
@@ -42,6 +43,7 @@ function App() {
       <Route path="/view-snippet" element={<ViewSnippetPage />} />
       <Route path="/view-lov" element={<ViewLovPage />} />
       <Route path="/add-lovDet/:lovId" element={<LovDetpage />} />
+      <Route path="/preview/:formGenId" element={<FormPreviewPage />} /> 
     </Routes>
   );
 }

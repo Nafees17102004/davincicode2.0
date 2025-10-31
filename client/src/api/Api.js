@@ -87,6 +87,10 @@ const insertAddFormDet = (addFormData) => {
   return api.post(`/add-form-det`, addFormData);
 };
 
+const insertFormGen = (formGenData) => {
+  return api.post("/form-generation/save", formGenData);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -108,6 +112,7 @@ const projectAPI = {
   getLovDropdown,
   insertTabDet,
   insertAddFormDet,
+  insertFormGen,
 };
 
 export default projectAPI;

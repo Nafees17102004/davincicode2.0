@@ -4,32 +4,32 @@ const pool = require("../../src/config/dbConfig");
 const formGenRepository = {
   saveFormGen: async (data) => {
     const {
-      ProjectID,
-      ProductID,
-      LayoutID,
-      ModuleID,
-      PageName,
-      Purpose,
-      Tabs,
-      CreatedBy,
-      Status,
-      InactiveReason,
+      projectId,
+      productId,
+      layoutId,
+      moduleId,
+      pageName,
+      purpose,
+      tabs,
+      createdBy,
+      status,
+      inactiveReason,
     } = data;
 
     const query =
       "CALL LT_DCS_SP_SAVE_FORM_GENERATION_DETAILS(?,?,?,?,?,?,?,?,?,?)";
 
     const [result] = await pool.query(query, [
-      ProjectID,
-      ProductID,
-      LayoutID,
-      ModuleID,
-      PageName,
-      Purpose,
-      JSON.stringify(Tabs),
-      CreatedBy,
-      Status,
-      InactiveReason,
+      projectId,
+      productId,
+      layoutId,
+      moduleId,
+      pageName,
+      purpose,
+      JSON.stringify(tabs),
+      createdBy,
+      status,
+      inactiveReason,
     ]);
 
     const response = result[0][0];
@@ -38,7 +38,7 @@ const formGenRepository = {
     return {
       success: response.success === 1 || response.success === true,
       message: response.message,
-      form_id: response.form_id || null,
+      insertedId: response.insertedId || null,
     };
   },
 };
