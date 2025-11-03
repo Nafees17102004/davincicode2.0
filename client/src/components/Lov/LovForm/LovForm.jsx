@@ -51,7 +51,7 @@ function LovForm() {
         alert("An error occurred while submitting the projects.");
       });
     setRows([]);
-    useNavigate("/view-lov");
+    navigate("/view-lov");
   };
   return (
     <div className="project-form-container mt-4">

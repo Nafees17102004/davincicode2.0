@@ -108,16 +108,38 @@ const FormPreviewPage = () => {
   };
 
   // --- Column Editor ---
+  // --- Column Editor ---
   const ColumnEditor = ({ column, path, updateConfig, removeColumn }) => {
     const [tabIndex, sectionIndex, columnIndex] = path;
 
-    const handleFieldChange = (key, value) => {
+    const handleFieldChange = async (key, value) => {
+      // First update the config immediately for the field change
       updateConfig((config) => {
         const newTabs = [...config.tabs];
-        newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] = {
-          ...newTabs[tabIndex].sections[sectionIndex].fields[columnIndex],
-          [key]: value,
-        };
+        const currentField =
+          newTabs[tabIndex].sections[sectionIndex].fields[columnIndex];
+
+        // Handle special cases for SP and Table selections
+        if (key === "spName") {
+          // Reset related fields when SP is selected
+          currentField.spParam = "";
+          currentField.tableName = "";
+          currentField.tableColumns = "";
+
+          // Fetch SP Parameters
+          fetchSpParams(value, columnIndex);
+        } else if (key === "tableName") {
+          // Reset related fields when Table is selected
+          currentField.spName = "";
+          currentField.spParam = "";
+          currentField.tableColumns = "";
+
+          // Fetch Table Columns
+          fetchTableColumns(value, columnIndex);
+        }
+
+        // Update the actual field
+        currentField[key] = value;
         return { ...config, tabs: newTabs };
       });
     };
@@ -456,7 +478,6 @@ const FormPreviewPage = () => {
       </div>
     );
   };
-
   // --- Section Editor ---
   const SectionEditor = ({
     section,

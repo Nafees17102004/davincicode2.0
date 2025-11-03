@@ -1,41 +1,39 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "./LeftTabMenu.css";
 
 function LeftTabMenu() {
+  const location = useLocation();
+
+  const menuItems = [
+    { path: "/", icon: "🌐", label: "Language" },
+    { path: "/project", icon: "📁", label: "Project" },
+    { path: "/field", icon: "📊", label: "Field" },
+    { path: "/snippet", icon: "📝", label: "Snippet" },
+    { path: "/lov", icon: "📋", label: "List of Values" },
+    { path: "/dynamic-form", icon: "🎨", label: "Dynamic Form" },
+  ];
+
   return (
     <div className="left-tab-menu">
+      <div className="menu-header">
+        <div className="menu-title">CodeGen Pro</div>
+      </div>
+
       <ul className="menu-list">
-        <li className="menu-item">
-          <Link to="/" className="nav-link">
-            Language
-          </Link>
-        </li>
-        <li className="menu-item">
-          <Link to="/project" className="nav-link">
-            Project
-          </Link>
-        </li>
-        <li className="menu-item">
-          <Link to="/field" className="nav-link">
-            Field
-          </Link>
-        </li>
-        <li className="menu-item">
-          <Link to="/snippet" className="nav-link">
-            Snippet
-          </Link>
-        </li>
-        <li className="menu-item">
-          <Link to="/lov" className="nav-link">
-            List of values
-          </Link>
-        </li>
-        <li className="menu-item">
-          <Link to="/dynamic-form" className="nav-link">
-            Dynamic Form
-          </Link>
-        </li>
+        {menuItems.map((item) => (
+          <li key={item.path} className="menu-item">
+            <Link
+              to={item.path}
+              className={`nav-link ${
+                location.pathname === item.path ? "active" : ""
+              }`}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+            </Link>
+          </li>
+        ))}
       </ul>
     </div>
   );

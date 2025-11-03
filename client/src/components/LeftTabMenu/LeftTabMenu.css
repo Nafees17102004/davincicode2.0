@@ -1,51 +1,84 @@
-/* Sidebar Container */
 .left-tab-menu {
-  width: 220px;
-  height: 100vh; /* full height */
-  background: #1e293b; /* dark slate */
-  padding: 20px 0;
-  position: fixed; /* stays on left */
-  top: 0;
+  width: 280px;
+  height: 100vh;
+  background: linear-gradient(180deg, var(--gray-900) 0%, var(--gray-800) 100%);
+  padding: var(--space-6) 0;
+  position: fixed;
   left: 0;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.15);
+  top: 0;
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  border-right: 1px solid var(--gray-700);
 }
 
-/* Menu List */
+.menu-header {
+  padding: 0 var(--space-6) var(--space-6);
+  border-bottom: 1px solid var(--gray-700);
+  margin-bottom: var(--space-4);
+}
+
+.menu-title {
+  color: white;
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.menu-title::before {
+  content: "⚡";
+  font-size: var(--font-size-lg);
+}
+
 .menu-list {
   list-style: none;
-  margin: 0;
   padding: 0;
+  margin: 0;
 }
 
-/* Menu Item */
 .menu-item {
-  margin: 8px 0;
+  margin: var(--space-1) var(--space-4);
 }
 
-/* Links */
 .nav-link {
-  display: block;
-  padding: 12px 20px;
-  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--gray-300);
   text-decoration: none;
-  font-size: 15px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
   font-weight: 500;
-  border-left: 4px solid transparent;
-  transition: 0.3s ease;
+  border: 1px solid transparent;
 }
 
-/* Hover effect */
 .nav-link:hover {
-  background: #334155;
-  color: #fff;
-  border-left: 4px solid #3b82f6; /* blue accent */
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-color: var(--gray-600);
+  transform: translateX(4px);
 }
 
-/* Active link (if you add .active) */
 .nav-link.active {
-  background: #1d4ed8;
-  color: #fff;
-  border-left: 4px solid #2563eb;
+  background: var(--primary-600);
+  color: white;
+  border-color: var(--primary-500);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-link i {
+  width: 20px;
+  text-align: center;
+  font-size: var(--font-size-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .left-tab-menu {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
 }

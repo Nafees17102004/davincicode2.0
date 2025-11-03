@@ -22,6 +22,7 @@ import LovDetpage from "./pages/LovDetpage/LovDetpage";
 import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
 import FormPreviewPage from "./pages/FormPreviewPage/FormPreviewPage";
 
+
 function App() {
   return (
     <Routes>
@@ -29,6 +30,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element={<LanguagePage />} />
       <Route path="/project" element={<ProjectPage />} />
+
       <Route path="/module/:pCode" element={<ModulePage />} />
       <Route path="/lovDet/:lovId" element={<LovDetViewpage />} />
       <Route path="/lov" element={<LovPage />} />
@@ -43,7 +45,7 @@ function App() {
       <Route path="/view-snippet" element={<ViewSnippetPage />} />
       <Route path="/view-lov" element={<ViewLovPage />} />
       <Route path="/add-lovDet/:lovId" element={<LovDetpage />} />
-      <Route path="/preview/:formGenId" element={<FormPreviewPage />} /> 
+      <Route path="/preview/:formGenId" element={<FormPreviewPage />} />
     </Routes>
   );
 }
