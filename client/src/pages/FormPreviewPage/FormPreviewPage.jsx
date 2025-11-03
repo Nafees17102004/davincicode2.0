@@ -112,37 +112,142 @@ const FormPreviewPage = () => {
   const ColumnEditor = ({ column, path, updateConfig, removeColumn }) => {
     const [tabIndex, sectionIndex, columnIndex] = path;
 
-    const handleFieldChange = async (key, value) => {
-      // First update the config immediately for the field change
+    const fetchSpParams = async (spName) => {
+      try {
+        const res = await projectAPI.getLovDropdown("SP_PARAMS", spName);
+        const formattedParams = res.data.result.map((each) => ({
+          id: each.Id,
+          name: each.Name,
+        }));
+        setSpParamData(formattedParams);
+      } catch (error) {
+        console.error("Error fetching SP Params data: ", error);
+      }
+    };
+
+    const fetchTableColumns = async (tableName) => {
+      try {
+        const res = await projectAPI.getLovDropdown("TABLE_COLS", tableName);
+        const formattedParams = res.data.result.map((each) => ({
+          id: each.Id,
+          name: each.Name,
+        }));
+        setTableCol(formattedParams);
+      } catch (error) {
+        console.error("Error fetching Table Columns data: ", error);
+      }
+    };
+
+    const handleFieldChange = (key, value) => {
       updateConfig((config) => {
         const newTabs = [...config.tabs];
-        const currentField =
+        const field =
           newTabs[tabIndex].sections[sectionIndex].fields[columnIndex];
 
-        // Handle special cases for SP and Table selections
-        if (key === "spName") {
-          // Reset related fields when SP is selected
-          currentField.spParam = "";
-          currentField.tableName = "";
-          currentField.tableColumns = "";
+        field[key] = value;
 
-          // Fetch SP Parameters
-          fetchSpParams(value, columnIndex);
-        } else if (key === "tableName") {
-          // Reset related fields when Table is selected
-          currentField.spName = "";
-          currentField.spParam = "";
-          currentField.tableColumns = "";
+        // Reset chain values
+        if (key === "fieldSourceLovDetId") {
+          field.spName = null;
+          field.spParam = null;
+          field.tableName = null;
+          field.tableColumns = null;
+          field.customName = null;
 
-          // Fetch Table Columns
-          fetchTableColumns(value, columnIndex);
+          setSpParamData([]);
+          setTableCol([]);
         }
 
-        // Update the actual field
-        currentField[key] = value;
+        if (key === "spName") {
+          field.spParam = null;
+          field.tableName = null;
+          field.tableColumns = null;
+          field.customName = null;
+
+          setTableCol([]); // because table-related lookup no longer valid
+          if (value) fetchSpParams(value); // dynamically fetch SP params
+        }
+
+        if (key === "tableName") {
+          field.spName = null;
+          field.spParam = null;
+          field.tableColumns = null;
+          field.customName = null;
+
+          setSpParamData([]); // clear previous SP param data
+          if (value) fetchTableColumns(value); // dynamically fetch table columns
+        }
+
         return { ...config, tabs: newTabs };
       });
     };
+
+    console.log(spParamData, tableCol);
+
+    // const fetchSpParams = async (spName, colIndex) => {
+    //   try {
+    //     const res = await projectAPI.getLovDropdown("SP_PARAMS", spName);
+    //     const formattedParams = res.data.result.map((each) => ({
+    //       id: each.Id,
+    //       name: each.Name,
+    //     }));
+    //     setSpParamData(formattedParams);
+    //   } catch (error) {
+    //     console.error("Error fetching SP Params data: ", error);
+    //   }
+    // };
+
+    // const fetchTableColumns = async (tableName, colIndex) => {
+    //   try {
+    //     const res = await projectAPI.getLovDropdown("TABLE_COLS", tableName);
+    //     const formattedParams = res.data.result.map((each) => ({
+    //       id: each.Id,
+    //       name: each.Name,
+    //     }));
+    //     setTableColumnData(formattedParams);
+    //   } catch (error) {
+    //     console.error("Error fetching SP Params data: ", error);
+    //   }
+    // };
+
+    // const handleFieldChange = (key, value) => {
+    //   updateConfig((config) => {
+    //     const newTabs = [...config.tabs];
+    //     newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] = {
+    //       ...newTabs[tabIndex].sections[sectionIndex].fields[columnIndex],
+    //       [key]: value,
+    //     };
+    //     const currentField =
+    //       newTabs[tabIndex].sections[sectionIndex].fields[columnIndex];
+
+    //     // --- Clear dependent fields when primary dropdown changes ---
+    //     if (key === "fieldSourceLovDetId") {
+    //       currentField.spName = null;
+    //       currentField.spParam = null;
+    //       currentField.tableName = null;
+    //       currentField.tableColumns = null;
+    //       currentField.customName = null;
+    //     } else if (key === "spName") {
+    //       currentField.spParam = null;
+    //       currentField.tableName = null;
+    //       currentField.tableColumns = null;
+    //       currentField.customName = null;
+
+    //       // Fetch SP Parameters asynchronously
+    //       if (value) fetchSpParams(value, columnIndex);
+    //     } else if (key === "tableName") {
+    //       currentField.spName = null;
+    //       currentField.spParam = null;
+    //       currentField.tableColumns = null;
+    //       currentField.customName = null;
+
+    //       // Fetch Table Columns asynchronously
+    //       if (value) fetchTableColumns(value, columnIndex);
+    //     }
+
+    //     return { ...config, tabs: newTabs };
+    //   });
+    // };
 
     return (
       <div className="bg-white p-3 border rounded mb-3 position-relative shadow-sm">
@@ -654,7 +759,11 @@ const FormPreviewPage = () => {
   };
   const [config, setConfig] = useState(initialState);
   console.log(config);
+
   const [showJson, setShowJson] = useState(false);
+
+  const [spParamData, setSpParamData] = useState([]);
+  const [tableCol, setTableCol] = useState([]);
 
   // Dropdown Bind List
   const [fieldSource, setFieldSource] = useState([]);
@@ -667,16 +776,16 @@ const FormPreviewPage = () => {
   const [pageData, setPageData] = useState([]);
   const [iconData, setIconData] = useState([]);
   const [spList, setSpList] = useState([]);
-  const [spParamData, setSpParamData] = useState([]);
   const [tableList, setTableList] = useState([]);
-  const [tableCol, setTableCol] = useState([]);
   const [fieldType, setFieldType] = useState([]);
   const [storedProcedures, setStoredProcedures] = useState([]);
   const [eventHandler, setEventHandler] = useState([]);
   const [layout, setLayout] = useState([]);
   const [productData, setProductData] = useState([]);
+  const [formGenData, setFormGenData] = useState([]);
 
   useEffect(() => {
+    // fetchFormGenDetails();
     fetchFieldSrcData();
     fetchFieldSizeData();
     fetchFieldIconData();
@@ -696,6 +805,19 @@ const FormPreviewPage = () => {
     fetchProductData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchFormGenDetails = async () => {
+    try {
+      await projectAPI.viewFormGenList().then((res) => {
+        setFormGenData(res.data.result);
+        console.log(res.data.result);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  console.log(formGenData);
 
   const fetchLayoutData = async () => {
     try {

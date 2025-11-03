@@ -8,10 +8,10 @@ const formGenController = {
       const response = await formGenService.saveFormGen(req.session, formData);
 
       console.log("Form ID from sessionID: ", req.session.formId);
-      return res.status(response.success ? 200 : 400).json(response);
+      res.status(200).json(response);
     } catch (err) {
       console.error("Error:", err);
-      return res.status(500).json({
+      res.status(500).json({
         success: false,
         message: "Internal server error",
       });
@@ -23,7 +23,7 @@ const formGenController = {
 
       const result = await formGenService.getFormGenById(formId);
 
-      res.status(result.success ? 200 : 400).json(result);
+      res.status(200).json(result);
     } catch (err) {
       console.error("Error: ", err);
       res.status(500).json({

@@ -91,6 +91,10 @@ const insertFormGen = (formGenData) => {
   return api.post("/form-generation/save", formGenData);
 };
 
+const viewFormGenList = () => {
+  return api.get("/form-generation/list");
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -113,6 +117,7 @@ const projectAPI = {
   insertTabDet,
   insertAddFormDet,
   insertFormGen,
+  viewFormGenList,
 };
 
 export default projectAPI;

@@ -10,7 +10,7 @@ const formGenService = {
 
     session.formId = formId;
 
-    return { result, finalFormDetails };
+    return { result };
   },
   getFormGenById: async (formId) => {
     try {
