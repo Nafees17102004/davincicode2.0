@@ -1,4 +1,4 @@
-import React, { useState, useCallback, use, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Form } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import projectAPI from "../../api/Api";
@@ -68,6 +68,7 @@ const FormPreviewPage = () => {
 
   // --- Default Structures ---
   const defaultColumn = (order = 1) => ({
+    column_id: generateId(),
     labelName: "",
     fieldType: 0,
     fieldSourceLovDetId: 0,
@@ -92,7 +93,7 @@ const FormPreviewPage = () => {
 
   const defaultTab = (count) => ({
     tabName: `Tab ${count}`,
-    tabIcon: "fa-file-alt",
+    tabIcon: 0,
     sections: [defaultSection()],
   });
 
@@ -121,44 +122,6 @@ const FormPreviewPage = () => {
       });
     };
 
-    const InputField = ({
-      label,
-      value,
-      name,
-      type = "text",
-      options = [],
-    }) => {
-      const isDropdown = options.length > 0;
-      return (
-        <div className="mb-3">
-          <label className="form-label small text-muted text-uppercase fw-bold">
-            {label}
-          </label>
-          {isDropdown ? (
-            <select
-              value={value}
-              onChange={(e) => handleFieldChange(name, e.target.value)}
-              className="form-select form-select-sm"
-            >
-              {options.map((opt) => (
-                <option key={opt.id || opt} value={opt.id || opt}>
-                  {opt.name || opt}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <input
-              type={type}
-              value={value}
-              onChange={(e) => handleFieldChange(name, e.target.value)}
-              className="form-control form-control-sm"
-              placeholder={label}
-            />
-          )}
-        </div>
-      );
-    };
-
     return (
       <div className="bg-white p-3 border rounded mb-3 position-relative shadow-sm">
         <h6 className="text-primary mb-3 border-bottom pb-2">
@@ -174,154 +137,319 @@ const FormPreviewPage = () => {
           <i className="fa fa-times"></i>
         </button>
 
-        <div className="row g-3">
-          <div className="col-md-3">
-            <InputField
-              label="Field Type"
-              name="fieldType"
-              value={column.fieldType}
-              options={fieldType}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Field Source"
-              name="fieldSourceLovDetId"
+        {/* Row 1 */}
+        <div className="row g-3 mb-2">
+          <div className="col-md-4">
+            <label className="form-label">Field Source</label>
+            <select
+              className="form-select form-select-sm"
               value={column.fieldSourceLovDetId}
-              options={fieldSource}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="SP Name"
-              name="spName"
-              value={column.spName}
-              options={spList}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="SP Param"
-              name="spParam"
-              value={column.spParam}
-              options={spParamData}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Table Name"
-              name="tableName"
-              value={column.tableName}
-              options={tableList}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Table Coumns"
-              name="tableColumns"
-              value={column.tableColumns}
-              options={tableCol}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Field Name (Key)"
-              name="labelName"
-              value={column.labelName}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Placeholder"
-              name="placeholder"
-              value={column.placeholder}
-            />
-          </div>
-          {/* <Form.Label>Validation</Form.Label>
-          <Form.Select
-            value=""
-            onChange={(e) => {
-              const val = Number(e.target.value);
-
-              // Ensures we don't add duplicates
-              if (val && !(column.validations || []).includes(val)) {
-                handleFieldChange("validations", [
-                  ...(column.validations || []),
-                  val,
-                ]);
+              onChange={(e) =>
+                handleFieldChange("fieldSourceLovDetId", Number(e.target.value))
               }
-            }}
-          >
-            {jsVal.map((eachJs) => (
-              <option key={eachJs.id} value={eachJs.id}>
-                {eachJs.name}
-              </option>
-            ))}
-          </Form.Select> */}
+            >
+              {fieldSource.map((eachItem) => (
+                <option key={eachItem.id} value={eachItem.id}>
+                  {eachItem.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          {/* Display badges (names from IDs) */}
-          {/* <div className="mt-1">
-            {(column.validations || []).map((vId) => {
-              const validationObj = jsVal.find((item) => item.id === vId);
-              const validationName = validationObj
-                ? validationObj.name
-                : `ID:${vId}`;
-
-              return (
-                <span
-                  key={vId}
-                  className="badge bg-secondary me-1"
-                  style={{ cursor: "pointer" }}
-                  onClick={() =>
-                    handleFieldChange(
-                      "validations",
-                      (column.validations || []).filter((id) => id !== vId)
-                    )
+          <div className="col-md-4">
+            {column.fieldSourceLovDetId === 1 && (
+              <>
+                <label className="form-label">Stored Procedure</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={column.spName || ""}
+                  onChange={(e) => handleFieldChange("spName", e.target.value)}
+                >
+                  {spList.map((sp) => (
+                    <option key={sp.id} value={sp.name}>
+                      {sp.name}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+            {column.fieldSourceLovDetId === 2 && (
+              <>
+                <label className="form-label">Table Name</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={column.tableName || ""}
+                  onChange={(e) =>
+                    handleFieldChange("tableName", e.target.value)
                   }
                 >
-                  {validationName} ✖
-                </span>
-              );
-            })}
+                  {tableList.map((t) => (
+                    <option key={t.id} value={t.name}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+          </div>
+
+          <div className="col-md-4">
+            {column.fieldSourceLovDetId === 1 && (
+              <>
+                <label className="form-label">SP Param</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={column.spParam || ""}
+                  onChange={(e) => handleFieldChange("spParam", e.target.value)}
+                >
+                  {(spParamData || []).map((p) => (
+                    <option key={p.id} value={p.name}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+            {column.fieldSourceLovDetId === 2 && (
+              <>
+                <label className="form-label">Table Columns</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={column.tableColumns || ""}
+                  onChange={(e) =>
+                    handleFieldChange("tableColumns", e.target.value)
+                  }
+                >
+                  {(tableCol || []).map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+          </div>
+
+          <div className="col-md-4">
+            <label className="form-label">Field Type</label>
+            <select
+              className="form-select form-select-sm"
+              value={column.fieldType}
+              onChange={(e) =>
+                handleFieldChange("fieldType", Number(e.target.value))
+              }
+            >
+              {fieldType.map((eachItem) => (
+                <option key={eachItem.id} value={eachItem.id}>
+                  {eachItem.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Row 2 */}
+        <div className="row g-3 mb-2">
+          <div className="col-md-4">
+            <label className="form-label">Field Name</label>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              value={column.labelName}
+              onChange={(e) => handleFieldChange("labelName", e.target.value)}
+            />
+          </div>
+
+          <div className="col-md-4">
+            <label className="form-label">Placeholder</label>
+            <input
+              type="text"
+              className="form-control form-control-sm"
+              value={column.placeholder}
+              onChange={(e) => handleFieldChange("placeholder", e.target.value)}
+            />
+          </div>
+
+          <div className="col-md-4">
+            <label className="form-label">Validation</label>
+            <select
+              className="form-select form-select-sm"
+              value=""
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val && !(column.validations || []).includes(val)) {
+                  handleFieldChange("validations", [
+                    ...(column.validations || []),
+                    val,
+                  ]);
+                }
+              }}
+            >
+              <option value="">Add Validation</option>
+              {jsVal.map((eachJs) => (
+                <option key={eachJs.id} value={eachJs.id}>
+                  {eachJs.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Validation Badges */}
+            <div className="mt-1">
+              {(column.validations || []).map((vId) => {
+                const validationObj = jsVal.find((item) => item.id === vId);
+                const validationName = validationObj
+                  ? validationObj.name
+                  : `ID:${vId}`;
+
+                return (
+                  <span
+                    key={vId}
+                    className="badge bg-secondary me-1"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      handleFieldChange(
+                        "validations",
+                        (column.validations || []).filter((id) => id !== vId)
+                      )
+                    }
+                  >
+                    {validationName} ✖
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="col-md-4">
+            <label className="form-label">Event handlers</label>
+            <select
+              className="form-select form-select-sm"
+              value=""
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val && !(column.eventHandlers || []).includes(val)) {
+                  handleFieldChange("eventHandlers", [
+                    ...(column.eventHandlers || []),
+                    val,
+                  ]);
+                }
+              }}
+            >
+              <option value="">Add Event Handlers</option>
+              {eventHandler.map((eachEvent) => (
+                <option key={eachEvent.id} value={eachEvent.id}>
+                  {eachEvent.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Validation Badges */}
+            <div className="mt-1">
+              {(column.eventHandlers || []).map((vId) => {
+                const eventHandlerObj = eventHandler.find(
+                  (item) => item.id === vId
+                );
+                const eventHandlerName = eventHandlerObj
+                  ? eventHandlerObj.name
+                  : `ID:${vId}`;
+
+                return (
+                  <span
+                    key={vId}
+                    className="badge bg-secondary me-1"
+                    style={{ cursor: "pointer" }}
+                    onClick={() =>
+                      handleFieldChange(
+                        "eventHandlers",
+                        (column.eventHandlers || []).filter((id) => id !== vId)
+                      )
+                    }
+                  >
+                    {eventHandlerName} ✖
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* <div className="col-md-4">
+            <label className="form-label">Event Handler</label>
+            <select
+              className="form-select form-select-sm"
+              value={column.eventHandlers || ""}
+              onChange={(e) =>
+                handleFieldChange("eventHandlers", e.target.value)
+              }
+            >
+              {eventHandler.map((eachItem) => (
+                <option key={eachItem.id} value={eachItem.id}>
+                  {eachItem.name}
+                </option>
+              ))}
+            </select>
           </div> */}
 
-          <div className="col-md-3">
-            <InputField
-              label="Event Handlers"
-              name="eventHandlers"
-              value={column.eventHandlers}
-              options={eventHandler}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Field Order"
-              name="fieldOrderLovDetId"
-              type="number"
-              value={column.fieldOrderLovDetId}
-              options={fieldOrder}
-            />
-          </div>
-          <div className="col-md-3">
-            <InputField
-              label="Field Icon"
-              name="fieldIconLovDetId"
+          <div className="col-md-4">
+            <label className="form-label">Field Icon</label>
+            <select
+              className="form-select form-select-sm"
               value={column.fieldIconLovDetId}
-              options={iconData}
-            />
+              onChange={(e) =>
+                handleFieldChange("fieldIconLovDetId", Number(e.target.value))
+              }
+            >
+              {fieldIcon.map((eachIcon) => (
+                <option key={eachIcon.id} value={eachIcon.id}>
+                  {eachIcon.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="col-md-3">
-            <InputField
-              label="Saving SP"
-              name="storingSP"
+
+          <div className="col-md-4">
+            <label className="form-label">Field Order</label>
+            <select
+              className="form-select form-select-sm"
+              value={column.fieldOrderLovDetId}
+              onChange={(e) =>
+                handleFieldChange("fieldOrderLovDetId", Number(e.target.value))
+              }
+            >
+              {fieldOrder.map((eachOrder) => (
+                <option key={eachOrder.id} value={eachOrder.id}>
+                  {eachOrder.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Row 3 */}
+        <div className="row g-3 mb-2">
+          <div className="col-md-4">
+            <label className="form-label">Saving SP</label>
+            <select
+              className="form-select form-select-sm"
               value={column.storingSP}
-            />
+              onChange={(e) => handleFieldChange("storingSP", e.target.value)}
+            >
+              {storedProcedures.map((sp) => (
+                <option key={sp.id} value={sp.name}>
+                  {sp.name}
+                </option>
+              ))}
+            </select>
           </div>
-          <div className="col-md-3">
-            <InputField
-              label="Created User"
-              name="created_user"
+
+          <div className="col-md-4">
+            <label className="form-label">Created User</label>
+            <input
+              type="text"
+              className="form-control form-control-sm"
               value={column.created_user}
+              onChange={(e) =>
+                handleFieldChange("created_user", e.target.value)
+              }
             />
           </div>
         </div>
@@ -469,7 +597,7 @@ const FormPreviewPage = () => {
                 className="form-select"
                 value={tab.tabIcon}
                 onChange={(e) =>
-                  handleTabFieldChange("tabIcon", Number(e.target.value))
+                  handleTabFieldChange("tabIcon", e.target.value)
                 }
               >
                 {iconData.map((iconName) => (
@@ -545,6 +673,7 @@ const FormPreviewPage = () => {
     fetchEventHandlerData();
     fetchLayoutData();
     fetchProductData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchLayoutData = async () => {
@@ -995,7 +1124,7 @@ const FormPreviewPage = () => {
 
         {config.tabs.map((tab, tabIndex) => (
           <TabEditor
-            key={tab.tab_id}
+            key={tab.tab_id || tabIndex}
             tab={tab}
             tabIndex={tabIndex}
             updateConfig={updateConfig}

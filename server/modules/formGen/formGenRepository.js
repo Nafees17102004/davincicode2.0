@@ -38,8 +38,18 @@ const formGenRepository = {
     return {
       success: response.success === 1 || response.success === true,
       message: response.message,
-      insertedId: response.insertedId || null,
+      formId: response.insertedId || null,
     };
+  },
+  getFormGenById: async (formGenId) => {
+    try {
+      const query = "CALL LT_DCS_SP_GET_FORM_GENERATION_DETAILS(?)";
+      const [result] = await pool.query(query, [formGenId]);
+      return { success: true, result: result[0][0] || null };
+    } catch (error) {
+      console.error("Error in fetching the data in Repo: ", error);
+      return { success: false, error: "Error in fetching the data in Repo" };
+    }
   },
 };
 
