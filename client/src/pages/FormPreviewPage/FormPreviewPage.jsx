@@ -108,6 +108,7 @@ const FormPreviewPage = () => {
   };
 
   // --- Column Editor ---
+  // --- Column Editor ---
   const ColumnEditor = ({ column, path, updateConfig, removeColumn }) => {
     const [tabIndex, sectionIndex, columnIndex] = path;
 
@@ -582,7 +583,6 @@ const FormPreviewPage = () => {
       </div>
     );
   };
-
   // --- Section Editor ---
   const SectionEditor = ({
     section,

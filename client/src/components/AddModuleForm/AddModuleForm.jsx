@@ -33,16 +33,22 @@ function AddModuleForm() {
     setRows(updatedRows);
   };
 
-  const handleSubmit = () => {
-    projectAPI.insertProject(rows).then((response) => {
-      console.log("Response:", response.data);
-      alert(`Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`);
-    }).catch((error) => {
-      console.error("There was an error!", error);
-      alert("An error occurred while submitting the projects.");
-    });
-    setRows([]);
-    useNavigate('/view-projects');
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    projectAPI
+      .insertProject(rows)
+      .then((response) => {
+        console.log("Response:", response.data);
+        alert(
+          `Projects added: ${response.data.addedCount}, Failed: ${response.data.failedCount}`
+        );
+        setRows([]);
+        navigate("/view-projects"); // ✅ Use the navigate variable
+      })
+      .catch((error) => {
+        console.error("There was an error!", error);
+        alert("An error occurred while submitting the projects.");
+      });
   };
   return (
     <div className="project-form-container mt-4">
