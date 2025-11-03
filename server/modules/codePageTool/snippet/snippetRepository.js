@@ -1,4 +1,4 @@
-const pool = require("../../src/config/dbConfig");
+const pool = require("../../../src/config/dbConfig");
 
 const snippetRepository = {
   getSnippet: async (snippetId) => {

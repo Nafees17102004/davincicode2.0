@@ -1,5 +1,5 @@
 // repositories/formGenRepository.js
-const pool = require("../../src/config/dbConfig");
+const pool = require("../../../src/config/dbConfig");
 
 const formGenRepository = {
   saveFormGen: async (data) => {

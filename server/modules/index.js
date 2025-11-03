@@ -1,5 +1,5 @@
 const express = require("express");
-const formGenRoute = require("./formGen/formGenRoute");
+const formGenRoute = require("../modules/codePageTool/formGen/formGenRoute");
 
 const router = express.Router();
 
@@ -8,5 +8,6 @@ const router = express.Router();
 
 // Form Generator Routes
 router.use("/form-generation/save", formGenRoute);
+router.use("/form-generation/list", formGenRoute);
 
 module.exports = router;
