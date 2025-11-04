@@ -64,7 +64,6 @@ const FormPreviewPage = () => {
     const newNumber = Math.floor(Math.random() * (max - min + 1)) + min;
     return newNumber;
   };
-  console.log(generateId());
 
   // --- Default Structures ---
   const defaultColumn = (order = 1) => ({
@@ -181,7 +180,6 @@ const FormPreviewPage = () => {
       });
     };
 
-    console.log(spParamData, tableCol);
 
     // const fetchSpParams = async (spName, colIndex) => {
     //   try {
@@ -411,7 +409,6 @@ const FormPreviewPage = () => {
                 }
               }}
             >
-              <option value="">Add Validation</option>
               {jsVal.map((eachJs) => (
                 <option key={eachJs.id} value={eachJs.id}>
                   {eachJs.name}
@@ -461,7 +458,6 @@ const FormPreviewPage = () => {
                 }
               }}
             >
-              <option value="">Add Event Handlers</option>
               {eventHandler.map((eachEvent) => (
                 <option key={eachEvent.id} value={eachEvent.id}>
                   {eachEvent.name}
