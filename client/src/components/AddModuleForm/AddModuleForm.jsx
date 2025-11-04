@@ -17,7 +17,7 @@ function AddModuleForm() {
         id: idCounter,
         pCode: '',
         pName: '',
-        pLanguageId: 0,
+        pLanguageId: 0,   
         pStatus: "active",
         pInactiveReason: null
       },
