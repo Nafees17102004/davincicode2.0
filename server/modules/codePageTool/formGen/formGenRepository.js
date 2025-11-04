@@ -32,8 +32,14 @@ const formGenRepository = {
       inactiveReason,
     ]);
 
-    const response = result[0][0];
-    console.log(response);
+    const response = result && result[0] && result[0][0] ? result[0][0] : null;
+    if (!response) {
+      return {
+        success: false,
+        message: "DB returned no response",
+        formId: null,
+      };
+    }
 
     return {
       success: response.success === 1 || response.success === true,
@@ -45,7 +51,9 @@ const formGenRepository = {
     try {
       const query = "CALL LT_DCS_SP_GET_FORM_GENERATION_DETAILS(?)";
       const [result] = await pool.query(query, [formGenId]);
-      return { success: true, result: result[0][0] || null };
+      const row = result && result[0] && result[0][0] ? result[0][0] : null;
+
+      return { success: !!row, result: row };
     } catch (error) {
       console.error("Error in fetching the data in Repo: ", error);
       return { success: false, error: "Error in fetching the data in Repo" };

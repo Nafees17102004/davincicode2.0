@@ -57,11 +57,8 @@ const EventHandlerModal = ({
   const handleAdd = () => {
     if (selectedEvent && functionName.trim()) {
       onAddEventHandler({
-        id: Date.now(),
         eventId: selectedEvent,
-        eventName: eventHandler.find((e) => e.id == selectedEvent)?.name || "",
         functionName: functionName.trim(),
-        sectionName: `Section_${Date.now()}`,
       });
       setSelectedEvent("");
       setFunctionName("");
@@ -95,7 +92,6 @@ const EventHandlerModal = ({
                   value={selectedEvent}
                   onChange={(e) => setSelectedEvent(e.target.value)}
                 >
-                  <option value="">Select Event Handler</option>
                   {eventHandler &&
                     eventHandler.map((event) => (
                       <option key={event.id} value={event.id}>
@@ -285,7 +281,7 @@ const FormPreviewPage = () => {
           name: each.Name,
         }));
         // You might want to handle this differently since spParamData is now passed as prop
-        console.log("SP Params:", formattedParams);
+        setSpParamData(formattedParams);
       } catch (error) {
         console.error("Error fetching SP Params data: ", error);
         showToast("Error fetching stored procedure parameters", "error");
@@ -299,7 +295,7 @@ const FormPreviewPage = () => {
           id: each.Id,
           name: each.Name,
         }));
-        console.log("Table Columns:", formattedParams);
+        setTableCol(formattedParams);
       } catch (error) {
         console.error("Error fetching Table Columns data: ", error);
         showToast("Error fetching table columns", "error");
@@ -344,7 +340,7 @@ const FormPreviewPage = () => {
         return { ...config, tabs: newTabs };
       });
     };
-
+    console.log(moduleData);
     const handleAddEventHandler = (eventObj) => {
       updateConfig((config) => {
         const newTabs = [...config.tabs];
@@ -396,7 +392,6 @@ const FormPreviewPage = () => {
               }
               required
             >
-              <option value="">Select Field Source</option>
               {fieldSource &&
                 fieldSource.map((eachItem) => (
                   <option key={eachItem.id} value={eachItem.id}>
@@ -416,7 +411,6 @@ const FormPreviewPage = () => {
               onChange={(e) => handleFieldChange("fieldType", e.target.value)}
               required
             >
-              <option value="">Select Field Type</option>
               {fieldType &&
                 fieldType.map((eachItem) => (
                   <option key={eachItem.id} value={eachItem.id}>
@@ -438,7 +432,6 @@ const FormPreviewPage = () => {
               }
               required
             >
-              <option value="">Select Field Order</option>
               {fieldOrder &&
                 fieldOrder.map((eachOrder) => (
                   <option key={eachOrder.id} value={eachOrder.id}>
@@ -462,7 +455,6 @@ const FormPreviewPage = () => {
                   value={column.spName || ""}
                   onChange={(e) => handleFieldChange("spName", e.target.value)}
                 >
-                  <option value="">Select Stored Procedure</option>
                   {spList &&
                     spList.map((sp) => (
                       <option key={sp.id} value={sp.name}>
@@ -482,7 +474,6 @@ const FormPreviewPage = () => {
                     handleFieldChange("tableName", e.target.value)
                   }
                 >
-                  <option value="">Select Table</option>
                   {tableList &&
                     tableList.map((t) => (
                       <option key={t.id} value={t.name}>
@@ -503,7 +494,6 @@ const FormPreviewPage = () => {
                   value={column.spParam || ""}
                   onChange={(e) => handleFieldChange("spParam", e.target.value)}
                 >
-                  <option value="">Select Parameter</option>
                   {(spParamData || []).map((p) => (
                     <option key={p.id} value={p.name}>
                       {p.name}
@@ -522,7 +512,6 @@ const FormPreviewPage = () => {
                     handleFieldChange("tableColumns", e.target.value)
                   }
                 >
-                  <option value="">Select Column</option>
                   {(tableCol || []).map((c) => (
                     <option key={c.id} value={c.name}>
                       {c.name}
@@ -567,7 +556,6 @@ const FormPreviewPage = () => {
                 handleFieldChange("fieldIconLovDetId", e.target.value)
               }
             >
-              <option value="">Select Icon</option>
               {fieldIcon &&
                 fieldIcon.map((eachIcon) => (
                   <option key={eachIcon.id} value={eachIcon.id}>
@@ -595,7 +583,6 @@ const FormPreviewPage = () => {
                 }
               }}
             >
-              <option value="">Add Validation</option>
               {jsVal &&
                 jsVal.map((eachJs) => (
                   <option key={eachJs.id} value={eachJs.id}>
@@ -683,7 +670,6 @@ const FormPreviewPage = () => {
               value={column.storingSP}
               onChange={(e) => handleFieldChange("storingSP", e.target.value)}
             >
-              <option value="">Select Stored Procedure</option>
               {storedProcedures &&
                 storedProcedures.map((sp) => (
                   <option key={sp.id} value={sp.name}>
@@ -871,7 +857,6 @@ const FormPreviewPage = () => {
                 }
                 required
               >
-                <option value="">Select Tab Icon</option>
                 {props.iconData &&
                   props.iconData.map((iconName) => (
                     <option key={iconName.id} value={iconName.id}>
@@ -907,6 +892,7 @@ const FormPreviewPage = () => {
   };
 
   const [config, setConfig] = useState(initialState);
+  const [retrivedFormGenData, setRetrivedFormGenData] = useState([]);
   const [showJson, setShowJson] = useState(false);
   const [isModuleEnabled, setIsModuleEnabled] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -930,6 +916,9 @@ const FormPreviewPage = () => {
   const [layout, setLayout] = useState([]);
   const [productData, setProductData] = useState([]);
 
+  // const [formId, setFormId] = useState(null);
+  // console.log(formId)
+
   useEffect(() => {
     setIsModuleEnabled(!!config.projectId);
     if (!config.projectId) {
@@ -938,6 +927,8 @@ const FormPreviewPage = () => {
   }, [config.projectId]);
 
   useEffect(() => {
+    // const formId = sessionStorage.getItem("formId");
+    // setFormId(formId);
     const fetchAllData = async () => {
       setIsLoading(true);
       try {
@@ -947,7 +938,6 @@ const FormPreviewPage = () => {
           fetchFieldOrderData(),
           fetchJsValData(),
           fetchProjectData(),
-          fetchModuleData(),
           fetchIconData(),
           fetchSpListData(),
           fetchTableListData(),
@@ -956,6 +946,7 @@ const FormPreviewPage = () => {
           fetchEventHandlerData(),
           fetchLayoutData(),
           fetchProductData(),
+          // fetchFormGenData(),
         ]);
         showToast("All data loaded successfully", "success");
       } catch (error) {
@@ -968,7 +959,6 @@ const FormPreviewPage = () => {
 
     fetchAllData();
   }, []);
-
   // API fetch functions
   const fetchFieldSrcData = async () => {
     try {
@@ -984,11 +974,11 @@ const FormPreviewPage = () => {
     } catch (error) {
       console.error("Error fetching field source:", error);
       // Set fallback data
-      setFieldSource([
-        { id: "1", name: "Static Value" },
-        { id: "2", name: "Database Table" },
-        { id: "3", name: "Stored Procedure" },
-      ]);
+      // setFieldSource([
+      //   { id: "1", name: "Static Value" },
+      //   { id: "2", name: "Database Table" },
+      //   { id: "3", name: "Stored Procedure" },
+      // ]);
     }
   };
 
@@ -1063,23 +1053,6 @@ const FormPreviewPage = () => {
       setProjectData([
         { id: "1", name: "Project Alpha" },
         { id: "2", name: "Project Beta" },
-      ]);
-    }
-  };
-
-  const fetchModuleData = async () => {
-    try {
-      const res = await projectAPI.getLovDropdown("MODULE_TABLE", null);
-      const formattedData = res.data.result.map((each) => ({
-        id: each.Id,
-        name: each.Name,
-      }));
-      setModuleData(formattedData);
-    } catch (error) {
-      console.error("Error fetching modules:", error);
-      setModuleData([
-        { id: "1", name: "Core Module" },
-        { id: "2", name: "Admin Module" },
       ]);
     }
   };
@@ -1265,10 +1238,54 @@ const FormPreviewPage = () => {
       newTabs[tabIndex].sections[sectionIndex].fields.splice(columnIndex, 1);
       return { ...config, tabs: newTabs };
     });
+  const fetchModuleData = async (projectId) => {
+    try {
+      const res = await projectAPI.getLovDropdown("MODULE_TABLE", projectId);
+      const formattedData = res.data.result.map((each) => ({
+        id: each.Id,
+        name: each.Name,
+      }));
+      setModuleData(formattedData);
+    } catch (error) {
+      console.error("Error fetching modules:", error);
+      setModuleData([
+        { id: "1", name: "Core Module" },
+        { id: "2", name: "Admin Module" },
+      ]);
+    }
+  };
+  // Data processing before storing the data inside form generation table
+  const processConfigForSave = (config) => {
+    const newConfig = { ...config };
+
+    newConfig.tabs = newConfig.tabs.map((tab) => ({
+      ...tab,
+      sections: tab.sections.map((sec) => ({
+        ...sec,
+        fields: sec.fields.map((field) => ({
+          ...field,
+
+          // ✅ Convert validations to [{ jsId }]
+          validations: (field.validations || []).map((vId) => ({
+            jsId: vId,
+          })),
+
+          // ✅ Keep event handlers structure: [{ eventId, functionName }]
+          eventHandlers: (field.eventHandlers || []).map((ev) => ({
+            eventId: ev.eventId,
+            functionName: ev.functionName,
+          })),
+        })),
+      })),
+    }));
+
+    return newConfig;
+  };
 
   const handleSubmitConfig = async (e) => {
     e.preventDefault();
-
+    // Data before storing them on the DB *finalPayload*
+    const finalPayload = processConfigForSave(config);
     // Validation
     if (
       !config.projectId ||
@@ -1295,10 +1312,14 @@ const FormPreviewPage = () => {
 
     try {
       await projectAPI
-        .insertFormGen(config)
-        .then((res) => {
+        .insertFormGen(finalPayload)
+        .then(async (res) => {
           console.log(res.data);
           showToast("Configuration saved successfully!", "success");
+
+          const formResponse = await projectAPI.viewFormGenList();
+          setRetrivedFormGenData(formResponse.data);
+          console.log("Fetched Form Data:", formResponse.data);
         })
         .catch((err) => {
           console.error(err);
@@ -1324,7 +1345,19 @@ const FormPreviewPage = () => {
       </div>
     );
   }
-
+  console.log(config);
+  const fetchFormGenData = async () => {
+    try {
+      projectAPI
+        .viewFormGenList()
+        .then((res) => {
+          console.log(res.data);
+        })
+        .catch((err) => {
+          console.error("Error in fetching data: ", err);
+        });
+    } catch (error) {}
+  };
   return (
     <>
       <link
@@ -1388,15 +1421,23 @@ const FormPreviewPage = () => {
                 <select
                   className="form-select"
                   value={config.projectId}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const selectedProjectId = e.target.value;
+
+                    // 1. Update project in config state
                     setConfig((prev) => ({
                       ...prev,
-                      projectId: e.target.value,
-                    }))
-                  }
+                      projectId: selectedProjectId,
+                      moduleId: "", // clear selected module
+                    }));
+
+                    // 2. Fetch modules for selected project
+                    if (selectedProjectId) {
+                      fetchModuleData(selectedProjectId);
+                    }
+                  }}
                   required
                 >
-                  <option value="">Select Project</option>
                   {projectData.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -1419,16 +1460,12 @@ const FormPreviewPage = () => {
                   disabled={!isModuleEnabled}
                   required
                 >
-                  <option value="">
-                    {isModuleEnabled
-                      ? "Select Module"
-                      : "Please select Project first"}
-                  </option>
-                  {moduleData.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
+                  {isModuleEnabled &&
+                    moduleData.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
                 </select>
               </div>
               <div className="col-md-4">
@@ -1446,7 +1483,6 @@ const FormPreviewPage = () => {
                   }
                   required
                 >
-                  <option value="">Select Product</option>
                   {productData.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
@@ -1466,7 +1502,6 @@ const FormPreviewPage = () => {
                   }
                   required
                 >
-                  <option value="">Select Layout</option>
                   {layout.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.name}

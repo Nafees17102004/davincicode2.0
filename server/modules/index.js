@@ -7,7 +7,7 @@ const router = express.Router();
 // router.use("/snippet", require("./snippet/snippetRoute"));
 
 // Form Generator Routes
-router.use("/form-generation/save", formGenRoute);
-router.use("/form-generation/list", formGenRoute);
+router.use("/form-generation", formGenRoute);
+router.use("/form-generation", formGenRoute);
 
 module.exports = router;
