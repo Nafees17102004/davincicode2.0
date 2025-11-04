@@ -6,17 +6,32 @@ const formGenService = {
     try {
     } catch (error) {}
     const result = await formGenRepository.saveFormGen(formData);
-    const { formId } = result;
 
-    session.formId = formId;
-
-    return { result };
+    return {
+      success: result.success,
+      message: result.message,
+      formId: result.formId || null,
+    };
   },
   getFormGenById: async (formId) => {
     try {
       if (!formId) return { success: false, error: "formId missing" };
       const formDetails = await formGenRepository.getFormGenById(formId);
+      // only set session if save succeeded and we have a formId
+      if (!formDetails || !formDetails.result) {
+        return { success: false, error: "Form not found" };
+      }
       const jsonData = formDetails.result.FormJson;
+      if (typeof jsonData === "string") {
+        try {
+          jsonData = JSON.parse(jsonData);
+        } catch (err) {
+          console.warn("FormJson parse warning:", err);
+          // if parse fails, return raw
+        }
+      }
+
+      if (!jsonData) return { success: false, error: "Form JSON missing" };
 
       const transformData = (jsonData) => {
         return {
