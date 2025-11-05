@@ -96,6 +96,9 @@ const FormPreviewPage = () => {
   const [layout, setLayout] = useState([]);
   const [productData, setProductData] = useState([]);
 
+  // const [formId, setFormId] = useState(null);
+  // console.log(formId)
+
   useEffect(() => {
     setIsModuleEnabled(!!config.projectId);
     if (!config.projectId) {
@@ -104,6 +107,8 @@ const FormPreviewPage = () => {
   }, [config.projectId]);
 
   useEffect(() => {
+    // const formId = sessionStorage.getItem("formId");
+    // setFormId(formId);
     const fetchAllData = async () => {
       setIsLoading(true);
       try {
@@ -121,6 +126,7 @@ const FormPreviewPage = () => {
           fetchEventHandlerData(),
           fetchLayoutData(),
           fetchProductData(),
+          // fetchFormGenData(),
         ]);
         showToast("All data loaded successfully", "success");
       } catch (error) {
@@ -435,6 +441,49 @@ const FormPreviewPage = () => {
       newTabs[tabIndex].sections[sectionIndex].fields.splice(columnIndex, 1);
       return { ...config, tabs: newTabs };
     });
+  const fetchModuleData = async (projectId) => {
+    try {
+      const res = await projectAPI.getLovDropdown("MODULE_TABLE", projectId);
+      const formattedData = res.data.result.map((each) => ({
+        id: each.Id,
+        name: each.Name,
+      }));
+      setModuleData(formattedData);
+    } catch (error) {
+      console.error("Error fetching modules:", error);
+      setModuleData([
+        { id: "1", name: "Core Module" },
+        { id: "2", name: "Admin Module" },
+      ]);
+    }
+  };
+  // Data processing before storing the data inside form generation table
+  const processConfigForSave = (config) => {
+    const newConfig = { ...config };
+
+    newConfig.tabs = newConfig.tabs.map((tab) => ({
+      ...tab,
+      sections: tab.sections.map((sec) => ({
+        ...sec,
+        fields: sec.fields.map((field) => ({
+          ...field,
+
+          // ✅ Convert validations to [{ jsId }]
+          validations: (field.validations || []).map((vId) => ({
+            jsId: vId,
+          })),
+
+          // ✅ Keep event handlers structure: [{ eventId, functionName }]
+          eventHandlers: (field.eventHandlers || []).map((ev) => ({
+            eventId: ev.eventId,
+            functionName: ev.functionName,
+          })),
+        })),
+      })),
+    }));
+
+    return newConfig;
+  };
 
   const fetchModuleData = async (projectId) => {
     try {
@@ -645,7 +694,6 @@ const FormPreviewPage = () => {
                   }}
                   required
                 >
-                  <option value="">Select Project</option>
                   {projectData.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
@@ -710,7 +758,6 @@ const FormPreviewPage = () => {
                   }
                   required
                 >
-                  <option value="">Select Layout</option>
                   {layout.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.name}

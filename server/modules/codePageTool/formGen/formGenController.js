@@ -7,7 +7,11 @@ const formGenController = {
       const formData = req.body;
       const response = await formGenService.saveFormGen(req.session, formData);
 
-      console.log("Form ID from sessionID: ", req.session.formId);
+      if (response.success) {
+        // IMPORTANT: store formId in session
+        req.session.formId = response.formId;
+        req.session.save(); // ensure it writes to store
+      }
       res.status(200).json(response);
     } catch (err) {
       console.error("Error:", err);

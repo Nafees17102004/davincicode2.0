@@ -3,6 +3,7 @@ const API_BASE_URL = "http://localhost:5000/code"; // Replace with your backend 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 const insertProject = (projectData) => {
@@ -92,7 +93,7 @@ const insertFormGen = (formGenData) => {
 };
 
 const viewFormGenList = () => {
-  return api.get("/form-generation/list");
+  return api.get("/form-generation/get");
 };
 
 const projectAPI = {
