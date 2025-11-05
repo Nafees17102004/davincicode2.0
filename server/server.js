@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 // Session config
 const session = require("express-session");
-const MySQLStore = require("express-mysql-session")(session);
 
 const app = express();
 const routes = require("./src/routes/createProjectRoutes");
@@ -11,7 +10,7 @@ const modules = require("./modules/index");
 
 app.use(
   cors({
-    origin: "http://localhost:5173, http://localhost:3000/",
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
@@ -31,7 +30,6 @@ app.use(
   })
 );
 
-
 // Register API routes
 app.use("/code", routes);
 app.use("/code", modules);
@@ -48,7 +46,6 @@ app.get("/check-session", (req, res) => {
     formId: req.session.formId || null,
   });
 });
-
 
 // Add this temporary test route in your server.js
 app.get("/test-db", async (req, res) => {
