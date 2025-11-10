@@ -12,6 +12,7 @@ function LeftTabMenu() {
     { path: "/snippet", icon: "📝", label: "Snippet" },
     { path: "/lov", icon: "📋", label: "List of Values" },
     { path: "/dynamic-form", icon: "🎨", label: "Dynamic Form" },
+    { path: "/code-generation", icon: "⚡", label: "Code Generation" }, // Add this line
   ];
 
   return (
