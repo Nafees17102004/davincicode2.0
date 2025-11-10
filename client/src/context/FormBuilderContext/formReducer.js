@@ -1,16 +1,6 @@
-export const ACTION_TYPES = {
-  UPDATE_CONFIG: "UPDATE_CONFIG",
-  UPDATE_FIELD: "UPDATE_FIELD",
-  ADD_TAB: "ADD_TAB",
-  REMOVE_TAB: "REMOVE_TAB",
-  ADD_SECTION: "ADD_SECTION",
-  REMOVE_SECTION: "REMOVE_SECTION",
-  ADD_COLUMN: "ADD_COLUMN",
-  REMOVE_COLUMN: "REMOVE_COLUMN",
-  UPDATE_TOAST: "UPDATE_TOAST",
-  SET_LOADING: "SET_LOADING",
-  SET_DROPDOWN_DATA: "SET_DROPDOWN_DATA",
-};
+import { produce } from "immer";
+
+import { ACTION_TYPES } from "./actionTypes";
 
 const generateId = () => {
   const min = 1;
@@ -86,6 +76,11 @@ const initialState = {
 
 const formReducer = (state, action) => {
   switch (action.type) {
+    case ACTION_TYPES.SET_FORM_DATA:
+      return {
+        ...state,
+        retrivedFormGenData: action.payload,
+      };
     case ACTION_TYPES.UPDATE_CONFIG:
       return {
         ...state,
@@ -95,58 +90,56 @@ const formReducer = (state, action) => {
             : action.payload,
       };
     case ACTION_TYPES.UPDATE_FIELD:
-      const { path, key, value } = action.payload;
-      const { tabIndex, sectionIndex, fieldIndex } = path;
+      return produce(state, (draft) => {
+        const [tabIndex, sectionIndex, fieldIndex] = action.payload.path;
+        const { key, value } = action.payload;
 
-      return {
-        ...state,
-        config: {
-          ...state.config,
-          tabs: state.config.tabs.map((tab, tIndex) => {
-            if (tIndex !== tabIndex) return tab;
-            return {
-              ...tab,
-              sections: tab.sections.map((section, sIndex) => {
-                if (sIndex !== sectionIndex) return section;
-                return {
-                  ...section,
-                  fields: section.fields.map((field, fIndex) => {
-                    if (fIndex !== fieldIndex) return field;
+        // ...state,
+        // config: {
+        //   ...state.config,
+        //   tabs: state.config.tabs.map((tab, tIndex) => {
+        //     if (tIndex !== tabIndex) return tab;
+        //     return {
+        //       ...tab,
+        //       sections: tab.sections.map((section, sIndex) => {
+        //         if (sIndex !== sectionIndex) return section;
+        //         return {
+        //           ...section,
+        //           fields: section.fields.map((field, fIndex) => {
+        //             if (fIndex !== fieldIndex) return field;
 
-                    const updatedField = { ...field, [key]: value };
+        //             const updatedField = { ...field, [key]: value };
 
-                    // Reset chain values (same logic as before)
-                    if (key === "fieldSourceLovDetId") {
-                      updatedField.spName = null;
-                      updatedField.spParam = null;
-                      updatedField.tableName = null;
-                      updatedField.tableColumns = null;
-                    }
+        const field =
+          draft.config.tabs[tabIndex].sections[sectionIndex].fields[fieldIndex];
 
-                    if (key === "spName") {
-                      updatedField.spParam = null;
-                      updatedField.tableName = null;
-                      updatedField.tableColumns = null;
-                    }
+        field[key] = value;
 
-                    if (key === "tableName") {
-                      updatedField.spName = null;
-                      updatedField.spParam = null;
-                      updatedField.tableColumns = null;
-                    }
+        // --- Chain Reset Rules ---
+        if (key === "fieldSourceLovDetId") {
+          field.spName = null;
+          field.spParam = null;
+          field.tableName = null;
+          field.tableColumns = null;
+        }
 
-                    if (key === "hasEvents" && !value) {
-                      updatedField.eventHandlers = [];
-                    }
+        if (key === "spName") {
+          field.spParam = null;
+          field.tableName = null;
+          field.tableColumns = null;
+        }
 
-                    return updatedField;
-                  }),
-                };
-              }),
-            };
-          }),
-        },
-      };
+        if (key === "tableName") {
+          field.spName = null;
+          field.spParam = null;
+          field.tableColumns = null;
+        }
+
+        if (key === "hasEvents" && !value) {
+          field.eventHandlers = [];
+        }
+      });
+
     case ACTION_TYPES.ADD_TAB:
       return {
         ...state,
@@ -159,23 +152,45 @@ const formReducer = (state, action) => {
         },
       };
     case ACTION_TYPES.REMOVE_TAB:
+      const updatedTabs = state.config.tabs.filter(
+        (_, i) => i !== action.payload
+      );
+
+      // Auto rename tabs (Tab 1, Tab 2, ...)
+      updatedTabs.forEach((tab, index) => {
+        tab.tabName = tab.tabName.startsWith("Tab")
+          ? `Tab ${index + 1}`
+          : tab.tabName;
+      });
+
       return {
         ...state,
         config: {
           ...state.config,
-          tabs: state.config.tabs((_, i) => i !== action.payload),
+          tabs: updatedTabs,
         },
       };
+
     case ACTION_TYPES.ADD_SECTION:
+      // return produce(state, (draft) => {
+      //   const { tabIndex } = action.payload;
+      //   // Ensure sections is an array
+      //   if (!Array.isArray(draft.config.tabs[tabIndex].sections)) {
+      //     draft.config.tabs[tabIndex].sections = [];
+      //   }
+
+      //   draft.config.tabs[tabIndex].sections.push(defaultSection());
+      // });
+      const { tabIndex } = action.payload;
       return {
         ...state,
         config: {
           ...state.config,
-          tabs: state.tabs.map((tab, tIndex) => {
+          tabs: state.config.tabs.map((tab, tIndex) => {
             if (tIndex === tabIndex) return tab;
             return {
               ...tab,
-              section: [...tab.sections, defaultSection()],
+              sections: [...tab.sections, defaultSection()],
             };
           }),
         },
@@ -289,6 +304,32 @@ const formReducer = (state, action) => {
         ...state,
         showJson: action.payload,
       };
+    case ACTION_TYPES.ADD_VALIDATION:
+      return produce(state, (draft) => {
+        const [tabIndex, sectionIndex, fieldIndex] = action.payload.path;
+        draft.config.tabs[tabIndex].sections[sectionIndex].fields[
+          fieldIndex
+        ].validations.push(action.payload.validation);
+      });
+
+    case ACTION_TYPES.UPDATE_VALIDATION:
+      return produce(state, (draft) => {
+        const { path, index, key, value } = action.payload;
+        const [tabIndex, sectionIndex, fieldIndex] = path;
+        draft.config.tabs[tabIndex].sections[sectionIndex].fields[
+          fieldIndex
+        ].validations[index][key] = value;
+      });
+
+    case ACTION_TYPES.REMOVE_VALIDATION:
+      return produce(state, (draft) => {
+        const { path, index } = action.payload;
+        const [tabIndex, sectionIndex, fieldIndex] = path;
+        draft.config.tabs[tabIndex].sections[sectionIndex].fields[
+          fieldIndex
+        ].validations.splice(index, 1);
+      });
+
     default:
       return state;
   }

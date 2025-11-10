@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import SectionEditor from "../SectionEditor/SectionEditor";
+import {
+  updateConfig,
+  updateField,
+  removeTab,
+} from "../../context/FormBuilderContext/formAction";
 
 const TabEditor = React.memo(
   ({
     tab,
     tabIndex,
-    updateConfig,
+    dispatch,
     addSection,
     removeSection,
     addColumn,
     removeColumn,
-    removeTab,
     ...props
   }) => {
     const [tabName, setTabName] = useState(tab.tabName);
@@ -24,20 +28,24 @@ const TabEditor = React.memo(
 
     const handleTabNameChange = (value) => {
       setTabName(value);
-      updateConfig((config) => {
-        const newTabs = [...config.tabs];
-        newTabs[tabIndex].tabName = value;
-        return { ...config, tabs: newTabs };
-      });
+      dispatch(
+        updateConfig((config) => {
+          const newTabs = [...config.tabs];
+          newTabs[tabIndex].tabName = value;
+          return { ...config, tabs: newTabs };
+        })
+      );
     };
 
     const handleTabIconChange = (value) => {
       setTabIcon(value);
-      updateConfig((config) => {
-        const newTabs = [...config.tabs];
-        newTabs[tabIndex].tabIcon = value;
-        return { ...config, tabs: newTabs };
-      });
+      dispatch(
+        updateConfig((config) => {
+          const newTabs = [...config.tabs];
+          newTabs[tabIndex].tabIcon = value;
+          return { ...config, tabs: newTabs };
+        })
+      );
     };
 
     const tabColorClass =
@@ -60,7 +68,7 @@ const TabEditor = React.memo(
             {tabName}
           </h4>
           <button
-            onClick={() => removeTab(tabIndex)}
+            onClick={() => dispatch(removeTab(tabIndex))}
             className="btn btn-sm btn-light text-danger shadow-sm"
           >
             <i className="fa fa-trash-alt me-1"></i> Remove Tab
@@ -100,22 +108,27 @@ const TabEditor = React.memo(
               </select>
             </div>
           </div>
-
-          {tab.sections.map((section, sectionIndex) => (
-            <SectionEditor
-              key={section.sectionIndex}
-              section={section}
-              path={[tabIndex, sectionIndex]}
-              updateConfig={updateConfig}
-              addColumn={addColumn}
-              removeColumn={removeColumn}
-              removeSection={removeSection}
-              {...props}
-            />
-          ))}
+          {tab && (
+            <>
+              {tab.sections.map((section, sectionIndex) => (
+                <SectionEditor
+                  key={section.sectionIndex}
+                  section={section}
+                  path={[tabIndex, sectionIndex]}
+                  dispatch={dispatch}
+                  updateConfig={updateConfig}
+                  updateField={updateField}
+                  addColumn={addColumn}
+                  removeColumn={removeColumn}
+                  removeSection={removeSection}
+                  {...props}
+                />
+              ))}
+            </>
+          )}
 
           <button
-            onClick={() => addSection(tabIndex)}
+            onClick={() => dispatch(addSection(tabIndex))}
             className="btn shadow-sm text-white"
             style={{ backgroundColor: "#070C37" }}
           >

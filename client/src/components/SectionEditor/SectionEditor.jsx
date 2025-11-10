@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import ColumnEditor from "../ColumnEditor/ColumnEditor";
+import {
+  updateConfig,
+  updateField,
+} from "../../context/FormBuilderContext/formAction";
 
 const SectionEditor = React.memo(
   ({
     section,
     path,
-    updateConfig,
+    dispatch,
     addColumn,
     removeColumn,
     removeSection,
@@ -23,11 +27,13 @@ const SectionEditor = React.memo(
     const handleSectionNameChange = (e) => {
       const newName = e.target.value;
       setSectionName(newName);
-      updateConfig((config) => {
-        const newTabs = [...config.tabs];
-        newTabs[tabIndex].sections[sectionIndex].sectionType = newName;
-        return { ...config, tabs: newTabs };
-      });
+      dispatch(
+        updateConfig((config) => {
+          const newTabs = [...config.tabs];
+          newTabs[tabIndex].sections[sectionIndex].sectionType = newName;
+          return { ...config, tabs: newTabs };
+        })
+      );
     };
 
     return (
@@ -74,13 +80,13 @@ const SectionEditor = React.memo(
           </div>
           <div>
             <button
-              onClick={() => addColumn(tabIndex, sectionIndex)}
+              onClick={() => dispatch(addColumn(tabIndex, sectionIndex))}
               className="btn btn-sm btn-light me-2"
             >
               <i className="fa fa-plus me-1"></i> Add Field
             </button>
             <button
-              onClick={() => removeSection(tabIndex, sectionIndex)}
+              onClick={() => dispatch(removeSection(tabIndex, sectionIndex))}
               className="btn btn-sm btn-outline-light"
             >
               <i className="fa fa-trash-alt"></i>
@@ -95,7 +101,9 @@ const SectionEditor = React.memo(
                 key={column.column_id}
                 column={column}
                 path={[tabIndex, sectionIndex, columnIndex]}
+                dispatch={dispatch}
                 updateConfig={updateConfig}
+                updateField={updateField}
                 removeColumn={removeColumn}
                 {...props}
               />

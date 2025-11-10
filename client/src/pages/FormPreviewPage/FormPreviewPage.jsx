@@ -1,116 +1,81 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useReducer, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useFormData } from "../../context/FormBuilderContext/FormContext";
 import projectAPI from "../../api/Api";
 import Toast from "../../components/Toaster/Toaster";
 import TabEditor from "../../components/TabEditor/TabEditor";
+import {
+  formReducer,
+  initialState,
+} from "../../context/FormBuilderContext/formReducer";
+import {
+  updateConfig,
+  addTab,
+  removeTab,
+  addSection,
+  removeSection,
+  addColumn,
+  removeColumn,
+  updateToast,
+  setFormGenData,
+  setLoading,
+  setDropdownData,
+  setSpParamData,
+  setTableCol,
+  setShowJson,
+} from "../../context/FormBuilderContext/formAction";
 
 // --- Main Component ---
 const FormPreviewPage = () => {
   const navigate = useNavigate();
+  const { state, dispatch } = useFormData();
 
-  // Toast state management
-  const [toasts, setToasts] = useState([]);
+  // Extract state for easier access
+  const {
+    config,
+    toasts,
+    isLoading,
+    dropdownData,
+    spParamData,
+    tableCol,
+    showJson,
+    retrivedFormGenData,
+  } = state;
+
+  useEffect(() => {
+    if (retrivedFormGenData && Object.keys(retrivedFormGenData).length > 0) {
+      console.log("✅ Data loaded:", retrivedFormGenData);
+    } else {
+      console.log("⚠️ No data found yet");
+    }
+  }, [retrivedFormGenData]);
 
   const showToast = (message, type = "info") => {
     const id = Date.now();
-    setToasts((prev) => [...prev, { id, message, type }]);
+    const newToast = { id, message, type };
+    const updatedToasts = [...toasts, newToast];
+    dispatch(updateToast(updatedToasts));
+
     setTimeout(() => {
       removeToast(id);
     }, 5000);
   };
 
   const removeToast = (id) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    const updatedToasts = toasts.filter((toast) => toast.id !== id);
+    dispatch(updateToast(updatedToasts));
   };
-
-  const generateId = () => {
-    const min = 1;
-    const max = 100;
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
-
-  // --- Default Structures ---
-  const defaultColumn = (order = 1) => ({
-    column_id: generateId(),
-    labelName: "",
-    fieldType: "",
-    fieldSourceLovDetId: "",
-    spName: null,
-    spParam: null,
-    tableName: null,
-    tableColumns: null,
-    eventHandlers: [],
-    placeholder: "Enter data...",
-    validations: [],
-    fieldIconLovDetId: "",
-    fieldOrderLovDetId: order,
-    storingSP: "",
-    created_user: "",
-    hasEvents: false,
-  });
-
-  const defaultSection = () => ({
-    sectionIndex: generateId(),
-    sectionType: "New Section",
-    fields: [defaultColumn()],
-  });
-
-  const defaultTab = (count) => ({
-    tabName: `Tab ${count}`,
-    tabIcon: "",
-    sections: [defaultSection()],
-  });
-
-  const initialState = {
-    projectId: "",
-    productId: "",
-    moduleId: "",
-    layoutId: "",
-    pageName: "",
-    purpose: "",
-    tabs: [],
-  };
-
-  const [config, setConfig] = useState(initialState);
-  const [retrivedFormGenData, setRetrivedFormGenData] = useState([]);
-  const [showJson, setShowJson] = useState(false);
-  const [isModuleEnabled, setIsModuleEnabled] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const [spParamData, setSpParamData] = useState([]);
-  const [tableCol, setTableCol] = useState([]);
-
-  // Dropdown Bind Lists with default empty arrays
-  const [fieldSource, setFieldSource] = useState([]);
-  const [fieldIcon, setFieldIcon] = useState([]);
-  const [fieldOrder, setFieldOrder] = useState([]);
-  const [jsVal, setJsVal] = useState([]);
-  const [projectData, setProjectData] = useState([]);
-  const [moduleData, setModuleData] = useState([]);
-  const [iconData, setIconData] = useState([]);
-  const [spList, setSpList] = useState([]);
-  const [tableList, setTableList] = useState([]);
-  const [fieldType, setFieldType] = useState([]);
-  const [storedProcedures, setStoredProcedures] = useState([]);
-  const [eventHandler, setEventHandler] = useState([]);
-  const [layout, setLayout] = useState([]);
-  const [productData, setProductData] = useState([]);
-
-  // const [formId, setFormId] = useState(null);
-  // console.log(formId)
 
   useEffect(() => {
-    setIsModuleEnabled(!!config.projectId);
+    const isModuleEnabled = !!config.projectId;
     if (!config.projectId) {
-      setConfig((prev) => ({ ...prev, moduleId: "" }));
+      dispatch(updateConfig((prevConfig) => ({ ...prevConfig, moduleId: "" })));
     }
   }, [config.projectId]);
 
   useEffect(() => {
-    // const formId = sessionStorage.getItem("formId");
-    // setFormId(formId);
     const fetchAllData = async () => {
-      setIsLoading(true);
+      dispatch(setLoading(true));
       try {
         await Promise.all([
           fetchFieldSrcData(),
@@ -126,21 +91,20 @@ const FormPreviewPage = () => {
           fetchEventHandlerData(),
           fetchLayoutData(),
           fetchProductData(),
-          // fetchFormGenData(),
         ]);
         showToast("All data loaded successfully", "success");
       } catch (error) {
         console.error("Error loading data:", error);
         showToast("Error loading some data. Using fallback values.", "warning");
       } finally {
-        setIsLoading(false);
+        dispatch(setLoading(false));
       }
     };
 
     fetchAllData();
   }, []);
 
-  // API fetch functions (keep the same as before)
+  // API fetch functions
   const fetchFieldSrcData = async () => {
     try {
       const res = await projectAPI.getLovDropdown(
@@ -151,7 +115,7 @@ const FormPreviewPage = () => {
         id: eachSrc.Id,
         name: eachSrc.Name,
       }));
-      setFieldSource(formattedData);
+      dispatch(setDropdownData({ fieldSource: formattedData }));
     } catch (error) {
       console.error("Error fetching field source:", error);
     }
@@ -167,13 +131,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setFieldIcon(formattedData);
+      dispatch(setDropdownData({ fieldIcon: formattedData }));
     } catch (error) {
       console.error("Error fetching field icon:", error);
-      setFieldIcon([
-        { id: "1", name: "fa-user" },
-        { id: "2", name: "fa-cog" },
-      ]);
+      dispatch(
+        setDropdownData({
+          fieldIcon: [
+            { id: "1", name: "fa-user" },
+            { id: "2", name: "fa-cog" },
+          ],
+        })
+      );
     }
   };
 
@@ -187,14 +155,18 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setFieldOrder(formattedData);
+      dispatch(setDropdownData({ fieldOrder: formattedData }));
     } catch (error) {
       console.error("Error fetching field order:", error);
-      setFieldOrder([
-        { id: "1", name: "1" },
-        { id: "2", name: "2" },
-        { id: "3", name: "3" },
-      ]);
+      dispatch(
+        setDropdownData({
+          fieldOrder: [
+            { id: "1", name: "1" },
+            { id: "2", name: "2" },
+            { id: "3", name: "3" },
+          ],
+        })
+      );
     }
   };
 
@@ -205,13 +177,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setJsVal(formattedData);
+      dispatch(setDropdownData({ jsVal: formattedData }));
     } catch (error) {
       console.error("Error fetching JS validations:", error);
-      setJsVal([
-        { id: "1", name: "Required" },
-        { id: "2", name: "Email" },
-      ]);
+      dispatch(
+        setDropdownData({
+          jsVal: [
+            { id: "1", name: "Required" },
+            { id: "2", name: "Email" },
+          ],
+        })
+      );
     }
   };
 
@@ -222,13 +198,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setProjectData(formattedData);
+      dispatch(setDropdownData({ projectData: formattedData }));
     } catch (error) {
       console.error("Error fetching projects:", error);
-      setProjectData([
-        { id: "1", name: "Project Alpha" },
-        { id: "2", name: "Project Beta" },
-      ]);
+      dispatch(
+        setDropdownData({
+          projectData: [
+            { id: "1", name: "Project Alpha" },
+            { id: "2", name: "Project Beta" },
+          ],
+        })
+      );
     }
   };
 
@@ -239,13 +219,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setIconData(formattedData);
+      dispatch(setDropdownData({ iconData: formattedData }));
     } catch (error) {
       console.error("Error fetching icons:", error);
-      setIconData([
-        { id: "1", name: "fa-user" },
-        { id: "2", name: "fa-cog" },
-      ]);
+      dispatch(
+        setDropdownData({
+          iconData: [
+            { id: "1", name: "fa-user" },
+            { id: "2", name: "fa-cog" },
+          ],
+        })
+      );
     }
   };
 
@@ -256,13 +240,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setSpList(formattedData);
+      dispatch(setDropdownData({ spList: formattedData }));
     } catch (error) {
       console.error("Error fetching SP list:", error);
-      setSpList([
-        { id: "1", name: "sp_getUsers" },
-        { id: "2", name: "sp_getProducts" },
-      ]);
+      dispatch(
+        setDropdownData({
+          spList: [
+            { id: "1", name: "sp_getUsers" },
+            { id: "2", name: "sp_getProducts" },
+          ],
+        })
+      );
     }
   };
 
@@ -273,13 +261,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setTableList(formattedData);
+      dispatch(setDropdownData({ tableList: formattedData }));
     } catch (error) {
       console.error("Error fetching table list:", error);
-      setTableList([
-        { id: "1", name: "Users" },
-        { id: "2", name: "Products" },
-      ]);
+      dispatch(
+        setDropdownData({
+          tableList: [
+            { id: "1", name: "Users" },
+            { id: "2", name: "Products" },
+          ],
+        })
+      );
     }
   };
 
@@ -290,13 +282,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setFieldType(formattedData);
+      dispatch(setDropdownData({ fieldType: formattedData }));
     } catch (error) {
       console.error("Error fetching field types:", error);
-      setFieldType([
-        { id: "1", name: "Text Input" },
-        { id: "2", name: "Number Input" },
-      ]);
+      dispatch(
+        setDropdownData({
+          fieldType: [
+            { id: "1", name: "Text Input" },
+            { id: "2", name: "Number Input" },
+          ],
+        })
+      );
     }
   };
 
@@ -307,13 +303,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setStoredProcedures(formattedData);
+      dispatch(setDropdownData({ storedProcedures: formattedData }));
     } catch (error) {
       console.error("Error fetching storing SP:", error);
-      setStoredProcedures([
-        { id: "1", name: "sp_saveUser" },
-        { id: "2", name: "sp_saveProduct" },
-      ]);
+      dispatch(
+        setDropdownData({
+          storedProcedures: [
+            { id: "1", name: "sp_saveUser" },
+            { id: "2", name: "sp_saveProduct" },
+          ],
+        })
+      );
     }
   };
 
@@ -324,13 +324,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setEventHandler(formattedData);
+      dispatch(setDropdownData({ eventHandler: formattedData }));
     } catch (error) {
       console.error("Error fetching event handlers:", error);
-      setEventHandler([
-        { id: "1", name: "onChange" },
-        { id: "2", name: "onClick" },
-      ]);
+      dispatch(
+        setDropdownData({
+          eventHandler: [
+            { id: "1", name: "onChange" },
+            { id: "2", name: "onClick" },
+          ],
+        })
+      );
     }
   };
 
@@ -341,13 +345,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setLayout(formattedData);
+      dispatch(setDropdownData({ layout: formattedData }));
     } catch (error) {
       console.error("Error fetching layouts:", error);
-      setLayout([
-        { id: "1", name: "Single Column" },
-        { id: "2", name: "Two Column" },
-      ]);
+      dispatch(
+        setDropdownData({
+          layout: [
+            { id: "1", name: "Single Column" },
+            { id: "2", name: "Two Column" },
+          ],
+        })
+      );
     }
   };
 
@@ -358,13 +366,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setProductData(formattedData);
+      dispatch(setDropdownData({ productData: formattedData }));
     } catch (error) {
       console.error("Error fetching products:", error);
-      setProductData([
-        { id: "1", name: "Product A" },
-        { id: "2", name: "Product B" },
-      ]);
+      dispatch(
+        setDropdownData({
+          productData: [
+            { id: "1", name: "Product A" },
+            { id: "2", name: "Product B" },
+          ],
+        })
+      );
     }
   };
 
@@ -375,7 +387,7 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setSpParamData(formattedParams);
+      dispatch(setSpParamData(formattedParams));
     } catch (error) {
       console.error("Error fetching SP Params data: ", error);
       showToast("Error fetching stored procedure parameters", "error");
@@ -389,59 +401,12 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setTableCol(formattedParams);
+      dispatch(setTableCol(formattedParams));
     } catch (error) {
       console.error("Error fetching Table Columns data: ", error);
       showToast("Error fetching table columns", "error");
     }
   };
-
-  const updateConfig = useCallback(
-    (updater) => setConfig((prev) => updater(prev)),
-    []
-  );
-
-  const addTab = () =>
-    updateConfig((config) => ({
-      ...config,
-      tabs: [...config.tabs, defaultTab(config.tabs.length + 1)],
-    }));
-
-  const removeTab = (tabIndex) =>
-    updateConfig((config) => ({
-      ...config,
-      tabs: config.tabs.filter((_, i) => i !== tabIndex),
-    }));
-
-  const addSection = (tabIndex) =>
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections.push(defaultSection());
-      return { ...config, tabs: newTabs };
-    });
-
-  const removeSection = (tabIndex, sectionIndex) =>
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections.splice(sectionIndex, 1);
-      return { ...config, tabs: newTabs };
-    });
-
-  const addColumn = (tabIndex, sectionIndex) =>
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      const cols = newTabs[tabIndex].sections[sectionIndex].fields;
-      cols.push(defaultColumn(cols.length + 1));
-      return { ...config, tabs: newTabs };
-    });
-
-  const removeColumn = (tabIndex, sectionIndex, columnIndex) =>
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections[sectionIndex].fields.splice(columnIndex, 1);
-      return { ...config, tabs: newTabs };
-    });
-
   const fetchModuleData = async (projectId) => {
     try {
       const res = await projectAPI.getLovDropdown("MODULE_TABLE", projectId);
@@ -449,13 +414,17 @@ const FormPreviewPage = () => {
         id: each.Id,
         name: each.Name,
       }));
-      setModuleData(formattedData);
+      dispatch(setDropdownData({ moduleData: formattedData }));
     } catch (error) {
       console.error("Error fetching modules:", error);
-      setModuleData([
-        { id: "1", name: "Core Module" },
-        { id: "2", name: "Admin Module" },
-      ]);
+      dispatch(
+        setDropdownData({
+          moduleData: [
+            { id: "1", name: "Core Module" },
+            { id: "2", name: "Admin Module" },
+          ],
+        })
+      );
     }
   };
 
@@ -523,7 +492,8 @@ const FormPreviewPage = () => {
           showToast("Configuration saved successfully!", "success");
 
           const formResponse = await projectAPI.viewFormGenList();
-          setRetrivedFormGenData(formResponse.data);
+          dispatch(setFormGenData(formResponse));
+          // You might want to add a new action for this
           console.log("Fetched Form Data:", formResponse.data);
         })
         .catch((err) => {
@@ -551,18 +521,7 @@ const FormPreviewPage = () => {
     );
   }
 
-  const fetchFormGenData = async () => {
-    try {
-      projectAPI
-        .viewFormGenList()
-        .then((res) => {
-          console.log(res.data);
-        })
-        .catch((err) => {
-          console.error("Error in fetching data: ", err);
-        });
-    } catch (error) {}
-  };
+  const isModuleEnabled = !!config.projectId;
 
   return (
     <>
@@ -598,7 +557,7 @@ const FormPreviewPage = () => {
             </span>
             <div className="d-flex">
               <button
-                onClick={() => setShowJson(!showJson)}
+                onClick={() => dispatch(setShowJson(!showJson))}
                 className="btn btn-outline-light me-2"
               >
                 <i
@@ -638,11 +597,13 @@ const FormPreviewPage = () => {
                     const selectedProjectId = e.target.value;
 
                     // 1. Update project in config state
-                    setConfig((prev) => ({
-                      ...prev,
-                      projectId: selectedProjectId,
-                      moduleId: "", // clear selected module
-                    }));
+                    dispatch(
+                      updateConfig((prevConfig) => ({
+                        ...prevConfig,
+                        projectId: selectedProjectId,
+                        moduleId: "", // clear selected module
+                      }))
+                    );
 
                     // 2. Fetch modules for selected project
                     if (selectedProjectId) {
@@ -651,7 +612,7 @@ const FormPreviewPage = () => {
                   }}
                   required
                 >
-                  {projectData.map((p) => (
+                  {dropdownData.projectData.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}
                     </option>
@@ -668,13 +629,18 @@ const FormPreviewPage = () => {
                   }`}
                   value={config.moduleId}
                   onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, moduleId: e.target.value }))
+                    dispatch(
+                      updateConfig((prevConfig) => ({
+                        ...prevConfig,
+                        moduleId: e.target.value,
+                      }))
+                    )
                   }
                   disabled={!isModuleEnabled}
                   required
                 >
                   {isModuleEnabled &&
-                    moduleData.map((m) => (
+                    dropdownData.moduleData.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.name}
                       </option>
@@ -689,14 +655,16 @@ const FormPreviewPage = () => {
                   className="form-select"
                   value={config.productId}
                   onChange={(e) =>
-                    setConfig((prev) => ({
-                      ...prev,
-                      productId: e.target.value,
-                    }))
+                    dispatch(
+                      updateConfig((prevConfig) => ({
+                        ...prevConfig,
+                        productId: e.target.value,
+                      }))
+                    )
                   }
                   required
                 >
-                  {productData.map((m) => (
+                  {dropdownData.productData.map((m) => (
                     <option key={m.id} value={m.id}>
                       {m.name}
                     </option>
@@ -711,11 +679,16 @@ const FormPreviewPage = () => {
                   className="form-select"
                   value={config.layoutId}
                   onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, layoutId: e.target.value }))
+                    dispatch(
+                      updateConfig((prevConfig) => ({
+                        ...prevConfig,
+                        layoutId: e.target.value,
+                      }))
+                    )
                   }
                   required
                 >
-                  {layout.map((l) => (
+                  {dropdownData.layout.map((l) => (
                     <option key={l.id} value={l.id}>
                       {l.name}
                     </option>
@@ -731,7 +704,12 @@ const FormPreviewPage = () => {
                   className="form-control"
                   value={config.pageName}
                   onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, pageName: e.target.value }))
+                    dispatch(
+                      updateConfig((prevConfig) => ({
+                        ...prevConfig,
+                        pageName: e.target.value,
+                      }))
+                    )
                   }
                   placeholder="Enter page name"
                   required
@@ -743,7 +721,12 @@ const FormPreviewPage = () => {
                   className="form-control"
                   value={config.purpose}
                   onChange={(e) =>
-                    setConfig((prev) => ({ ...prev, purpose: e.target.value }))
+                    dispatch(
+                      updateConfig((prevConfig) => ({
+                        ...prevConfig,
+                        purpose: e.target.value,
+                      }))
+                    )
                   }
                   placeholder="Describe the purpose of this form..."
                   rows="3"
@@ -760,7 +743,7 @@ const FormPreviewPage = () => {
             {config.tabs.length})
           </h3>
           <button
-            onClick={addTab}
+            onClick={() => dispatch(addTab())}
             className="btn btn-lg shadow text-white"
             style={{ backgroundColor: "#070C37" }}
           >
@@ -773,22 +756,22 @@ const FormPreviewPage = () => {
             key={tab.tab_id || tabIndex}
             tab={tab}
             tabIndex={tabIndex}
-            updateConfig={updateConfig}
+            dispatch={dispatch}
             addSection={addSection}
             removeSection={removeSection}
             addColumn={addColumn}
             removeColumn={removeColumn}
             removeTab={removeTab}
-            fieldSource={fieldSource}
-            fieldType={fieldType}
-            fieldOrder={fieldOrder}
-            fieldIcon={fieldIcon}
-            jsVal={jsVal}
-            spList={spList}
-            tableList={tableList}
-            storedProcedures={storedProcedures}
-            eventHandler={eventHandler}
-            iconData={iconData}
+            fieldSource={dropdownData.fieldSource}
+            fieldType={dropdownData.fieldType}
+            fieldOrder={dropdownData.fieldOrder}
+            fieldIcon={dropdownData.fieldIcon}
+            jsVal={dropdownData.jsVal}
+            spList={dropdownData.spList}
+            tableList={dropdownData.tableList}
+            storedProcedures={dropdownData.storedProcedures}
+            eventHandler={dropdownData.eventHandler}
+            iconData={dropdownData.iconData}
             spParamData={spParamData}
             tableCol={tableCol}
             showToast={showToast}
