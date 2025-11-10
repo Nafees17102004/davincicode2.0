@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Routes, Route } from "react-router-dom";
+
+// Context
+import { FormDataProvider } from "./context/FormBuilderContext/FormContext";
 
 import ProjectPage from "./pages/ProjectPage/ProjectPage";
 import LanguagePage from "./pages/LanguagePage/LanguagePage";
@@ -22,31 +25,31 @@ import LovDetpage from "./pages/LovDetpage/LovDetpage";
 import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
 import FormPreviewPage from "./pages/FormPreviewPage/FormPreviewPage";
 
-
 function App() {
   return (
-    <Routes>
-      {/* Main Pages */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<LanguagePage />} />
-      <Route path="/project" element={<ProjectPage />} />
-
-      <Route path="/module/:pCode" element={<ModulePage />} />
-      <Route path="/lovDet/:lovId" element={<LovDetViewpage />} />
-      <Route path="/lov" element={<LovPage />} />
-      <Route path="/field" element={<FieldTypePage />} />
-      <Route path="/snippet" element={<SnippetPage />} />
-      <Route path="/dynamic-form" element={<FormPreviewPage />} />
-      {/* View Page */}
-      <Route path="/view-languages" element={<ViewLanguagePage />} />
-      <Route path="/view-Projects" element={<ViewProjectsPage />} />
-      <Route path="/add-module/:pCode" element={<AddModulePage />} />
-      <Route path="/view-field" element={<ViewFieldPage />} />
-      <Route path="/view-snippet" element={<ViewSnippetPage />} />
-      <Route path="/view-lov" element={<ViewLovPage />} />
-      <Route path="/add-lovDet/:lovId" element={<LovDetpage />} />
-      <Route path="/preview/:formGenId" element={<FormPreviewPage />} />
-    </Routes>
+    <FormDataProvider>
+      <Routes>
+        {/* Main Pages */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<LanguagePage />} />
+        <Route path="/project" element={<ProjectPage />} />
+        <Route path="/module/:pCode" element={<ModulePage />} />
+        <Route path="/lovDet/:lovId" element={<LovDetViewpage />} />
+        <Route path="/lov" element={<LovPage />} />
+        <Route path="/field" element={<FieldTypePage />} />
+        <Route path="/snippet" element={<SnippetPage />} />
+        <Route path="/dynamic-form" element={<FormPreviewPage />} />
+        {/* View Page */}
+        <Route path="/view-languages" element={<ViewLanguagePage />} />
+        <Route path="/view-Projects" element={<ViewProjectsPage />} />
+        <Route path="/add-module/:pCode" element={<AddModulePage />} />
+        <Route path="/view-field" element={<ViewFieldPage />} />
+        <Route path="/view-snippet" element={<ViewSnippetPage />} />
+        <Route path="/view-lov" element={<ViewLovPage />} />
+        <Route path="/add-lovDet/:lovId" element={<LovDetpage />} />
+        <Route path="/preview/:formGenId" element={<FormPreviewPage />} />
+      </Routes>
+    </FormDataProvider>
   );
 }
 

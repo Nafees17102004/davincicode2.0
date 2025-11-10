@@ -1,0 +1,30 @@
+{{! Repository File Template }}
+import db from "../config/db.js";
+
+{{#each Tabs}}
+  {{#each Sections}}
+    {{#each Fields}}
+
+      // Field:
+      {{labelName}}
+      (FieldID:
+      {{FieldId}}) // Source SP:
+      {{spName}}
+      async get_{{labelName}}_details({{spParam}}) { try { const query = `CALL
+      {{spName}}(?);`; const params = [{{spParam}}]; const [rows] = await
+      db.execute(query, params); return rows; } catch (error) {
+      console.error("Repository Error (get_{{labelName}}_details):", error);
+      throw error; } } // Saving Field Data Using Storing SP:
+      {{storingSP}}
+      async save_{{labelName}}(data) { try { const query = `CALL
+      {{storingSP}}(?);`; const params = [JSON.stringify(data)]; const [result]
+      = await db.execute(query, params); return result; } catch (error) {
+      console.error("Repository Error (save_{{labelName}}):", error); throw
+      error; } }
+
+    {{/each}}
+  {{/each}}
+{{/each}}
+
+export default
+{{labelName}}();

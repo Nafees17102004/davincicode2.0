@@ -1,3 +1,7 @@
+const fs = require("fs");
+const handleBarJs = require("handlebars");
+const path = require("path");
+
 // services/formGenService.js
 const formGenRepository = require("./formGenRepository");
 
@@ -56,6 +60,35 @@ const formGenService = {
     } catch (error) {
       console.error("Error in Service Layer: ", error);
       return { success: false, error: "Error in Service Layer" };
+    }
+  },
+  generateCode: async (data) => {
+    try {
+      const templatePath = path.join(__dirname, "formTemplate.hbs");
+
+      // Read file, not just reference its path
+      const templateContent = fs.readFileSync(templatePath, "utf-8");
+
+      // Compile properly
+      const template = handleBarJs.compile(templateContent);
+
+      // Handlebars expects raw "result", not service wrapper
+      const payload = data.result;
+      console.log(data.result);
+
+      // Generate component code
+      const output = template(payload);
+      console.log(output);
+
+      const outputPath = path.join(__dirname, "GeneratedForm.jsx");
+      fs.writeFileSync(outputPath, output);
+
+      console.log("✅ React Form Generated →", outputPath);
+
+      return outputPath; // Let controller respond with download or view later
+    } catch (error) {
+      console.error("❌ Code Generation Failed:", error);
+      throw error;
     }
   },
 };

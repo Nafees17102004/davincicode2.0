@@ -1,3 +1,4 @@
+import { ACTION_TYPES } from "./actionTypes";
 export const updateConfig = (updater) => ({
   type: ACTION_TYPES.UPDATE_CONFIG,
   payload: updater,
@@ -42,6 +43,12 @@ export const updateToast = (toasts) => ({
   payload: toasts,
 });
 
+// Setters
+export const setFormGenData = (formData) => ({
+  type: ACTION_TYPES.SET_FORM_DATA,
+  payload: formData,
+});
+
 export const setLoading = (isLoading) => ({
   type: ACTION_TYPES.SET_LOADING,
   payload: isLoading,
@@ -66,3 +73,18 @@ export const setShowJson = (show) => ({
   type: ACTION_TYPES.SET_SHOW_JSON,
   payload: show,
 });
+
+// export const addValidation = (path, validation) => ({
+//   type: ACTION_TYPES.ADD_VALIDATION,
+//   payload: { path, validation },
+// });
+
+// export const updateValidation = (path, index, key, value) => ({
+//   type: ACTION_TYPES.UPDATE_VALIDATION,
+//   payload: { path, index, key, value },
+// });
+
+// export const removeValidation = (path, index) => ({
+//   type: ACTION_TYPES.REMOVE_VALIDATION,
+//   payload: { path, index },
+// });
