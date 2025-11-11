@@ -38,9 +38,18 @@ const formGenController = {
   },
   generateCode: async (req, res) => {
     try {
-      const formId = req.session.formId || req.query.formId;
-      const data = await formGenService.getFormGenById(formId);
-      const code = await formGenService.generateCode(data);
+      // const formId = req.session.formId || req.query.formId ;
+      // const data = await formGenService.getFormGenById(formId);
+      const formData = req.body;
+      console.log(formData.data);
+
+      if (!formData || Object.keys(formData).length === 0) {
+        return res
+          .status(400)
+          .json({ error: "No form data provided in request body" });
+      }
+
+      const code = await formGenService.generateCode(formData.data);
       res.status(200).json({ message: code });
     } catch (error) {
       res.status(500).json({ error: error });
