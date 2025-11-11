@@ -67,13 +67,13 @@ const formGenService = {
   },
   generateCode: async (data) => {
     try {
-      const templatePath = path.join(__dirname, "formTemplate.hbs");
+      // const templatePath = path.join(__dirname, "formTemplate.hbs");
 
       // Read file, not just reference its path
-      const templateContent = fs.readFileSync(templatePath, "utf-8");
+      // const templateContent = fs.readFileSync(templatePath, "utf-8");
 
       // Compile properly
-      const template = handleBarJs.compile(templateContent);
+      // const template = handleBarJs.compile(templateContent);
 
       handleBarJs.registerHelper("pascalCase", function (str) {
         if (!str) return "";
@@ -95,9 +95,25 @@ const formGenService = {
           .replace(/^(.)/, (chr) => chr.toLowerCase());
       });
 
+      handleBarJs.registerHelper("dashCase", function (str) {
+        if (!str) return "";
+        return str
+          .toString()
+          .trim()
+          .replace(/([a-z])([A-Z])/g, "$1-$2")
+          .replace(/[\s_]+/g, "-")
+          .toLowerCase();
+      });
+
       // Handlebars expects raw "result", not service wrapper
       const payload = data.result;
 
+      console.log(payload);
+      // fetch language id dynamically using project id from json
+      const languageId = await formGenRepository.getLanguageIdByProjectId(
+        payload.ProjectID
+      );
+      let finalOutput = "";
       for (const tab of payload.Tabs) {
         for (const section of tab.Sections) {
           for (const field of section.Fields) {
@@ -107,10 +123,20 @@ const formGenService = {
               field.spName.trim() !== ""
             ) {
               field.spParams = await formGenUtils.getSpParams(field.spName);
-              
             } else {
               field.spParams = [];
             }
+            const snippetRows = await formGenRepository.getSnippetByFsm(
+              field.fieldType,
+              languageId
+            );
+            const snippetTemplate = snippetRows?.[0]?.Snippet || "";
+            console.log(snippetTemplate);
+            const template = handleBarJs.compile(snippetTemplate);
+            console.log(template);
+            const output = template(field);
+
+            finalOutput += output + "\n\n";
           }
         }
       }
@@ -118,20 +144,20 @@ const formGenService = {
       for (const tab of payload.Tabs) {
         for (const section of tab.Sections) {
           for (const field of section.Fields) {
-            // console.log(field);
+            console.log(field);
           }
         }
       }
 
       // Generate component code
-      const output = template(payload);
+      // const output = template(payload);
 
       const outputPath = path.join(__dirname, "GeneratedForm.js");
-      fs.writeFileSync(outputPath, output);
+      fs.writeFileSync(outputPath, finalOutput);
 
       console.log("✅ React Form Generated →", outputPath);
 
-      return output; // Let controller respond with download or view later
+      return finalOutput; // Let controller respond with download or view later
     } catch (error) {
       console.error("❌ Code Generation Failed:", error);
       throw error;

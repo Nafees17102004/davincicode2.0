@@ -1,27 +1,76 @@
-const pool = require("../config/dbConfig.js");
+const saveA = async (
+  p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+) => {
+  try {
+    const query = `CALL SP_INSERT_ADD_FORM_TABLE(
+      ?, ?, ?, ?, ?, ?, ?, ?
+    );`;
 
-      const insertDetails = async (
-        p_COLUMN_ID, p_SECTION_ID, p_TAB_ID, p_FIELD_SOURCE_ID, p_FIELD_TYPE_ID, p_SP_NAME, p_SP_PARAM, p_TABLE_NAME, p_TABLE_COLUMNS, p_CUSTOM_NAME, p_FIELD_NAME, p_FIELD_SIZE_ID, p_FIELD_ICON_ID, p_PLACEHOLDER, p_FIELD_ORDER_ID, p_STORED_PROCEDURE, p_VALIDATION_IDS, p_FORM_EVENT_HANDLER_ID, p_CUSER
-      ) => { try { const query = `CALL
-      SP_INSERT_FORM_FIELD_WITH_VALIDATIONS(
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-      );`; const params = [
-        p_COLUMN_ID, p_SECTION_ID, p_TAB_ID, p_FIELD_SOURCE_ID, p_FIELD_TYPE_ID, p_SP_NAME, p_SP_PARAM, p_TABLE_NAME, p_TABLE_COLUMNS, p_CUSTOM_NAME, p_FIELD_NAME, p_FIELD_SIZE_ID, p_FIELD_ICON_ID, p_PLACEHOLDER, p_FIELD_ORDER_ID, p_STORED_PROCEDURE, p_VALIDATION_IDS, p_FORM_EVENT_HANDLER_ID, p_CUSER
-      ]; const [rows] = await pool.query(query, params); return rows; } catch
-      (error) { console.error("Repository Error ():", error); throw
-      error; } };
-      const insertRepoDemoDetails = async (
-        p_Project_ID, p_Product_ID, p_Layout_ID, p_Module_ID, p_PageName, p_Purpose, p_TabStructure, p_EBMS_User, p_EBMS_Status, p_EBMS_Inactive_Reason
-      ) => { try { const query = `CALL
-      LT_DCS_SP_SAVE_FORM_GENERATION_DETAILS(
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-      );`; const params = [
-        p_Project_ID, p_Product_ID, p_Layout_ID, p_Module_ID, p_PageName, p_Purpose, p_TabStructure, p_EBMS_User, p_EBMS_Status, p_EBMS_Inactive_Reason
-      ]; const [rows] = await pool.query(query, params); return rows; } catch
-      (error) { console.error("Repository Error (repo demo):", error); throw
-      error; } };
+    const params = [
+      p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+    ];
 
-module.exports = {
-      insertDetails,
-      insertRepoDemoDetails,
+    const [rows] = await pool.query(query, params);
+    return rows;
+
+  } catch (error) {
+    console.error("Repository Error (a):", error);
+    throw error;
+  }
 };
+
+ 
+ module.exports = {
+  saveA,
+};
+
+ 
+const repository = require("../repository/aRepository");
+
+const saveA = async (
+  p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+) => {
+  try {
+    const result = await repository.saveA(
+      p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+    );
+    return result;
+  } catch (error) {
+    console.error("Service Error (a Service):", error);
+    throw error;
+  }
+};
+
+module.exports = { saveA };
+
+
+const service = require("../service/aService");
+
+const saveA = async (req, res) => {
+  try {
+    const {
+        p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+    } = req.body;
+
+    const result = await service.saveA(
+      p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+    );
+
+    return res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Controller Error (a):", error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { saveA };
+
+const express = require("express");
+const router = express.Router();
+const controller = require("../controller/aController");
+
+router.post("/a", controller.saveA);
+
+module.exports = router;
+
+

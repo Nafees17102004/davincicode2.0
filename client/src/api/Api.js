@@ -96,6 +96,10 @@ const viewFormGenList = () => {
   return api.get("/form-generation/get");
 };
 
+const codeGen = (payload) => {
+  return api.post("/form-generation/gen", payload);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -119,6 +123,7 @@ const projectAPI = {
   insertAddFormDet,
   insertFormGen,
   viewFormGenList,
+  codeGen,
 };
 
 export default projectAPI;

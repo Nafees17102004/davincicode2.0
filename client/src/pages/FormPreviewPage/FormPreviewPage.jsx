@@ -24,11 +24,15 @@ import {
   setTableCol,
   setShowJson,
 } from "../../context/FormBuilderContext/formAction";
+import { use } from "react";
+import { useState } from "react";
 
 // --- Main Component ---
 const FormPreviewPage = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useFormData();
+
+  const [generatedCode, setGeneratedCode] = useState(null);
 
   // Extract state for easier access
   const {
@@ -42,9 +46,11 @@ const FormPreviewPage = () => {
     retrivedFormGenData,
   } = state;
 
+  console.log(generatedCode);
+
   useEffect(() => {
     if (retrivedFormGenData && Object.keys(retrivedFormGenData).length > 0) {
-      console.log("✅ Data loaded:", retrivedFormGenData);
+      console.log("✅ Data loaded:", retrivedFormGenData.data.result);
     } else {
       console.log("⚠️ No data found yet");
     }
@@ -522,7 +528,16 @@ const FormPreviewPage = () => {
   }
 
   const isModuleEnabled = !!config.projectId;
-
+  const handleGeneratedCode = (e) => {
+    e.preventDefault();
+    try {
+      projectAPI.codeGen(retrivedFormGenData).then((res) => {
+        setGeneratedCode(res.data.message);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <link
@@ -564,6 +579,9 @@ const FormPreviewPage = () => {
                   className={`fa ${showJson ? "fa-eye-slash" : "fa-eye"} me-1`}
                 ></i>
                 {showJson ? "Hide Config" : "Show JSON"}
+              </button>
+              <button onClick={(e) => handleGeneratedCode(e)}>
+                Generated Code
               </button>
               <button
                 onClick={handleSubmitConfig}
