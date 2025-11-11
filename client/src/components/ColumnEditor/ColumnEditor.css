@@ -90,3 +90,21 @@
   border-radius: 4px;
 }
 
+/* ColumnEditor.css */
+.event-handler-modal-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.column-editor-wrapper {
+  position: relative;
+}
+
+/* Ensure modal stays within column editor context */
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+.modal {
+  z-index: 1050 !important;
+}

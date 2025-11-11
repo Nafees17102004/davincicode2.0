@@ -24,6 +24,7 @@ import LovDetViewpage from "./pages/LovDetViewpage/LovDetViewpage";
 import LovDetpage from "./pages/LovDetpage/LovDetpage";
 import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
 import FormPreviewPage from "./pages/FormPreviewPage/FormPreviewPage";
+import CodeGenerationPage from "./pages/codeGenerationPage/codeGenerationPage.jsx";
 
 function App() {
   return (
@@ -39,6 +40,8 @@ function App() {
         <Route path="/field" element={<FieldTypePage />} />
         <Route path="/snippet" element={<SnippetPage />} />
         <Route path="/dynamic-form" element={<FormPreviewPage />} />
+        <Route path="/code-generation" element={<CodeGenerationPage />} />
+
         {/* View Page */}
         <Route path="/view-languages" element={<ViewLanguagePage />} />
         <Route path="/view-Projects" element={<ViewProjectsPage />} />

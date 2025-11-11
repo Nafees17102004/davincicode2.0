@@ -63,23 +63,45 @@ const ColumnEditor = ({
     );
   };
 
-  const handleAddEventHandler = (eventObj) => {
+  // const handleAddEventHandler = (eventObj) => {
+  //   dispatch(
+  //     updateField(path, "eventHandlers", [
+  //       ...(column.eventHandlers || []),
+  //       eventObj,
+  //     ])
+  //   );
+  // };
+
+  // const handleRemoveEventHandler = (eventId) => {
+  //   dispatch(
+  //     updateField(
+  //       path,
+  //       "eventHandlers",
+  //       (column.eventHandlers || []).filter((e) => e.id !== eventId)
+  //     )
+  //   );
+  // };
+
+  const handleAddEventHandlers = (events) => {
+    dispatch(updateField(path, "eventHandlers", events)); // store events
+    dispatch(updateField(path, "hasEvents", true)); // mark field as having events
+  };
+
+  const handleRemoveEventHandler = (id) => {
     dispatch(
-      updateField(path, "eventHandlers", [
-        ...(column.eventHandlers || []),
-        eventObj,
-      ])
+      updateConfig((config) => {
+        const updated = { ...config };
+        const field = updated.tabs[path[0]].sections[path[1]].fields[path[2]];
+        field.eventHandlers = field.eventHandlers.filter((e) => e.id !== id);
+        field.hasEvents = field.eventHandlers.length > 0;
+        return updated;
+      })
     );
   };
 
-  const handleRemoveEventHandler = (eventId) => {
-    dispatch(
-      updateField(
-        path,
-        "eventHandlers",
-        (column.eventHandlers || []).filter((e) => e.id !== eventId)
-      )
-    );
+  const handleClearAllEventHandlers = () => {
+    dispatch(updateField(path, "eventHandlers", []));
+    dispatch(updateField(path, "hasEvents", false));
   };
 
   return (
@@ -411,9 +433,10 @@ const ColumnEditor = ({
         show={showEventModal}
         onClose={() => setShowEventModal(false)}
         eventHandlers={column.eventHandlers || []}
-        onAddEventHandler={handleAddEventHandler}
+        onAddEventHandlers={handleAddEventHandlers}
         onRemoveEventHandler={handleRemoveEventHandler}
         eventHandler={eventHandler}
+        path={[tabIndex, sectionIndex, columnIndex]}
       />
     </div>
   );

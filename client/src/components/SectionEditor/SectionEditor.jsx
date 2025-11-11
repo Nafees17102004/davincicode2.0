@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import ColumnEditor from "../ColumnEditor/ColumnEditor";
-import {
-  updateConfig,
-  updateField,
-} from "../../context/FormBuilderContext/formAction";
 
 const SectionEditor = React.memo(
   ({
     section,
     path,
-    dispatch,
+    updateConfig,
     addColumn,
     removeColumn,
     removeSection,
@@ -18,8 +14,8 @@ const SectionEditor = React.memo(
     const [tabIndex, sectionIndex] = path;
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [sectionName, setSectionName] = useState(section.sectionType);
+    const [isHovered, setIsHovered] = useState(false);
 
-    // Use useEffect to sync with prop changes
     useEffect(() => {
       setSectionName(section.sectionType);
     }, [section.sectionType]);
@@ -27,13 +23,28 @@ const SectionEditor = React.memo(
     const handleSectionNameChange = (e) => {
       const newName = e.target.value;
       setSectionName(newName);
-      dispatch(
-        updateConfig((config) => {
-          const newTabs = [...config.tabs];
-          newTabs[tabIndex].sections[sectionIndex].sectionType = newName;
-          return { ...config, tabs: newTabs };
-        })
-      );
+      updateConfig((config) => {
+        const newTabs = [...config.tabs];
+        newTabs[tabIndex].sections[sectionIndex].sectionType = newName;
+        return { ...config, tabs: newTabs };
+      });
+    };
+
+    const handleAddColumn = () => {
+      console.log("Adding column to tab:", tabIndex, "section:", sectionIndex);
+      addColumn(tabIndex, sectionIndex);
+    };
+
+    const handleRemoveSection = () => {
+      console.log("Removing section:", tabIndex, sectionIndex);
+      removeSection(tabIndex, sectionIndex);
+    };
+
+    const generateColumnKey = (column, columnIndex) => {
+      return `column-${tabIndex}-${sectionIndex}-${columnIndex}-${
+        column.column_id ||
+        `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }`;
     };
 
     return (
@@ -47,20 +58,26 @@ const SectionEditor = React.memo(
               className="btn btn-sm btn-light me-2"
               type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
+              aria-label={isCollapsed ? "Expand section" : "Collapse section"}
+              title={isCollapsed ? "Expand section" : "Collapse section"}
             >
               <i
                 className={`fa ${
                   isCollapsed ? "fa-chevron-down" : "fa-chevron-up"
                 }`}
+                aria-hidden="true"
               ></i>
             </button>
-            <i className="fa fa-layer-group me-2"></i>
+            <i className="fa fa-layer-group me-2" aria-hidden="true"></i>
             <input
               type="text"
               value={sectionName}
               onChange={handleSectionNameChange}
               className="form-control form-control-sm me-3 fw-bold"
               placeholder="Section Name"
+              id={`section-name-${tabIndex}-${sectionIndex}`}
+              name={`section-name-${tabIndex}-${sectionIndex}`}
+              aria-label="Section name"
               style={{
                 color: "white",
                 fontWeight: "bold",
@@ -80,34 +97,44 @@ const SectionEditor = React.memo(
           </div>
           <div>
             <button
-              onClick={() => dispatch(addColumn(tabIndex, sectionIndex))}
+              onClick={handleAddColumn}
               className="btn btn-sm btn-light me-2"
+              aria-label="Add field to section"
+              title="Add field to section"
             >
-              <i className="fa fa-plus me-1"></i> Add Field
+              <i className="fa fa-plus me-1" aria-hidden="true"></i> Add Field
             </button>
             <button
-              onClick={() => dispatch(removeSection(tabIndex, sectionIndex))}
+              onClick={handleRemoveSection}
               className="btn btn-sm btn-outline-light"
+              style={{
+                transition: "all 0.3s ease",
+                backgroundColor: isHovered ? "#dc3545" : "transparent",
+                borderColor: isHovered ? "#dc3545" : "#fff",
+              }}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              aria-label="Remove section"
+              title="Remove section"
             >
-              <i className="fa fa-trash-alt"></i>
+              <i className="fa fa-trash-alt" aria-hidden="true"></i>
             </button>
           </div>
         </div>
 
         <div className={`collapse ${!isCollapsed ? "show" : ""}`}>
           <div className="card-body bg-light">
-            {section.fields.map((column, columnIndex) => (
-              <ColumnEditor
-                key={column.column_id}
-                column={column}
-                path={[tabIndex, sectionIndex, columnIndex]}
-                dispatch={dispatch}
-                updateConfig={updateConfig}
-                updateField={updateField}
-                removeColumn={removeColumn}
-                {...props}
-              />
-            ))}
+            {section.fields &&
+              section.fields.map((column, columnIndex) => (
+                <ColumnEditor
+                  key={generateColumnKey(column, columnIndex)}
+                  column={column}
+                  path={[tabIndex, sectionIndex, columnIndex]}
+                  updateConfig={updateConfig}
+                  removeColumn={removeColumn}
+                  {...props}
+                />
+              ))}
           </div>
         </div>
       </div>
