@@ -5,6 +5,9 @@ const path = require("path");
 // services/formGenService.js
 const formGenRepository = require("./formGenRepository");
 
+// Form Gen Utils
+const formGenUtils = require("../../../src/utils/codeGenUtils");
+
 const formGenService = {
   saveFormGen: async (session, formData) => {
     try {
@@ -72,20 +75,63 @@ const formGenService = {
       // Compile properly
       const template = handleBarJs.compile(templateContent);
 
+      handleBarJs.registerHelper("pascalCase", function (str) {
+        if (!str) return "";
+        return str
+          .toString()
+          .replace(/[-_\s]+(.)?/g, (match, chr) =>
+            chr ? chr.toUpperCase() : ""
+          )
+          .replace(/^(.)/, (chr) => chr.toUpperCase());
+      });
+
+      handleBarJs.registerHelper("camelCase", function (str) {
+        if (!str) return "";
+        return str
+          .toString()
+          .replace(/[-_\s]+(.)?/g, (match, chr) =>
+            chr ? chr.toUpperCase() : ""
+          )
+          .replace(/^(.)/, (chr) => chr.toLowerCase());
+      });
+
       // Handlebars expects raw "result", not service wrapper
       const payload = data.result;
-      console.log(data.result);
+
+      for (const tab of payload.Tabs) {
+        for (const section of tab.Sections) {
+          for (const field of section.Fields) {
+            if (
+              field.spName &&
+              field.spName !== "null" &&
+              field.spName.trim() !== ""
+            ) {
+              field.spParams = await formGenUtils.getSpParams(field.spName);
+              
+            } else {
+              field.spParams = [];
+            }
+          }
+        }
+      }
+
+      for (const tab of payload.Tabs) {
+        for (const section of tab.Sections) {
+          for (const field of section.Fields) {
+            // console.log(field);
+          }
+        }
+      }
 
       // Generate component code
       const output = template(payload);
-      console.log(output);
 
-      const outputPath = path.join(__dirname, "GeneratedForm.jsx");
+      const outputPath = path.join(__dirname, "GeneratedForm.js");
       fs.writeFileSync(outputPath, output);
 
       console.log("✅ React Form Generated →", outputPath);
 
-      return outputPath; // Let controller respond with download or view later
+      return output; // Let controller respond with download or view later
     } catch (error) {
       console.error("❌ Code Generation Failed:", error);
       throw error;

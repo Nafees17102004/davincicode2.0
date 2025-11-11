@@ -106,7 +106,7 @@ const EventHandlerModal = ({
     });
 
     if (formattedEvents.length > 0) {
-      onAddEventHandlers(formattedEvents);
+      onAddEventHandlers(formattedEvents, eventRows);
       setEventRows([{ eventId: "", functionName: "", functionNameError: "" }]);
       setGlobalError("");
       onClose();

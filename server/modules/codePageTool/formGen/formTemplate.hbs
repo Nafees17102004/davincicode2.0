@@ -1,30 +1,35 @@
 {{! Repository File Template }}
-import db from "../config/db.js";
+const pool = require("../config/dbConfig.js");
 
 {{#each Tabs}}
   {{#each Sections}}
     {{#each Fields}}
-
-      // Field:
-      {{labelName}}
-      (FieldID:
-      {{FieldId}}) // Source SP:
-      {{spName}}
-      async get_{{labelName}}_details({{spParam}}) { try { const query = `CALL
-      {{spName}}(?);`; const params = [{{spParam}}]; const [rows] = await
-      db.execute(query, params); return rows; } catch (error) {
-      console.error("Repository Error (get_{{labelName}}_details):", error);
-      throw error; } } // Saving Field Data Using Storing SP:
-      {{storingSP}}
-      async save_{{labelName}}(data) { try { const query = `CALL
-      {{storingSP}}(?);`; const params = [JSON.stringify(data)]; const [result]
-      = await db.execute(query, params); return result; } catch (error) {
-      console.error("Repository Error (save_{{labelName}}):", error); throw
-      error; } }
-
+      const insert{{pascalCase labelName}}Details = async (
+      {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+      {{/if}}
+      ) => { try { const query = `CALL
+      {{spName}}(
+      {{#if spParams.length}}
+        {{#each spParams}}?{{#unless @last}}, {{/unless}}{{/each}}
+      {{/if}}
+      );`; const params = [
+      {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+      {{/if}}
+      ]; const [rows] = await pool.query(query, params); return rows; } catch
+      (error) { console.error("Repository Error ({{labelName}}):", error); throw
+      error; } };
     {{/each}}
   {{/each}}
 {{/each}}
 
-export default
-{{labelName}}();
+module.exports = {
+{{#each Tabs}}
+  {{#each Sections}}
+    {{#each Fields}}
+      insert{{pascalCase labelName}}Details,
+    {{/each}}
+  {{/each}}
+{{/each}}
+};

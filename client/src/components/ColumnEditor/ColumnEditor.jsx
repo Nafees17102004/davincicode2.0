@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import EventHandlerModal from "../EventHandlerModal/EventHandlerModal";
-import "./ColumnEditor.css";
-
+import { updateField } from "../../context/FormBuilderContext/formAction";
 
 const ColumnEditor = ({
   column,
   path,
-  updateConfig,
+  dispatch,
   removeColumn,
   eventHandler,
   fieldSource,
@@ -25,130 +24,84 @@ const ColumnEditor = ({
 }) => {
   const [tabIndex, sectionIndex, columnIndex] = path;
   const [showEventModal, setShowEventModal] = useState(false);
-  const [localColumn, setLocalColumn] = useState(column);
-  const [labelNameError, setLabelNameError] = useState("");
-  const [isHovered, setIsHovered] = useState(false);
-
-  useEffect(() => {
-    setLocalColumn(column);
-  }, [column]);
-
-  const validateCamelCase = (text) => {
-    if (!text) return true;
-    const camelCaseRegex = /^[a-z][a-zA-Z0-9]*$/;
-    return camelCaseRegex.test(text);
-  };
-
-  const handleLabelNameChange = (value) => {
-    if (value && !validateCamelCase(value)) {
-      setLabelNameError(
-        "Label Name must be in camelCase (start with lowercase letter, no spaces or special characters)"
-      );
-    } else {
-      setLabelNameError("");
-    }
-
-    const updatedColumn = { ...localColumn, labelName: value };
-    setLocalColumn(updatedColumn);
-
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] =
-        updatedColumn;
-      return { ...config, tabs: newTabs };
-    });
-  };
-
+  // REMOVED local state - use the column prop directly
   const handleFieldChange = (key, value) => {
-    const updatedColumn = { ...localColumn, [key]: value };
-    setLocalColumn(updatedColumn);
+    console.log(
+      `🔄 Field Change: [${tabIndex},${sectionIndex},${columnIndex}]`,
+      { key, value }
+    );
 
-    if (key === "fieldSourceLovDetId") {
-      updatedColumn.spName = null;
-      updatedColumn.spParam = null;
-      updatedColumn.tableName = null;
-      updatedColumn.tableColumns = null;
+    dispatch(updateField(path, key, value));
+
+    // 🚀 Trigger SP Params fetch when SP changes
+    if (key === "spName" && value && fetchSpParams) {
+      fetchSpParams(value, columnIndex);
     }
 
-    if (key === "spName") {
-      updatedColumn.spParam = null;
-      updatedColumn.tableName = null;
-      updatedColumn.tableColumns = null;
-      if (value && fetchSpParams) fetchSpParams(value);
+    // 🚀 Trigger Table Columns fetch when table changes
+    if (key === "tableName" && value && fetchTableColumns) {
+      fetchTableColumns(value, columnIndex);
     }
-
-    if (key === "tableName") {
-      updatedColumn.spName = null;
-      updatedColumn.spParam = null;
-      updatedColumn.tableColumns = null;
-      if (value && fetchTableColumns) fetchTableColumns(value);
-    }
-
-    if (key === "hasEvents" && !value) {
-      updatedColumn.eventHandlers = [];
-    }
-
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] =
-        updatedColumn;
-      return { ...config, tabs: newTabs };
-    });
   };
 
-  const handleRemoveColumn = () => {
-    console.log("Removing column:", tabIndex, sectionIndex, columnIndex);
-    removeColumn(tabIndex, sectionIndex, columnIndex);
+  const addValidation = (path, validationId) => {
+    dispatch(
+      updateField(path, "validations", [
+        ...(column.validations || []),
+        validationId,
+      ])
+    );
   };
 
-  const handleAddEventHandlers = (eventHandlersArray) => {
-    const updatedColumn = {
-      ...localColumn,
-      eventHandlers: [
-        ...(localColumn.eventHandlers || []),
-        ...eventHandlersArray,
-      ],
-    };
-    setLocalColumn(updatedColumn);
-
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] =
-        updatedColumn;
-      return { ...config, tabs: newTabs };
-    });
+  const removeValidation = (path, index) => {
+    dispatch(
+      updateField(
+        path,
+        "validations",
+        column.validations.filter((_, i) => i !== index)
+      )
+    );
   };
 
-  const handleRemoveEventHandler = (eventId) => {
-    const updatedColumn = {
-      ...localColumn,
-      eventHandlers: (localColumn.eventHandlers || []).filter(
-        (e) => e.id !== eventId
-      ),
-    };
-    setLocalColumn(updatedColumn);
+  // const handleAddEventHandler = (eventObj) => {
+  //   dispatch(
+  //     updateField(path, "eventHandlers", [
+  //       ...(column.eventHandlers || []),
+  //       eventObj,
+  //     ])
+  //   );
+  // };
 
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] =
-        updatedColumn;
-      return { ...config, tabs: newTabs };
-    });
+  // const handleRemoveEventHandler = (eventId) => {
+  //   dispatch(
+  //     updateField(
+  //       path,
+  //       "eventHandlers",
+  //       (column.eventHandlers || []).filter((e) => e.id !== eventId)
+  //     )
+  //   );
+  // };
+
+  const handleAddEventHandlers = (events) => {
+    dispatch(updateField(path, "eventHandlers", events)); // store events
+    dispatch(updateField(path, "hasEvents", true)); // mark field as having events
+  };
+
+  const handleRemoveEventHandler = (id) => {
+    dispatch(
+      updateConfig((config) => {
+        const updated = { ...config };
+        const field = updated.tabs[path[0]].sections[path[1]].fields[path[2]];
+        field.eventHandlers = field.eventHandlers.filter((e) => e.id !== id);
+        field.hasEvents = field.eventHandlers.length > 0;
+        return updated;
+      })
+    );
   };
 
   const handleClearAllEventHandlers = () => {
-    const updatedColumn = {
-      ...localColumn,
-      eventHandlers: [],
-    };
-    setLocalColumn(updatedColumn);
-
-    updateConfig((config) => {
-      const newTabs = [...config.tabs];
-      newTabs[tabIndex].sections[sectionIndex].fields[columnIndex] =
-        updatedColumn;
-      return { ...config, tabs: newTabs };
-    });
+    dispatch(updateField(path, "eventHandlers", []));
+    dispatch(updateField(path, "hasEvents", false));
   };
 
   return (
@@ -157,42 +110,36 @@ const ColumnEditor = ({
         className="mb-3 border-bottom pb-2 d-flex align-items-center"
         style={{ color: "#070C37" }}
       >
-        <i className={`fa ${localColumn.fieldIconLovDetId} me-2`}></i>
-        Field: {localColumn.labelName || `Column ${columnIndex + 1}`}
+        <i className={`fa ${column.fieldIconLovDetId} me-2`}></i>
+        Field: {column.labelName || `Column ${columnIndex + 1}`}
       </h6>
 
       <button
-        onClick={handleRemoveColumn}
-        className="btn btn-sm btn-outline-dark position-absolute top-0 end-0 m-2"
-        style={{
-          borderColor: isHovered ? "#dc3545" : "#000",
-          color: isHovered ? "#fff" : "#000",
-          backgroundColor: isHovered ? "#dc3545" : "transparent",
-          transition: "all 0.3s ease",
-        }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        aria-label="Remove column"
-        title="Remove column"
+        onClick={() =>
+          dispatch(removeColumn(tabIndex, sectionIndex, columnIndex))
+        }
+        className="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle"
+        title="Remove Column/Field"
       >
-        <i className="fa fa-trash-alt" aria-hidden="true"></i>
+        <i className="fa fa-times"></i>
       </button>
 
-      {/* Row 1 - Required Fields - FIELD TYPE FIRST, FIELD SOURCE SECOND */}
+      {/* Row 1 - Required Fields */}
       <div className="row g-3 mb-3">
         <div className="col-md-4">
           <label className="form-label fw-semibold">
-            Field Type <span className="text-danger">*</span>
+            Field Source <span className="text-danger">*</span>
           </label>
           <select
             className="form-select"
-            value={localColumn.fieldType || ""}
-            onChange={(e) => handleFieldChange("fieldType", e.target.value)}
+            value={column.fieldSourceLovDetId || ""}
+            onChange={(e) =>
+              handleFieldChange("fieldSourceLovDetId", e.target.value)
+            }
             required
           >
-            <option value="">Select Field Type</option>
-            {fieldType &&
-              fieldType.map((eachItem) => (
+            {fieldSource &&
+              fieldSource.map((eachItem) => (
                 <option key={eachItem.id} value={eachItem.id}>
                   {eachItem.name}
                 </option>
@@ -202,19 +149,16 @@ const ColumnEditor = ({
 
         <div className="col-md-4">
           <label className="form-label fw-semibold">
-            Field Source <span className="text-danger">*</span>
+            Field Type <span className="text-danger">*</span>
           </label>
           <select
             className="form-select"
-            value={localColumn.fieldSourceLovDetId || ""}
-            onChange={(e) =>
-              handleFieldChange("fieldSourceLovDetId", e.target.value)
-            }
+            value={column.fieldType || ""}
+            onChange={(e) => handleFieldChange("fieldType", e.target.value)}
             required
           >
-            <option value="">Select Field Source</option>
-            {fieldSource &&
-              fieldSource.map((eachItem) => (
+            {fieldType &&
+              fieldType.map((eachItem) => (
                 <option key={eachItem.id} value={eachItem.id}>
                   {eachItem.name}
                 </option>
@@ -228,13 +172,12 @@ const ColumnEditor = ({
           </label>
           <select
             className="form-select"
-            value={localColumn.fieldOrderLovDetId || ""}
+            value={column.fieldOrderLovDetId || ""}
             onChange={(e) =>
               handleFieldChange("fieldOrderLovDetId", e.target.value)
             }
             required
           >
-            <option value="">Select Field Order</option>
             {fieldOrder &&
               fieldOrder.map((eachOrder) => (
                 <option key={eachOrder.id} value={eachOrder.id}>
@@ -245,136 +188,93 @@ const ColumnEditor = ({
         </div>
       </div>
 
-      {/* Rest of the ColumnEditor component remains the same... */}
-      {/* Field Source Specific Fields with Visual Separation */}
-      {(localColumn.fieldSourceLovDetId === "1" ||
-        localColumn.fieldSourceLovDetId === "2") && (
-        <>
-          <hr className="my-4 border-2" />
-          <div className="row g-3 mb-3">
-            <div className="col-12">
-              <h6 className="text-primary mb-3">
-                <i className="fa fa-database me-2"></i>
-                Field Source Configuration
-              </h6>
-            </div>
-
-            <div className="col-md-4">
-              {localColumn.fieldSourceLovDetId === "1" && (
-                <>
-                  <label className="form-label fw-semibold">
-                    Stored Procedure
-                  </label>
-                  <select
-                    className="form-select"
-                    value={localColumn.spName || ""}
-                    onChange={(e) =>
-                      handleFieldChange("spName", e.target.value)
-                    }
-                  >
-                    <option value="">Select Stored Procedure</option>
-                    {spList &&
-                      spList.map((sp) => (
-                        <option key={sp.id} value={sp.name}>
-                          {sp.name}
-                        </option>
-                      ))}
-                  </select>
-                </>
-              )}
-              {localColumn.fieldSourceLovDetId === "2" && (
-                <>
-                  <label className="form-label fw-semibold">Table Name</label>
-                  <select
-                    className="form-select"
-                    value={localColumn.tableName || ""}
-                    onChange={(e) =>
-                      handleFieldChange("tableName", e.target.value)
-                    }
-                  >
-                    <option value="">Select Table</option>
-                    {tableList &&
-                      tableList.map((t) => (
-                        <option key={t.id} value={t.name}>
-                          {t.name}
-                        </option>
-                      ))}
-                  </select>
-                </>
-              )}
-            </div>
-
-            <div className="col-md-4">
-              {localColumn.fieldSourceLovDetId === "1" &&
-                localColumn.spName && (
-                  <>
-                    <label className="form-label fw-semibold">
-                      SP Parameter
-                    </label>
-                    <select
-                      className="form-select"
-                      value={localColumn.spParam || ""}
-                      onChange={(e) =>
-                        handleFieldChange("spParam", e.target.value)
-                      }
-                    >
-                      <option value="">Select Parameter</option>
-                      {(spParamData || []).map((p) => (
-                        <option key={p.id} value={p.name}>
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                )}
-              {localColumn.fieldSourceLovDetId === "2" &&
-                localColumn.tableName && (
-                  <>
-                    <label className="form-label fw-semibold">
-                      Table Column
-                    </label>
-                    <select
-                      className="form-select"
-                      value={localColumn.tableColumns || ""}
-                      onChange={(e) =>
-                        handleFieldChange("tableColumns", e.target.value)
-                      }
-                    >
-                      <option value="">Select Column</option>
-                      {(tableCol || []).map((c) => (
-                        <option key={c.id} value={c.name}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </>
-                )}
-            </div>
-          </div>
-          <hr className="my-4 border-2" />
-        </>
-      )}
-
-      {/* Rest of the form fields... */}
+      {/* Field Source Specific Fields */}
       <div className="row g-3 mb-3">
         <div className="col-md-4">
-          <label className="form-label fw-semibold">
-            Label Name <span className="text-danger">*</span>
-          </label>
+          {column.fieldSourceLovDetId === "1" && (
+            <>
+              <label className="form-label fw-semibold">Stored Procedure</label>
+              <select
+                className="form-select"
+                value={column.spName || ""}
+                onChange={(e) => handleFieldChange("spName", e.target.value)}
+              >
+                {spList?.map((sp) => (
+                  <option key={sp.id} value={sp.name}>
+                    {sp.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+
+          {column.fieldSourceLovDetId === "2" && (
+            <>
+              <label className="form-label fw-semibold">Table Name</label>
+              <select
+                className="form-select"
+                value={column.tableName || ""}
+                onChange={(e) => handleFieldChange("tableName", e.target.value)}
+              >
+                {tableList?.map((t) => (
+                  <option key={t.id} value={t.name}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+
+        <div className="col-md-4">
+          {column.fieldSourceLovDetId === "1" && column.spName && (
+            <>
+              <label className="form-label fw-semibold">SP Param</label>
+              <select
+                className="form-select"
+                value={column.spParam || ""}
+                onChange={(e) => handleFieldChange("spParam", e.target.value)}
+              >
+                {(spParamData || []).map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+          {column.fieldSourceLovDetId === "2" && column.tableName && (
+            <>
+              <label className="form-label fw-semibold">Table Columns</label>
+              <select
+                className="form-select"
+                value={column.tableColumns || ""}
+                onChange={(e) =>
+                  handleFieldChange("tableColumns", e.target.value)
+                }
+              >
+                {(tableCol || []).map((c) => (
+                  <option key={c.id} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Row 2 - Field Details */}
+      <div className="row g-3 mb-3">
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">Field Name</label>
           <input
             type="text"
-            className={`form-control ${labelNameError ? "is-invalid" : ""}`}
-            value={localColumn.labelName || ""}
-            onChange={(e) => handleLabelNameChange(e.target.value)}
-            placeholder="Enter label name (camelCase)"
-            required
+            className="form-control"
+            value={column.labelName || ""}
+            onChange={(e) => handleFieldChange("labelName", e.target.value)}
+            placeholder="Enter field name"
           />
-          {labelNameError && (
-            <div className="invalid-feedback">{labelNameError}</div>
-          )}
-          <small className="form-text text-muted">
-            Must be camelCase (e.g., firstName, emailAddress, userProfile)
-          </small>
         </div>
 
         <div className="col-md-4">
@@ -382,8 +282,8 @@ const ColumnEditor = ({
           <input
             type="text"
             className="form-control"
-            value={localColumn.placeholder || ""}
-            onChange={(e) => handleFieldChange("placeholder", e.target.value)}
+            value={column.placeHolder || ""}
+            onChange={(e) => handleFieldChange("placeHolder", e.target.value)}
             placeholder="Enter placeholder text"
           />
         </div>
@@ -395,12 +295,11 @@ const ColumnEditor = ({
           <label className="form-label fw-semibold">Field Icon</label>
           <select
             className="form-select"
-            value={localColumn.fieldIconLovDetId || ""}
+            value={column.fieldIconLovDetId || ""}
             onChange={(e) =>
               handleFieldChange("fieldIconLovDetId", e.target.value)
             }
           >
-            <option value="">Select Icon</option>
             {fieldIcon &&
               fieldIcon.map((eachIcon) => (
                 <option key={eachIcon.id} value={eachIcon.id}>
@@ -418,31 +317,18 @@ const ColumnEditor = ({
           <select
             className="form-select"
             value=""
-            onChange={(e) => {
-              const val = e.target.value;
-              if (val && !(localColumn.validations || []).includes(val)) {
-                handleFieldChange("validations", [
-                  ...(localColumn.validations || []),
-                  val,
-                ]);
-              }
-            }}
+            onChange={(e) => addValidation(path, Number(e.target.value))}
           >
-            <option value="">Select Validation</option>
-            {jsVal &&
-              jsVal.map((eachJs) => (
-                <option key={eachJs.id} value={eachJs.id}>
-                  {eachJs.name}
-                </option>
-              ))}
+            {jsVal?.map((eachJs) => (
+              <option key={eachJs.id} value={eachJs.id}>
+                {eachJs.name}
+              </option>
+            ))}
           </select>
 
-          {/* Validation Badges */}
           <div className="mt-2">
-            {(localColumn.validations || []).map((vId) => {
-              const validationObj = (jsVal || []).find(
-                (item) => item.id === vId
-              );
+            {(column.validations || []).map((vId, index) => {
+              const validationObj = jsVal?.find((i) => i.id === vId);
               const validationName = validationObj
                 ? validationObj.name
                 : `ID:${vId}`;
@@ -455,12 +341,7 @@ const ColumnEditor = ({
                     fontSize: "0.8rem",
                     backgroundColor: "#070C37",
                   }}
-                  onClick={() =>
-                    handleFieldChange(
-                      "validations",
-                      (localColumn.validations || []).filter((id) => id !== vId)
-                    )
-                  }
+                  onClick={() => removeValidation(path, index)}
                 >
                   {validationName} <i className="fa fa-times ms-1"></i>
                 </span>
@@ -475,18 +356,20 @@ const ColumnEditor = ({
               <input
                 className="form-check-input"
                 type="checkbox"
-                checked={localColumn.hasEvents || false}
+                checked={column.hasEvents || false}
                 onChange={(e) =>
                   handleFieldChange("hasEvents", e.target.checked)
                 }
+                id={`event-checkbox-${column.column_id}`}
               />
-              <label className="form-check-label fw-semibold">
+              <label
+                className="form-check-label fw-semibold"
+                htmlFor={`event-checkbox-${column.column_id}`}
+              >
                 Event Handlers
               </label>
             </div>
-            {(localColumn.hasEvents ||
-              (localColumn.eventHandlers &&
-                localColumn.eventHandlers.length > 0)) && (
+            {(column.hasEvents || column.eventHandlers?.length > 0) && (
               <button
                 className="btn btn-sm btn-outline-primary ms-2"
                 style={{ borderColor: "#070C37", color: "#070C37" }}
@@ -499,7 +382,7 @@ const ColumnEditor = ({
 
           {/* Event Handler Badges */}
           <div className="mt-1">
-            {(localColumn.eventHandlers || []).map((event) => (
+            {(column.eventHandlers || []).map((event) => (
               <span
                 key={event.id}
                 className="badge me-1 mb-1 text-white"
@@ -509,11 +392,6 @@ const ColumnEditor = ({
                 }}
               >
                 {event.eventName}: {event.functionName}
-                <i
-                  className="fa fa-times ms-1"
-                  style={{ cursor: "pointer" }}
-                  onClick={() => handleRemoveEventHandler(event.id)}
-                ></i>
               </span>
             ))}
           </div>
@@ -526,10 +404,9 @@ const ColumnEditor = ({
           <label className="form-label fw-semibold">Saving SP</label>
           <select
             className="form-select"
-            value={localColumn.storingSP || ""}
+            value={column.storingSP || ""}
             onChange={(e) => handleFieldChange("storingSP", e.target.value)}
           >
-            <option value="">Select Stored Procedure</option>
             {storedProcedures &&
               storedProcedures.map((sp) => (
                 <option key={sp.id} value={sp.name}>
@@ -544,7 +421,7 @@ const ColumnEditor = ({
           <input
             type="text"
             className="form-control"
-            value={localColumn.created_user || ""}
+            value={column.created_user || ""}
             onChange={(e) => handleFieldChange("created_user", e.target.value)}
             placeholder="Enter user name"
           />
@@ -552,17 +429,15 @@ const ColumnEditor = ({
       </div>
 
       {/* Event Handler Modal */}
-      <div className="event-handler-modal-container">
-        <EventHandlerModal
-          show={showEventModal}
-          onClose={() => setShowEventModal(false)}
-          eventHandlers={localColumn.eventHandlers || []}
-          onAddEventHandlers={handleAddEventHandlers}
-          onRemoveEventHandler={handleRemoveEventHandler}
-          onClearAllEventHandlers={handleClearAllEventHandlers}
-          eventHandler={eventHandler}
-        />
-      </div>
+      <EventHandlerModal
+        show={showEventModal}
+        onClose={() => setShowEventModal(false)}
+        eventHandlers={column.eventHandlers || []}
+        onAddEventHandlers={handleAddEventHandlers}
+        onRemoveEventHandler={handleRemoveEventHandler}
+        eventHandler={eventHandler}
+        path={[tabIndex, sectionIndex, columnIndex]}
+      />
     </div>
   );
 };

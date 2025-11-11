@@ -1,21 +1,26 @@
 import React, { useState, useEffect } from "react";
 import SectionEditor from "../SectionEditor/SectionEditor";
+import {
+  updateConfig,
+  updateField,
+  removeTab,
+} from "../../context/FormBuilderContext/formAction";
 
 const TabEditor = React.memo(
   ({
     tab,
     tabIndex,
-    updateConfig,
+    dispatch,
     addSection,
     removeSection,
     addColumn,
     removeColumn,
-    removeTab,
     ...props
   }) => {
     const [tabName, setTabName] = useState(tab.tabName);
     const [tabIcon, setTabIcon] = useState(tab.tabIcon);
 
+    // Sync with prop changes
     useEffect(() => {
       setTabName(tab.tabName);
       setTabIcon(tab.tabIcon);
@@ -23,30 +28,24 @@ const TabEditor = React.memo(
 
     const handleTabNameChange = (value) => {
       setTabName(value);
-      updateConfig((config) => {
-        const newTabs = [...config.tabs];
-        newTabs[tabIndex].tabName = value;
-        return { ...config, tabs: newTabs };
-      });
+      dispatch(
+        updateConfig((config) => {
+          const newTabs = [...config.tabs];
+          newTabs[tabIndex].tabName = value;
+          return { ...config, tabs: newTabs };
+        })
+      );
     };
 
     const handleTabIconChange = (value) => {
       setTabIcon(value);
-      updateConfig((config) => {
-        const newTabs = [...config.tabs];
-        newTabs[tabIndex].tabIcon = value;
-        return { ...config, tabs: newTabs };
-      });
-    };
-
-    const handleRemoveTab = () => {
-      console.log("Removing tab:", tabIndex);
-      removeTab(tabIndex);
-    };
-
-    const handleAddSection = () => {
-      console.log("Adding section to tab:", tabIndex);
-      addSection(tabIndex);
+      dispatch(
+        updateConfig((config) => {
+          const newTabs = [...config.tabs];
+          newTabs[tabIndex].tabIcon = value;
+          return { ...config, tabs: newTabs };
+        })
+      );
     };
 
     const tabColorClass =
@@ -58,6 +57,10 @@ const TabEditor = React.memo(
           className="card-header text-white p-3 d-flex justify-content-between align-items-center"
           style={{
             backgroundColor: "#070C37",
+            background:
+              tabIndex % 2 === 0
+                ? "linear-gradient(135deg, #070C37, #070C37)"
+                : "linear-gradient(135deg, #070C37, #070C37)",
           }}
         >
           <h4 className="mb-0">
@@ -65,7 +68,7 @@ const TabEditor = React.memo(
             {tabName}
           </h4>
           <button
-            onClick={handleRemoveTab}
+            onClick={() => dispatch(removeTab(tabIndex))}
             className="btn btn-sm btn-light text-danger shadow-sm"
           >
             <i className="fa fa-trash-alt me-1"></i> Remove Tab
@@ -96,7 +99,6 @@ const TabEditor = React.memo(
                 onChange={(e) => handleTabIconChange(e.target.value)}
                 required
               >
-                <option value="">Select Icon</option>
                 {props.iconData &&
                   props.iconData.map((iconName) => (
                     <option key={iconName.id} value={iconName.id}>
@@ -106,31 +108,32 @@ const TabEditor = React.memo(
               </select>
             </div>
           </div>
+          {tab && (
+            <>
+              {tab.sections.map((section, sectionIndex) => (
+                <SectionEditor
+                  key={section.sectionIndex}
+                  section={section}
+                  path={[tabIndex, sectionIndex]}
+                  dispatch={dispatch}
+                  updateConfig={updateConfig}
+                  updateField={updateField}
+                  addColumn={addColumn}
+                  removeColumn={removeColumn}
+                  removeSection={removeSection}
+                  {...props}
+                />
+              ))}
+            </>
+          )}
 
-          {/* Add Section Button */}
-          <div className="d-flex justify-content-start mb-4">
-            <button
-              onClick={handleAddSection}
-              className="btn shadow-sm text-white"
-              style={{ backgroundColor: "#070C37" }}
-            >
-              <i className="fa fa-plus me-2"></i> Add Section
-            </button>
-          </div>
-
-          {tab.sections &&
-            tab.sections.map((section, sectionIndex) => (
-              <SectionEditor
-                key={section.section_id || `section-${sectionIndex}`}
-                section={section}
-                path={[tabIndex, sectionIndex]}
-                updateConfig={updateConfig}
-                addColumn={addColumn}
-                removeColumn={removeColumn}
-                removeSection={removeSection}
-                {...props}
-              />
-            ))}
+          <button
+            onClick={() => dispatch(addSection(tabIndex))}
+            className="btn shadow-sm text-white"
+            style={{ backgroundColor: "#070C37" }}
+          >
+            <i className="fa fa-plus me-2"></i> Add Section
+          </button>
         </div>
       </div>
     );
