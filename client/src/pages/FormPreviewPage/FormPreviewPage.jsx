@@ -359,6 +359,31 @@ const FormPreviewPage = () => {
     }
   };
 
+  // Replace the defaultColumn function with this:
+  const defaultColumn = (order = 1) => {
+    const uniqueId = `col-${Date.now()}-${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    return {
+      column_id: uniqueId,
+      labelName: "",
+      fieldType: "",
+      fieldSourceLovDetId: "",
+      spName: null,
+      spParam: null,
+      tableName: null,
+      tableColumns: null,
+      eventHandlers: [],
+      placeholder: "Enter data...",
+      validations: [],
+      fieldIconLovDetId: "",
+      fieldOrderLovDetId: order,
+      storingSP: "",
+      created_user: "",
+      hasEvents: false,
+    };
+  };
+
   const fetchProductData = async () => {
     try {
       const res = await projectAPI.getLovDropdown("PRODUCT_TABLE", null);
@@ -545,17 +570,19 @@ const FormPreviewPage = () => {
           className="navbar navbar-dark sticky-top shadow-lg mb-4 rounded-3 p-2"
           style={{ backgroundColor: "#070C37" }}
         >
-          <div className="container-fluid">
-            <button
-              onClick={() => navigate("/")}
-              className="btn btn-outline-light me-3"
-            >
-              <i className="fa fa-chevron-left me-1"></i> Back
-            </button>
-            <span className="navbar-brand h1 mb-0 text-white">
-              <i className="fa fa-magic me-2"></i>Dynamic Form Generator V2
-            </span>
-            <div className="d-flex">
+          <div className="container-fluid d-flex justify-content-between align-items-center">
+            <div className="d-flex align-items-center">
+              <button
+                onClick={() => navigate("/")}
+                className="btn btn-outline-light me-3"
+              >
+                <i className="fa fa-chevron-left me-1"></i> Back
+              </button>
+              <span className="navbar-brand h1 mb-0 text-white">
+                <i className="fa fa-magic me-2"></i>Dynamic Form Generator V2
+              </span>
+            </div>
+            <div className="d-flex align-items-center">
               <button
                 onClick={() => dispatch(setShowJson(!showJson))}
                 className="btn btn-outline-light me-2"
@@ -566,17 +593,7 @@ const FormPreviewPage = () => {
                 {showJson ? "Hide Config" : "Show JSON"}
               </button>
               <button
-                onClick={handleSubmitConfig}
-                className="btn btn-outline-light text-white shadow-sm"
-                style={{ backgroundColor: "#070C37" }}
-              >
-                <i className="fa fa-save me-1"></i> Save Configuration
-              </button>
-              // Add this button in the navigation section of
-              FormPreviewPage.jsx
-              <button
                 onClick={() => {
-                  // Save the current configuration
                   sessionStorage.setItem(
                     "lastSavedForm",
                     JSON.stringify(config)
@@ -587,6 +604,13 @@ const FormPreviewPage = () => {
                 disabled={!config.pageName || config.tabs.length === 0}
               >
                 <i className="fa fa-code me-1"></i> Generate Code
+              </button>
+              <button
+                onClick={handleSubmitConfig}
+                className="btn btn-outline-light text-white shadow-sm"
+                style={{ backgroundColor: "#070C37" }}
+              >
+                <i className="fa fa-save me-1"></i> Save Configuration
               </button>
             </div>
           </div>
@@ -773,11 +797,17 @@ const FormPreviewPage = () => {
             tab={tab}
             tabIndex={tabIndex}
             dispatch={dispatch}
-            addSection={addSection}
-            removeSection={removeSection}
-            addColumn={addColumn}
-            removeColumn={removeColumn}
-            removeTab={removeTab}
+            addSection={() => dispatch(addSection(tabIndex))}
+            removeSection={(tabIndex, sectionIndex) =>
+              dispatch(removeSection(tabIndex, sectionIndex))
+            }
+            addColumn={(tabIndex, sectionIndex) =>
+              dispatch(addColumn(tabIndex, sectionIndex))
+            }
+            removeColumn={(tabIndex, sectionIndex, columnIndex) =>
+              dispatch(removeColumn(tabIndex, sectionIndex, columnIndex))
+            }
+            removeTab={(tabIndex) => dispatch(removeTab(tabIndex))}
             fieldSource={dropdownData.fieldSource}
             fieldType={dropdownData.fieldType}
             fieldOrder={dropdownData.fieldOrder}
