@@ -590,6 +590,19 @@ const FormPreviewPage = () => {
               >
                 <i className="fa fa-save me-1"></i> Save Configuration
               </button>
+              <button
+                onClick={() => {
+                  sessionStorage.setItem(
+                    "lastSavedForm",
+                    JSON.stringify(config)
+                  );
+                  navigate("/code-generation", { state: { formData: config } });
+                }}
+                className="btn btn-outline-light me-2"
+                disabled={!config.pageName || config.tabs.length === 0}
+              >
+                <i className="fa fa-code me-1"></i> Generate Code
+              </button>
             </div>
           </div>
         </nav>
