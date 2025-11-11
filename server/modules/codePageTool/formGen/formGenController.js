@@ -40,7 +40,6 @@ const formGenController = {
     try {
       const formId = req.session.formId || req.query.formId;
       const data = await formGenService.getFormGenById(formId);
-      console.log(data);
       const code = await formGenService.generateCode(data);
       res.status(200).json({ message: code });
     } catch (error) {
