@@ -62,7 +62,11 @@ function SnippetForm() {
         <h3 className="project-page-heading">Snippet Creation</h3>
       </div>
 
-      <SnippetTable rows={rows} onChange={(e) => handleChange(e)} />
+      <SnippetTable
+        rows={rows}
+        onChange={(e) => handleChange(e)}
+        snippetTypeData={snippetTypeData}
+      />
 
       <div className="project-btn-container">
         <Button onClick={handleSubmit} className="submit-btn">
