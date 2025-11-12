@@ -75,6 +75,7 @@ const formGenService = {
       // Compile properly
       // const template = handleBarJs.compile(templateContent);
 
+      // handleBarJs pascalCase
       handleBarJs.registerHelper("pascalCase", function (str) {
         if (!str) return "";
         return str
@@ -84,7 +85,7 @@ const formGenService = {
           )
           .replace(/^(.)/, (chr) => chr.toUpperCase());
       });
-
+      // handleBarJs camelCase
       handleBarJs.registerHelper("camelCase", function (str) {
         if (!str) return "";
         return str
@@ -95,6 +96,7 @@ const formGenService = {
           .replace(/^(.)/, (chr) => chr.toLowerCase());
       });
 
+      // handleBarJs dashCase
       handleBarJs.registerHelper("dashCase", function (str) {
         if (!str) return "";
         return str
@@ -122,20 +124,22 @@ const formGenService = {
               field.spName !== "null" &&
               field.spName.trim() !== ""
             ) {
-              field.spParams = await formGenUtils.getSpParams(field.spName);
+              field.spParams = await formGenUtils.getSpParams(field.spName); // Adding spParams containing the params of spName
             } else {
               field.spParams = [];
             }
+            // Extracting template from DB using fieldTypeId and languageId via ProjectId
             const snippetRows = await formGenRepository.getSnippetByFsm(
               field.fieldType,
               languageId
             );
+            // Extracting just the code template
             const snippetTemplate = snippetRows?.[0]?.Snippet || "";
-            console.log(snippetTemplate);
+            // Using handleBarJs compiling the code snippet into template
             const template = handleBarJs.compile(snippetTemplate);
-            console.log(template);
+            // Passing the payload from recievedFormData(using formReducer) as parameters
             const output = template(field);
-
+            // Updating the final output using finalOutput
             finalOutput += output + "\n\n";
           }
         }
@@ -144,7 +148,7 @@ const formGenService = {
       for (const tab of payload.Tabs) {
         for (const section of tab.Sections) {
           for (const field of section.Fields) {
-            console.log(field);
+            console.log(field); // To check data of individual field or columns
           }
         }
       }
@@ -152,6 +156,7 @@ const formGenService = {
       // Generate component code
       // const output = template(payload);
 
+      // Testing the template by writing the content to the specific path
       const outputPath = path.join(__dirname, "GeneratedForm.js");
       fs.writeFileSync(outputPath, finalOutput);
 

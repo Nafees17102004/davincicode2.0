@@ -1,75 +1,75 @@
-const saveA = async (
-  p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+const saveRepoDemo = async (
+  p_field_type_id, p_language_id, p_snippet_name, p_snippet
 ) => {
   try {
-    const query = `CALL SP_INSERT_ADD_FORM_TABLE(
-      ?, ?, ?, ?, ?, ?, ?, ?
+    const query = `CALL SP_INSERT_UPDATE_SNIPPET(
+      ?, ?, ?, ?
     );`;
 
     const params = [
-      p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+      p_field_type_id, p_language_id, p_snippet_name, p_snippet
     ];
 
     const [rows] = await pool.query(query, params);
     return rows;
 
   } catch (error) {
-    console.error("Repository Error (a):", error);
+    console.error("Repository Error (repoDemo):", error);
     throw error;
   }
 };
 
  
  module.exports = {
-  saveA,
+  saveRepoDemo,
 };
 
  
-const repository = require("../repository/aRepository");
+const repository = require("../repository/repoDemoRepository");
 
-const saveA = async (
-  p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+const saveRepoDemo = async (
+  p_field_type_id, p_language_id, p_snippet_name, p_snippet
 ) => {
   try {
-    const result = await repository.saveA(
-      p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+    const result = await repository.saveRepoDemo(
+      p_field_type_id, p_language_id, p_snippet_name, p_snippet
     );
     return result;
   } catch (error) {
-    console.error("Service Error (a Service):", error);
+    console.error("Service Error (repoDemo Service):", error);
     throw error;
   }
 };
 
-module.exports = { saveA };
+module.exports = { saveRepoDemo };
 
 
-const service = require("../service/aService");
+const service = require("../service/repoDemoService");
 
-const saveA = async (req, res) => {
+const saveRepoDemo = async (req, res) => {
   try {
     const {
-        p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+        p_field_type_id, p_language_id, p_snippet_name, p_snippet
     } = req.body;
 
-    const result = await service.saveA(
-      p_TAB_ID, p_FIELD_SOURCE_LOV_DET_ID, p_FIELD_NAME, p_FIELD_SIZE_LOV_DET_ID, p_FIELD_ICON_LOV_DET_ID, p_PLACEHOLDER, p_FIELD_ORDER_LOV_DET_ID, p_C2C_CUSER
+    const result = await service.saveRepoDemo(
+      p_field_type_id, p_language_id, p_snippet_name, p_snippet
     );
 
     return res.status(200).json({ success: true, data: result });
   } catch (error) {
-    console.error("Controller Error (a):", error);
+    console.error("Controller Error (repoDemo):", error);
     return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { saveA };
+module.exports = { saveRepoDemo };
 
 const express = require("express");
 const router = express.Router();
-const controller = require("../controller/aController");
+const controller = require("../controller/repoDemoController");
 
-router.post("/a", controller.saveA);
+router.post("/repo-demo", controller.saveRepoDemo);
 
 module.exports = router;
 
