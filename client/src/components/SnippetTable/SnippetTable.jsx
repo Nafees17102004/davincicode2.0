@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Form } from "react-bootstrap";
 import projectAPI from "../../api/Api";
 
-function SnippetTable({ rows, onChange }) {
+function SnippetTable({ rows, onChange, snippetTypeData }) {
   const [language, setLanguage] = useState([]);
   const [field, setField] = useState([]);
 
