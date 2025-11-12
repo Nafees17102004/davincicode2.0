@@ -3,8 +3,10 @@ import SnippetTable from "../SnippetTable/SnippetTable";
 import { Button } from "react-bootstrap";
 import projectAPI from "../../api/Api";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 function SnippetForm() {
+  const [snippetTypeData, setSnippetTypeData] = useState([]);
   const [rows, setRows] = useState({
     fieldTypeId: 0,
     languageId: 0,
@@ -13,7 +15,26 @@ function SnippetForm() {
   });
   const navigate = useNavigate();
 
-  console.log(rows);
+  useEffect(() => {
+    fetchSnippetType();
+  }, []);
+
+  const fetchSnippetType = async () => {
+    try {
+      await projectAPI.getLovDropdown("SNIPPET_TYPE", null).then((res) => {
+        console.log(res.data);
+        const formattedData = res.data.result.map((eachItem) => ({
+          id: eachItem.Id,
+          name: eachItem.Name,
+        }));
+        setSnippetTypeData(formattedData);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  console.log(snippetTypeData);
 
   const handleChange = (e) => {
     setRows({ ...rows, [e.target.name]: e.target.value });
