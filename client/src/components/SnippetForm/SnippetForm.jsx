@@ -10,6 +10,7 @@ function SnippetForm() {
   const [rows, setRows] = useState({
     fieldTypeId: 0,
     languageId: 0,
+    snippetTypeId: 0,
     snippetName: "",
     snippet: "",
   });
