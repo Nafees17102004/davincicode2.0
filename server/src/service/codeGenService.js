@@ -33,11 +33,18 @@ const insertModule = async (
   }
 };
 
-const insertSnippet = async (fieldTypeId, languageId, snippetName, snippet) => {
+const insertSnippet = async (
+  fieldTypeId,
+  languageId,
+  snippetTypeId,
+  snippetName,
+  snippet
+) => {
   try {
     const result = await repo.insertSnippet(
       fieldTypeId,
       languageId,
+      snippetTypeId,
       snippetName,
       snippet
     );

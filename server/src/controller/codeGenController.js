@@ -69,9 +69,15 @@ const insertSnippet = async (req, res) => {
     const errors = [];
 
     for (const [index, snip] of snippets.entries()) {
-      const { fieldTypeId, languageId, snippetName, snippet } = snip;
+      const {
+        fieldTypeId,
+        languageId,
+        snippetTypeId,
+        snippetName,
+        snippet,
+      } = snip;
 
-      if (!fieldTypeId || !languageId || !snippetName || !snippet) {
+      if (!fieldTypeId || !languageId || !snippetTypeId || !snippetName || !snippet) {
         errors.push({ index, error: "All fields are required", snippet: snip });
         continue;
       }
@@ -80,6 +86,7 @@ const insertSnippet = async (req, res) => {
         const result = await service.insertSnippet(
           fieldTypeId,
           languageId,
+          snippetTypeId,
           snippetName,
           snippet
         );
