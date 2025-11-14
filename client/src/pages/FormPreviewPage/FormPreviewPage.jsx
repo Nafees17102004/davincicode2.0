@@ -593,7 +593,7 @@ const FormPreviewPage = () => {
               <button
                 onClick={(e) => {
                   handleGeneratedCode(e);
-                  // setShowGeneratedCode(true);
+                  setShowGeneratedCode(true);
                   // navigate("/code-generation", { state: { generatedCode } });
                 }}
                 className="btn btn-outline-light ms-2"
