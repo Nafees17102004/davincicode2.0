@@ -1,12 +1,13 @@
 import React from "react";
 import { Table, Form } from "react-bootstrap";
 
-function FieldTypeTable({ rows, onChange }) {
+function FieldTypeTable({ rows, onChange, fieldType }) {
   return (
     <Table bordered hover className="table">
       <thead className="table-header">
         <tr className="table-field-row">
           <th className="field-name">S.no</th>
+          <th className="field-name">Field Type</th>
           <th className="field-name">Field Name</th>
           <th className="field-name">Field Status</th>
           {rows.some((row) => row.fStatus === "inactive") && (
@@ -18,6 +19,19 @@ function FieldTypeTable({ rows, onChange }) {
         {rows.map((row, index) => (
           <tr key={row.sNO}>
             <td>{row.sNO}</td>
+            <td>
+              <Form.Select
+                value={row.fieldTypeId}
+                name="fieldTypeId"
+                onChange={(e) => onChange(index, "fieldTypeId", e.target.value)}
+              >
+                {fieldType.map((eachLang) => (
+                  <option key={eachLang.id} value={eachLang.id}>
+                    {eachLang.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </td>
             <td>
               <Form.Control
                 type="text"

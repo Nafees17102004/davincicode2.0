@@ -29,12 +29,10 @@ function SnippetTable({ rows, onChange, snippetTypeData }) {
 
   const fetchFieldTypes = async () => {
     try {
-      await projectAPI.getFieldTypes().then((response) => {
-        const formattedFields = response.data.map((field) => ({
-          fId: field.FIELD_TYPE_ID,
-          fName: field.FIELD_NAME,
-          fStatus: field.status,
-          fInactiveReason: field.inactive_reason,
+      await projectAPI.getLovDropdown("FIELD_TYPE", null).then((response) => {
+        const formattedFields = response.data.result.map((field) => ({
+          id: field.Id,
+          name: field.Name,
         }));
         setField(formattedFields);
       });
@@ -45,6 +43,20 @@ function SnippetTable({ rows, onChange, snippetTypeData }) {
 
   return (
     <Form.Group className="p-2">
+      <Form.Label htmlFor="fieldType">Select Field Type</Form.Label>
+      <Form.Select
+        id="fieldType"
+        value={rows.fieldTypeId}
+        name="fieldTypeId"
+        onChange={(e) => onChange(e)}
+        className="mb-3"
+      >
+        {field.map((eachField) => (
+          <option key={eachField.id} value={eachField.id}>
+            {eachField.name}
+          </option>
+        ))}
+      </Form.Select>
       <Form.Label htmlFor="fieldType">Select Field Name</Form.Label>
       <Form.Select
         id="fieldType"
@@ -53,10 +65,9 @@ function SnippetTable({ rows, onChange, snippetTypeData }) {
         onChange={(e) => onChange(e)}
         className="mb-3"
       >
-        <option value="">Select Field</option>
         {field.map((eachField) => (
-          <option key={eachField.fId} value={eachField.fId}>
-            {eachField.fName}
+          <option key={eachField.id} value={eachField.id}>
+            {eachField.name}
           </option>
         ))}
       </Form.Select>
