@@ -115,6 +115,7 @@ const formGenService = {
       const languageId = await formGenRepository.getLanguageIdByProjectId(
         payload.ProjectID
       );
+      let generatedCode = {};
       let finalOutput = "";
       for (const tab of payload.Tabs) {
         for (const section of tab.Sections) {
@@ -133,6 +134,15 @@ const formGenService = {
               field.fieldType,
               languageId
             );
+            for (const snippet of snippetRows) {
+              const template = handleBarJs.compile(snippet.Snippet);
+              const output = template(field);
+
+              if (!generatedCode[snippet.Snippet_type_name])
+                generatedCode[snippet.Snippet_type_name] = "";
+
+              generatedCode[snippet.Snippet_type_name] += output + "\n\n";
+            }
             // Extracting just the code template
             const snippetTemplate = snippetRows?.[0]?.Snippet || "";
             // Using handleBarJs compiling the code snippet into template
@@ -162,7 +172,7 @@ const formGenService = {
 
       console.log("✅ React Form Generated →", outputPath);
 
-      return finalOutput; // Let controller respond with download or view later
+      return generatedCode; // Let controller respond with download or view later
     } catch (error) {
       console.error("❌ Code Generation Failed:", error);
       throw error;

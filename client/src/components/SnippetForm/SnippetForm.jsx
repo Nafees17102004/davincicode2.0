@@ -8,8 +8,10 @@ import { useEffect } from "react";
 function SnippetForm() {
   const [snippetTypeData, setSnippetTypeData] = useState([]);
   const [rows, setRows] = useState({
+    snippetId: null,
     fieldTypeId: 0,
     languageId: 0,
+    snippetTypeId: 0,
     snippetName: "",
     snippet: "",
   });
@@ -22,7 +24,6 @@ function SnippetForm() {
   const fetchSnippetType = async () => {
     try {
       await projectAPI.getLovDropdown("SNIPPET_TYPE", null).then((res) => {
-        console.log(res.data);
         const formattedData = res.data.result.map((eachItem) => ({
           id: eachItem.Id,
           name: eachItem.Name,
@@ -33,8 +34,7 @@ function SnippetForm() {
       console.error(error);
     }
   };
-
-  console.log(snippetTypeData);
+  
 
   const handleChange = (e) => {
     setRows({ ...rows, [e.target.name]: e.target.value });

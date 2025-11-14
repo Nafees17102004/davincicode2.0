@@ -24,7 +24,7 @@ import LovDetViewpage from "./pages/LovDetViewpage/LovDetViewpage";
 import LovDetpage from "./pages/LovDetpage/LovDetpage";
 import DynamicFormPage from "./pages/DynamicFormPage/DynamicFormPage";
 import FormPreviewPage from "./pages/FormPreviewPage/FormPreviewPage";
-import CodeGenerationPage from "./pages/codeGenerationPage/codeGenerationPage.jsx";
+import CodeGenerationPage from "./pages/codeGenerationPage/CodeGenerationPage";
 
 function App() {
   return (

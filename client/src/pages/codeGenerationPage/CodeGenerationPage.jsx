@@ -16,9 +16,13 @@ import projectAPI from "../../api/Api";
 import LeftTabMenu from "../../components/LeftTabMenu/LeftTabMenu";
 import "./CodeGenerationPage.css";
 
-const CodeGenerationPage = () => {
+const CodeGenerationPage = ({ sampleGeneratedCode }) => {
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
+
+  // const demoGeneratedCode = location?.generatedCode;
+  // console.log(demoGeneratedCode);
+  console.log(sampleGeneratedCode);
 
   const [formData, setFormData] = useState({});
   const [generatedCode, setGeneratedCode] = useState({

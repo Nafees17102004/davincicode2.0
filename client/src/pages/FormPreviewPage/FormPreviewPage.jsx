@@ -4,6 +4,7 @@ import { useFormData } from "../../context/FormBuilderContext/FormContext";
 import projectAPI from "../../api/Api";
 import Toast from "../../components/Toaster/Toaster";
 import TabEditor from "../../components/TabEditor/TabEditor";
+import CodeGenerationPage from "../codeGenerationPage/CodeGenerationPage";
 import {
   formReducer,
   initialState,
@@ -33,6 +34,8 @@ const FormPreviewPage = () => {
   const { state, dispatch } = useFormData();
 
   const [generatedCode, setGeneratedCode] = useState(null);
+  const [showGeneratedCode, setShowGeneratedCode] = useState(false);
+  console.log(generatedCode);
 
   // Extract state for easier access
   const {
@@ -580,9 +583,6 @@ const FormPreviewPage = () => {
                 ></i>
                 {showJson ? "Hide Config" : "Show JSON"}
               </button>
-              <button onClick={(e) => handleGeneratedCode(e)}>
-                Generated Code
-              </button>
               <button
                 onClick={handleSubmitConfig}
                 className="btn btn-outline-light text-white shadow-sm"
@@ -591,14 +591,12 @@ const FormPreviewPage = () => {
                 <i className="fa fa-save me-1"></i> Save Configuration
               </button>
               <button
-                onClick={() => {
-                  sessionStorage.setItem(
-                    "lastSavedForm",
-                    JSON.stringify(config)
-                  );
-                  navigate("/code-generation", { state: { formData: config } });
+                onClick={(e) => {
+                  handleGeneratedCode(e);
+                  // setShowGeneratedCode(true);
+                  // navigate("/code-generation", { state: { generatedCode } });
                 }}
-                className="btn btn-outline-light me-2"
+                className="btn btn-outline-light ms-2"
                 disabled={!config.pageName || config.tabs.length === 0}
               >
                 <i className="fa fa-code me-1"></i> Generate Code
@@ -606,233 +604,238 @@ const FormPreviewPage = () => {
             </div>
           </div>
         </nav>
+        {showGeneratedCode ? (
+          <CodeGenerationPage codeData={generatedCode} />
+        ) : (
+          <>
+            {/* --- Project Setup Details --- */}
+            <div className="card mb-4 shadow-lg border-0">
+              <div
+                className="card-header text-white fw-bold p-3"
+                style={{ backgroundColor: "#070C37" }}
+              >
+                <i className="fa fa-cog me-2"></i>Project Setup Details
+              </div>
+              <div className="card-body">
+                <div className="row g-3">
+                  <div className="col-md-4">
+                    <label className="form-label fw-semibold">
+                      Project ID <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={config.projectId}
+                      onChange={(e) => {
+                        const selectedProjectId = e.target.value;
 
-        {/* --- Project Setup Details --- */}
-        <div className="card mb-4 shadow-lg border-0">
-          <div
-            className="card-header text-white fw-bold p-3"
-            style={{ backgroundColor: "#070C37" }}
-          >
-            <i className="fa fa-cog me-2"></i>Project Setup Details
-          </div>
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-4">
-                <label className="form-label fw-semibold">
-                  Project ID <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-select"
-                  value={config.projectId}
-                  onChange={(e) => {
-                    const selectedProjectId = e.target.value;
+                        // 1. Update project in config state
+                        dispatch(
+                          updateConfig((prevConfig) => ({
+                            ...prevConfig,
+                            projectId: selectedProjectId,
+                            moduleId: "", // clear selected module
+                          }))
+                        );
 
-                    // 1. Update project in config state
-                    dispatch(
-                      updateConfig((prevConfig) => ({
-                        ...prevConfig,
-                        projectId: selectedProjectId,
-                        moduleId: "", // clear selected module
-                      }))
-                    );
-
-                    // 2. Fetch modules for selected project
-                    if (selectedProjectId) {
-                      fetchModuleData(selectedProjectId);
-                    }
-                  }}
-                  required
-                >
-                  {dropdownData.projectData.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-4">
-                <label className="form-label fw-semibold">
-                  Module ID <span className="text-danger">*</span>
-                </label>
-                <select
-                  className={`form-select ${
-                    !isModuleEnabled ? "bg-light text-muted" : ""
-                  }`}
-                  value={config.moduleId}
-                  onChange={(e) =>
-                    dispatch(
-                      updateConfig((prevConfig) => ({
-                        ...prevConfig,
-                        moduleId: e.target.value,
-                      }))
-                    )
-                  }
-                  disabled={!isModuleEnabled}
-                  required
-                >
-                  {isModuleEnabled &&
-                    dropdownData.moduleData.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-              <div className="col-md-4">
-                <label className="form-label fw-semibold">
-                  Product ID <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-select"
-                  value={config.productId}
-                  onChange={(e) =>
-                    dispatch(
-                      updateConfig((prevConfig) => ({
-                        ...prevConfig,
-                        productId: e.target.value,
-                      }))
-                    )
-                  }
-                  required
-                >
-                  {dropdownData.productData.map((m) => (
-                    <option key={m.id} value={m.id}>
-                      {m.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-4">
-                <label className="form-label fw-semibold">
-                  Layout ID <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-select"
-                  value={config.layoutId}
-                  onChange={(e) =>
-                    dispatch(
-                      updateConfig((prevConfig) => ({
-                        ...prevConfig,
-                        layoutId: e.target.value,
-                      }))
-                    )
-                  }
-                  required
-                >
-                  {dropdownData.layout.map((l) => (
-                    <option key={l.id} value={l.id}>
-                      {l.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-md-8">
-                <label className="form-label fw-semibold">
-                  Page Name <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={config.pageName}
-                  onChange={(e) =>
-                    dispatch(
-                      updateConfig((prevConfig) => ({
-                        ...prevConfig,
-                        pageName: e.target.value,
-                      }))
-                    )
-                  }
-                  placeholder="Enter page name"
-                  required
-                />
-              </div>
-              <div className="col-12">
-                <label className="form-label fw-semibold">Purpose</label>
-                <textarea
-                  className="form-control"
-                  value={config.purpose}
-                  onChange={(e) =>
-                    dispatch(
-                      updateConfig((prevConfig) => ({
-                        ...prevConfig,
-                        purpose: e.target.value,
-                      }))
-                    )
-                  }
-                  placeholder="Describe the purpose of this form..."
-                  rows="3"
-                ></textarea>
+                        // 2. Fetch modules for selected project
+                        if (selectedProjectId) {
+                          fetchModuleData(selectedProjectId);
+                        }
+                      }}
+                      required
+                    >
+                      {dropdownData.projectData.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-semibold">
+                      Module ID <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className={`form-select ${
+                        !isModuleEnabled ? "bg-light text-muted" : ""
+                      }`}
+                      value={config.moduleId}
+                      onChange={(e) =>
+                        dispatch(
+                          updateConfig((prevConfig) => ({
+                            ...prevConfig,
+                            moduleId: e.target.value,
+                          }))
+                        )
+                      }
+                      disabled={!isModuleEnabled}
+                      required
+                    >
+                      {isModuleEnabled &&
+                        dropdownData.moduleData.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-semibold">
+                      Product ID <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={config.productId}
+                      onChange={(e) =>
+                        dispatch(
+                          updateConfig((prevConfig) => ({
+                            ...prevConfig,
+                            productId: e.target.value,
+                          }))
+                        )
+                      }
+                      required
+                    >
+                      {dropdownData.productData.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-4">
+                    <label className="form-label fw-semibold">
+                      Layout ID <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={config.layoutId}
+                      onChange={(e) =>
+                        dispatch(
+                          updateConfig((prevConfig) => ({
+                            ...prevConfig,
+                            layoutId: e.target.value,
+                          }))
+                        )
+                      }
+                      required
+                    >
+                      {dropdownData.layout.map((l) => (
+                        <option key={l.id} value={l.id}>
+                          {l.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-md-8">
+                    <label className="form-label fw-semibold">
+                      Page Name <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={config.pageName}
+                      onChange={(e) =>
+                        dispatch(
+                          updateConfig((prevConfig) => ({
+                            ...prevConfig,
+                            pageName: e.target.value,
+                          }))
+                        )
+                      }
+                      placeholder="Enter page name"
+                      required
+                    />
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label fw-semibold">Purpose</label>
+                    <textarea
+                      className="form-control"
+                      value={config.purpose}
+                      onChange={(e) =>
+                        dispatch(
+                          updateConfig((prevConfig) => ({
+                            ...prevConfig,
+                            purpose: e.target.value,
+                          }))
+                        )
+                      }
+                      placeholder="Describe the purpose of this form..."
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* --- Tabs Section --- */}
-        <div className="d-flex justify-content-between align-items-center mb-4">
-          <h3 className="text-dark fw-light">
-            <i className="fa fa-layer-group me-2"></i>Form Tabs (
-            {config.tabs.length})
-          </h3>
-          <button
-            onClick={() => dispatch(addTab())}
-            className="btn btn-lg shadow text-white"
-            style={{ backgroundColor: "#070C37" }}
-          >
-            <i className="fa fa-plus me-2"></i> Add Tab
-          </button>
-        </div>
+            {/* --- Tabs Section --- */}
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <h3 className="text-dark fw-light">
+                <i className="fa fa-layer-group me-2"></i>Form Tabs (
+                {config.tabs.length})
+              </h3>
+              <button
+                onClick={() => dispatch(addTab())}
+                className="btn btn-lg shadow text-white"
+                style={{ backgroundColor: "#070C37" }}
+              >
+                <i className="fa fa-plus me-2"></i> Add Tab
+              </button>
+            </div>
 
-        {config.tabs.map((tab, tabIndex) => (
-          <TabEditor
-            key={tab.tab_id || tabIndex}
-            tab={tab}
-            tabIndex={tabIndex}
-            dispatch={dispatch}
-            addSection={addSection}
-            removeSection={removeSection}
-            addColumn={addColumn}
-            removeColumn={removeColumn}
-            removeTab={removeTab}
-            fieldSource={dropdownData.fieldSource}
-            fieldType={dropdownData.fieldType}
-            fieldOrder={dropdownData.fieldOrder}
-            fieldIcon={dropdownData.fieldIcon}
-            jsVal={dropdownData.jsVal}
-            spList={dropdownData.spList}
-            tableList={dropdownData.tableList}
-            storedProcedures={dropdownData.storedProcedures}
-            eventHandler={dropdownData.eventHandler}
-            iconData={dropdownData.iconData}
-            spParamData={spParamData}
-            tableCol={tableCol}
-            showToast={showToast}
-            fetchSpParams={fetchSpParams}
-            fetchTableColumns={fetchTableColumns}
-          />
-        ))}
+            {config.tabs.map((tab, tabIndex) => (
+              <TabEditor
+                key={tab.tab_id || tabIndex}
+                tab={tab}
+                tabIndex={tabIndex}
+                dispatch={dispatch}
+                addSection={addSection}
+                removeSection={removeSection}
+                addColumn={addColumn}
+                removeColumn={removeColumn}
+                removeTab={removeTab}
+                fieldSource={dropdownData.fieldSource}
+                fieldType={dropdownData.fieldType}
+                fieldOrder={dropdownData.fieldOrder}
+                fieldIcon={dropdownData.fieldIcon}
+                jsVal={dropdownData.jsVal}
+                spList={dropdownData.spList}
+                tableList={dropdownData.tableList}
+                storedProcedures={dropdownData.storedProcedures}
+                eventHandler={dropdownData.eventHandler}
+                iconData={dropdownData.iconData}
+                spParamData={spParamData}
+                tableCol={tableCol}
+                showToast={showToast}
+                fetchSpParams={fetchSpParams}
+                fetchTableColumns={fetchTableColumns}
+              />
+            ))}
 
-        {config.tabs.length === 0 && (
-          <div className="text-center py-5 bg-white rounded shadow">
-            <i className="fa fa-inbox fa-3x text-muted mb-3"></i>
-            <h4 className="text-muted">No tabs added yet</h4>
-            <p className="text-muted">
-              Click the "Add Tab" button to get started
-            </p>
-          </div>
-        )}
+            {config.tabs.length === 0 && (
+              <div className="text-center py-5 bg-white rounded shadow">
+                <i className="fa fa-inbox fa-3x text-muted mb-3"></i>
+                <h4 className="text-muted">No tabs added yet</h4>
+                <p className="text-muted">
+                  Click the "Add Tab" button to get started
+                </p>
+              </div>
+            )}
 
-        {showJson && (
-          <div className="mt-5">
-            <h3 className="text-dark border-bottom pb-2">
-              <i className="fa fa-code me-2"></i>Final JSON Output
-            </h3>
-            <pre
-              className="bg-dark text-white p-4 rounded shadow-lg overflow-auto"
-              style={{ maxHeight: "500px" }}
-            >
-              {JSON.stringify(config, null, 2)}
-            </pre>
-          </div>
+            {showJson && (
+              <div className="mt-5">
+                <h3 className="text-dark border-bottom pb-2">
+                  <i className="fa fa-code me-2"></i>Final JSON Output
+                </h3>
+                <pre
+                  className="bg-dark text-white p-4 rounded shadow-lg overflow-auto"
+                  style={{ maxHeight: "500px" }}
+                >
+                  {JSON.stringify(config, null, 2)}
+                </pre>
+              </div>
+            )}
+          </>
         )}
       </div>
     </>

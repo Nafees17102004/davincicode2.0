@@ -31,6 +31,7 @@ const insertModule = async (
 };
 
 const insertSnippet = async (
+  snippetId,
   fieldTypeId,
   languageId,
   snippetTypeId,
@@ -38,8 +39,15 @@ const insertSnippet = async (
   snippet
 ) => {
   try {
-    const query = "Call LT_DCS_SP_INSERT_UPDATE_SNIPPET(?,?,?,?,?)";
-    const data = [fieldTypeId, languageId, snippetTypeId, snippetName, snippet];
+    const query = "Call LT_DCS_SP_INSERT_UPDATE_SNIPPET(?,?,?,?,?,?)";
+    const data = [
+      snippetId,
+      fieldTypeId,
+      languageId,
+      snippetTypeId,
+      snippetName,
+      snippet,
+    ];
     const result = await pool.query(query, data);
     console.log(result[0]);
     return result[0];
