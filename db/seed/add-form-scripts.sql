@@ -32,29 +32,6 @@ VALUES
 ('Job Details', '/assets/icons/job.png', 'admin'),
 ('Settings', '/assets/icons/settings.png', 'admin');
 
-
-CREATE TABLE ADD_FORM_TABLE (
-    ADD_FORM_ID INT AUTO_INCREMENT PRIMARY KEY,
-    TAB_ID INT NOT NULL,
-    FIELD_SOURCE_LOV_DET_ID INT NULL,   -- e.g., dropdown/textbox source
-    FIELD_NAME VARCHAR(100) NOT NULL,
-    FIELD_SIZE_LOV_DET_ID INT NULL,     -- e.g., small, medium, large
-    FIELD_ICON_LOV_DET_ID INT NULL,     -- e.g., user, email icon
-    PLACEHOLDER VARCHAR(255) NULL,
-    FIELD_ORDER_LOV_DET_ID INT NULL,    -- defines display order
-    STATUS ENUM('active','inactive') DEFAULT 'active',
-    INACTIVE_REASON VARCHAR(255) NULL,
-    C2C_CDATE DATETIME DEFAULT CURRENT_TIMESTAMP,
-    C2C_CUSER VARCHAR(100),
-    C2C_UDATE DATETIME ON UPDATE CURRENT_TIMESTAMP,
-    C2C_UUSER VARCHAR(100),
-    FOREIGN KEY (TAB_ID) REFERENCES TAB_TABLE(TAB_ID) ON DELETE CASCADE,
-    FOREIGN KEY (FIELD_SOURCE_LOV_DET_ID) REFERENCES LIST_OF_VALUES_DETAILS(LOV_DET_ID) ON DELETE SET NULL,
-    FOREIGN KEY (FIELD_SIZE_LOV_DET_ID) REFERENCES LIST_OF_VALUES_DETAILS(LOV_DET_ID) ON DELETE SET NULL,
-    FOREIGN KEY (FIELD_ICON_LOV_DET_ID) REFERENCES LIST_OF_VALUES_DETAILS(LOV_DET_ID) ON DELETE SET NULL,
-    FOREIGN KEY (FIELD_ORDER_LOV_DET_ID) REFERENCES LIST_OF_VALUES_DETAILS(LOV_DET_ID) ON DELETE SET NULL
-);
-
 INSERT INTO LIST_OF_VALUES (LOV_NAME, LOV_DESCRIPTION)
 VALUES ('FIELD_SOURCE', 'Specifies where the field’s data comes from (SP, Table, Custom)'), 
 ('FIELD_SIZE', 'Size of input fields'),
@@ -83,23 +60,135 @@ INSERT INTO LIST_OF_VALUES_DETAILS (LOV_ID, LOV_DET_NAME, LOV_DET_DESCP) VALUES
 (4, '2', 'Second in order'),
 (4, '3', 'Third in order');
 
-INSERT INTO ADD_FORM_TABLE 
-(TAB_ID, FIELD_SOURCE_LOV_DET_ID, FIELD_NAME, FIELD_SIZE_LOV_DET_ID, FIELD_ICON_LOV_DET_ID, PLACEHOLDER, FIELD_ORDER_LOV_DET_ID, C2C_CUSER)
-VALUES
-(1, 1, 'emp_data', 4, 7, 'Enter employee data', 10, 'admin'),
-(1, 1, 'emp_name', 4, 7, 'Enter full name', 10, 'admin'),
-(1, 2, 'emp_gender', 4, 8, 'Select gender', 11, 'admin'),
-(1, 3, 'emp_join_date', 5, 9, 'Select joining date', 12, 'admin');
+CREATE TABLE `form_event_handler_master` (
+  `FORM_EVENT_HANDLER_ID` INT NOT NULL AUTO_INCREMENT,
+  `EVENT_NAME` VARCHAR(100) NOT NULL, -- e.g., onChange, onClick, onBlur
+  `DESCRIPTION` VARCHAR(255) DEFAULT NULL,
+  `STATUS` ENUM('active', 'inactive') DEFAULT 'active',
+  `C2C_CDATE` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` VARCHAR(100) DEFAULT NULL,
+  `C2C_UDATE` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` VARCHAR(100) DEFAULT NULL,
+  PRIMARY KEY (`FORM_EVENT_HANDLER_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE ADD_FORM_JS_VALIDATION (
-    ADD_FORM_JS_ID INT AUTO_INCREMENT PRIMARY KEY,
-    ADD_FORM_ID INT NOT NULL,
-    JS_ID INT NOT NULL,
-    STATUS ENUM('active','inactive') DEFAULT 'active',
-    C2C_CDATE DATETIME DEFAULT CURRENT_TIMESTAMP,
-    C2C_CUSER VARCHAR(100),
-    C2C_UDATE DATETIME ON UPDATE CURRENT_TIMESTAMP,
-    C2C_UUSER VARCHAR(100),
-    FOREIGN KEY (ADD_FORM_ID) REFERENCES ADD_FORM_TABLE(ADD_FORM_ID) ON DELETE CASCADE,
-    FOREIGN KEY (JS_ID) REFERENCES JS_SCRIPT(JS_ID) ON DELETE CASCADE
-);
+INSERT INTO `form_event_handler_master` 
+(`EVENT_NAME`, `DESCRIPTION`, `STATUS`, `C2C_CUSER`)
+VALUES
+('onChange', 'Triggered when the value of the field changes', 'active', 'system'),
+('onClick', 'Triggered when the user clicks the field', 'active', 'system'),
+('onFocus', 'Triggered when the field gains focus', 'active', 'system'),
+('onBlur', 'Triggered when the field loses focus', 'active', 'system'),
+('onInput', 'Triggered immediately when user types in input field', 'active', 'system'),
+('onKeyUp', 'Triggered when a key is released while focusing on the field', 'active', 'system'),
+('onKeyDown', 'Triggered when a key is pressed down while focusing on the field', 'active', 'system'),
+('onSubmit', 'Triggered when the form is submitted', 'active', 'system'),
+('onMouseEnter', 'Triggered when mouse enters the element area', 'active', 'system'),
+('onMouseLeave', 'Triggered when mouse leaves the element area', 'active', 'system'),
+('onSelect', 'Triggered when user selects text inside a field', 'active', 'system'),
+('onDoubleClick', 'Triggered when user double clicks the field', 'active', 'system'),
+('onScroll', 'Triggered when user scrolls within an element', 'inactive', 'system'),
+('onPaste', 'Triggered when user pastes content into the field', 'active', 'system'),
+('onCopy', 'Triggered when user copies content from the field', 'inactive', 'system'),
+('onCut', 'Triggered when user cuts content from the field', 'inactive', 'system');
+
+CREATE TABLE `form_field_event_handler` (
+  `FORM_FIELD_EVENT_HANDLER_ID` INT NOT NULL AUTO_INCREMENT,
+  `FORM_FIELD_ID` INT NOT NULL,
+  `FORM_EVENT_HANDLER_ID` INT NOT NULL,
+  `JS_SCRIPT_ID` INT DEFAULT NULL, -- Optional: link to js_script_library (action to execute)
+  `STATUS` ENUM('active','inactive') DEFAULT 'active',
+  `C2C_CDATE` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` VARCHAR(100) DEFAULT NULL,
+  `C2C_UDATE` DATETIME DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` VARCHAR(100) DEFAULT NULL,
+  PRIMARY KEY (`FORM_FIELD_EVENT_HANDLER_ID`),
+  KEY `FORM_FIELD_ID` (`FORM_FIELD_ID`),
+  KEY `FORM_EVENT_HANDLER_ID` (`FORM_EVENT_HANDLER_ID`),
+  KEY `JS_SCRIPT_ID` (`JS_SCRIPT_ID`),
+  CONSTRAINT `form_field_event_handler_ibfk_1` FOREIGN KEY (`FORM_FIELD_ID`) REFERENCES `add_form_table` (`ADD_FORM_ID`) ON DELETE CASCADE,
+  CONSTRAINT `form_field_event_handler_ibfk_2` FOREIGN KEY (`FORM_EVENT_HANDLER_ID`) REFERENCES `form_event_handler_master` (`FORM_EVENT_HANDLER_ID`) ON DELETE CASCADE,
+  CONSTRAINT `form_field_event_handler_ibfk_3` FOREIGN KEY (`JS_SCRIPT_ID`) REFERENCES `js_script_library` (`js_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `m_form_generation_details` (
+  `Form_Gen_Details_Id` int NOT NULL AUTO_INCREMENT,
+  `Project_ID` int DEFAULT NULL,
+  `Module_ID` int DEFAULT NULL,
+  `Layout_ID` int DEFAULT NULL,
+  `Product_ID` int DEFAULT NULL,
+  `Page_ID` int DEFAULT NULL,
+  `Purpose` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_STATUS` enum('active','inactive') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `C2C_INACTIVE_REASON` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`Form_Gen_Details_Id`),
+  KEY `fk_form_project` (`Project_ID`),
+  KEY `fk_form_product` (`Product_ID`),
+  KEY `fk_form_layout` (`Layout_ID`),
+  KEY `fk_module_id` (`Module_ID`),
+  KEY `fk_form_page` (`Page_ID`),
+  CONSTRAINT `fk_form_layout` FOREIGN KEY (`Layout_ID`) REFERENCES `m_layout` (`Layout_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_form_page` FOREIGN KEY (`Page_ID`) REFERENCES `page` (`PAGE_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_form_product` FOREIGN KEY (`Product_ID`) REFERENCES `m_product` (`Product_ID`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_form_project` FOREIGN KEY (`Project_ID`) REFERENCES `projects` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `fk_module_id` FOREIGN KEY (`Module_ID`) REFERENCES `modules` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+CREATE TABLE `tab_table` (
+  `TAB_ID` int NOT NULL AUTO_INCREMENT,
+  `PROJECT_ID` int NOT NULL,
+  `PAGE_ID` int NOT NULL,
+  `TAB_NAME` varchar(150) NOT NULL,
+  `TAB_IMAGE_ID` int DEFAULT NULL,
+  `STATUS` enum('active','inactive') DEFAULT 'active',
+  `INACTIVE_REASON` varchar(255) DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`TAB_ID`),
+  KEY `PROJECT_ID` (`PROJECT_ID`),
+  KEY `PAGE_ID` (`PAGE_ID`),
+  KEY `TAB_IMAGE_ID` (`TAB_IMAGE_ID`),
+  CONSTRAINT `tab_table_ibfk_1` FOREIGN KEY (`PROJECT_ID`) REFERENCES `projects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `tab_table_ibfk_2` FOREIGN KEY (`PAGE_ID`) REFERENCES `page` (`PAGE_ID`) ON DELETE CASCADE,
+  CONSTRAINT `tab_table_ibfk_3` FOREIGN KEY (`TAB_IMAGE_ID`) REFERENCES `tab_image_table` (`TAB_IMAGE_ID`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `m_section` (
+  `Section_ID` int NOT NULL AUTO_INCREMENT,
+  `TAB_ID` int NOT NULL,
+  `Section_Name` varchar(150) NOT NULL,
+  `Section_Order` int DEFAULT '1',
+  `Section_Description` varchar(255) DEFAULT NULL,
+  `Status` enum('active','inactive') DEFAULT 'active',
+  `Inactive_Reason` varchar(255) DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`Section_ID`),
+  KEY `TAB_ID` (`TAB_ID`),
+  CONSTRAINT `m_section_ibfk_1` FOREIGN KEY (`TAB_ID`) REFERENCES `tab_table` (`TAB_ID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+
+CREATE TABLE `m_column` (
+  `Column_ID` int NOT NULL AUTO_INCREMENT,
+  `Section_ID` int NOT NULL,
+  `Column_Name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Column_Type` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `Column_Order` int DEFAULT '1',
+  `Is_Required` tinyint(1) DEFAULT '0',
+  `Status` enum('active','inactive') COLLATE utf8mb4_unicode_ci DEFAULT 'active',
+  `Inactive_Reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_CDATE` datetime DEFAULT CURRENT_TIMESTAMP,
+  `C2C_CUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `C2C_UDATE` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `C2C_UUSER` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`Column_ID`),
+  KEY `Section_ID` (`Section_ID`),
+  CONSTRAINT `fk_section_column` FOREIGN KEY (`Section_ID`) REFERENCES `m_section` (`Section_ID`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

@@ -1,15 +1,16 @@
 import React from "react";
 import { Table, Form } from "react-bootstrap";
 
-function FieldTypeTable({ rows, onChange }) {
+function FieldTypeTable({ rows, onChange, elementType }) {
   return (
     <Table bordered hover className="table">
       <thead className="table-header">
         <tr className="table-field-row">
           <th className="field-name">S.no</th>
+          <th className="field-name">Element Type</th>
           <th className="field-name">Field Name</th>
           <th className="field-name">Field Status</th>
-          {rows.some((row) => row.fStatus === "inactive") && (
+          {rows.some((row) => row.fStatus === "0") && (
             <th className="field-name">Inactive Reason</th>
           )}
         </tr>
@@ -18,6 +19,21 @@ function FieldTypeTable({ rows, onChange }) {
         {rows.map((row, index) => (
           <tr key={row.sNO}>
             <td>{row.sNO}</td>
+            <td>
+              <Form.Select
+                value={row.elementTypeId}
+                name="elementTypeId"
+                onChange={(e) =>
+                  onChange(index, "elementTypeId", e.target.value)
+                }
+              >
+                {elementType.map((eachLang) => (
+                  <option key={eachLang.id} value={eachLang.id}>
+                    {eachLang.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </td>
             <td>
               <Form.Control
                 type="text"
@@ -30,18 +46,14 @@ function FieldTypeTable({ rows, onChange }) {
               <Form.Check
                 type="switch"
                 id={`status-switch-${index}`}
-                label={row.fStatus === "active" ? "active" : "inactive"}
-                checked={row.fStatus === "active"}
+                label={row.fStatus === "1" ? "Active" : "In-Active"}
+                checked={row.fStatus === "1"}
                 onChange={(e) =>
-                  onChange(
-                    index,
-                    "fStatus",
-                    e.target.checked ? "active" : "inactive"
-                  )
+                  onChange(index, "fStatus", e.target.checked ? "1" : "0")
                 }
               />
             </td>
-            {row.fStatus === "inactive" && (
+            {row.fStatus === "0" && (
               <td>
                 <Form.Control
                   as="textarea"

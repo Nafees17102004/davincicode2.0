@@ -441,3 +441,503 @@ BEGIN
         SELECT 'Tab updated successfully!' AS message;
     END IF;
 END
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_INSERT_FORM_FIELD_WITH_VALIDATIONS`(
+    IN p_TAB_ID INT,
+    IN p_FIELD_SOURCE_ID INT,
+    IN p_FIELD_TYPE_ID INT,
+    IN p_SP_NAME VARCHAR(255),
+    IN p_SP_PARAM VARCHAR(255),
+    IN p_TABLE_NAME VARCHAR(255),
+    IN p_TABLE_COLUMNS VARCHAR(255),
+    IN p_CUSTOM_NAME VARCHAR(255),
+    IN p_FIELD_NAME VARCHAR(100),
+    IN p_FIELD_SIZE_ID INT,
+    IN p_FIELD_ICON_ID INT,
+    IN p_PLACEHOLDER VARCHAR(255),
+    IN p_FIELD_ORDER_ID INT,
+    IN p_STORED_PROCEDURE VARCHAR(255),
+    IN p_VALIDATION_IDS JSON,       -- e.g. '[1,4,6]'
+    IN p_EVENT_HANDLER VARCHAR(255),
+    IN p_CUSER VARCHAR(100)
+)
+BEGIN
+    DECLARE v_err_msg TEXT DEFAULT '';
+    DECLARE v_tab_exists INT DEFAULT 0;
+    DECLARE v_field_exists INT DEFAULT 0;
+    DECLARE v_FORM_FIELD_ID INT DEFAULT 0;
+
+    -- Error handler
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION 
+    BEGIN
+        ROLLBACK;
+        SET v_err_msg = CONCAT('SQL Exception occurred while inserting form field. Details: ', COALESCE(v_err_msg, 'Unknown error'));
+        SELECT FALSE AS success, v_err_msg AS message;
+    END;
+
+    START TRANSACTION;
+
+    -- ===================================================
+    -- 1. Validate Required Fields
+    -- ===================================================
+    IF p_TAB_ID IS NULL OR p_TAB_ID = 0 THEN
+        SET v_err_msg = 'TAB_ID cannot be NULL or 0.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_SOURCE_ID IS NULL OR p_FIELD_SOURCE_ID = 0 THEN
+        SET v_err_msg = 'FIELD_SOURCE_ID cannot be NULL or 0.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_TYPE_ID IS NULL OR p_FIELD_TYPE_ID = 0 THEN
+        SET v_err_msg = 'FIELD_TYPE_ID cannot be NULL or 0.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_NAME IS NULL OR TRIM(p_FIELD_NAME) = '' THEN
+        SET v_err_msg = 'FIELD_NAME cannot be empty.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_CUSER IS NULL OR TRIM(p_CUSER) = '' THEN
+        SET v_err_msg = 'Created user (CUSER) cannot be empty.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 2. Existence Checks
+    -- ===================================================
+    SELECT COUNT(*) INTO v_tab_exists FROM TAB_TABLE WHERE TAB_ID = p_TAB_ID;
+    IF v_tab_exists = 0 THEN
+        SET v_err_msg = CONCAT('TAB_ID ', p_TAB_ID, ' does not exist in TAB_TABLE.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    SELECT COUNT(*) INTO v_field_exists 
+    FROM ADD_FORM_TABLE 
+    WHERE FIELD_NAME = p_FIELD_NAME AND TAB_ID = p_TAB_ID;
+
+    IF v_field_exists > 0 THEN
+        SET v_err_msg = CONCAT('FIELD_NAME "', p_FIELD_NAME, '" already exists for this TAB_ID.');
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 3. Validate Foreign Keys (if not null)
+    -- ===================================================
+    IF p_FIELD_SOURCE_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_SOURCE_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_SIZE_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_SIZE_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_ICON_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_ICON_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_FIELD_ORDER_ID NOT IN (SELECT LOV_DET_ID FROM LIST_OF_VALUES_DETAILS) THEN
+        SET v_err_msg = 'Invalid FIELD_ORDER_ID reference.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 4. Logical and JSON Validations
+    -- ===================================================
+    IF p_SP_NAME IS NOT NULL AND TRIM(p_SP_NAME) != '' AND (p_SP_PARAM IS NULL OR TRIM(p_SP_PARAM) = '') THEN
+        SET v_err_msg = 'If SP_NAME is provided, SP_PARAM must also be specified.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_TABLE_NAME IS NOT NULL AND TRIM(p_TABLE_NAME) != '' AND (p_TABLE_COLUMNS IS NULL OR TRIM(p_TABLE_COLUMNS) = '') THEN
+        SET v_err_msg = 'If TABLE_NAME is provided, TABLE_COLUMNS must also be specified.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    IF p_VALIDATION_IDS IS NOT NULL AND JSON_VALID(p_VALIDATION_IDS) = 0 THEN
+        SET v_err_msg = 'Invalid JSON format in VALIDATION_IDS.';
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = v_err_msg;
+    END IF;
+
+    -- ===================================================
+    -- 5. Insert into ADD_FORM_TABLE
+    -- ===================================================
+    INSERT INTO ADD_FORM_TABLE (
+        TAB_ID,
+        FIELD_SOURCE_LOV_DET_ID,
+        FIELD_TYPE_ID,
+        SP_NAME,
+        SP_PARAM,
+        TABLE_NAME,
+        TABLE_COLUMNS,
+        CUSTOM_NAME,
+        FIELD_NAME,
+        FIELD_SIZE_LOV_DET_ID,
+        FIELD_ICON_LOV_DET_ID,
+        PLACEHOLDER,
+        FIELD_ORDER_LOV_DET_ID,
+        STORING_SP,
+        EVENT_HANDLER,
+        STATUS,
+        C2C_CUSER,
+        C2C_CDATE
+    )
+    VALUES (
+        p_TAB_ID,
+        p_FIELD_SOURCE_ID,
+        p_FIELD_TYPE_ID,
+        p_SP_NAME,
+        p_SP_PARAM,
+        p_TABLE_NAME,
+        p_TABLE_COLUMNS,
+        p_CUSTOM_NAME,
+        p_FIELD_NAME,
+        p_FIELD_SIZE_ID,
+        p_FIELD_ICON_ID,
+        p_PLACEHOLDER,
+        p_FIELD_ORDER_ID,
+        p_STORED_PROCEDURE,
+        p_EVENT_HANDLER,
+        'active',
+        p_CUSER,
+        NOW()
+    );
+
+    SET v_FORM_FIELD_ID = LAST_INSERT_ID();
+
+    -- ===================================================
+    -- 6. Insert into FORM_VALIDATION_TABLE
+    -- ===================================================
+    IF p_VALIDATION_IDS IS NOT NULL AND JSON_LENGTH(p_VALIDATION_IDS) > 0 THEN
+        INSERT INTO FORM_VALIDATION_TABLE (
+            FORM_FIELD_ID,
+            JS_SCRIPT_ID,
+            C2C_CUSER,
+            C2C_CDATE
+        )
+        SELECT 
+            v_FORM_FIELD_ID,
+            JSON_UNQUOTE(js.id),
+            p_CUSER,
+            NOW()
+        FROM JSON_TABLE(
+            p_VALIDATION_IDS,
+            '$[*]' COLUMNS (id VARCHAR(10) PATH '$')
+        ) AS js;
+    END IF;
+
+    COMMIT;
+
+    -- ===================================================
+    -- Success Message
+    -- ===================================================
+    SELECT TRUE AS success,
+           CONCAT('Field "', p_FIELD_NAME, '" successfully added to TAB_ID ', p_TAB_ID, '.') AS message,
+           v_FORM_FIELD_ID AS inserted_id;
+END
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `SP_GET_FORM_FIELD_BY_TAB_ID`(
+    IN p_TAB_ID INT
+)
+BEGIN
+    DECLARE v_tab_exists INT DEFAULT 0;
+
+    -- ========================================
+    -- 1. Input Validation
+    -- ========================================
+    IF p_TAB_ID IS NULL OR p_TAB_ID = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Invalid Tab ID provided.';
+    END IF;
+
+    SELECT COUNT(*) INTO v_tab_exists FROM tab_table WHERE TAB_ID = p_TAB_ID;
+    IF v_tab_exists = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Tab ID does not exist.';
+    END IF;
+
+    -- ========================================
+    -- 2. Fetch All Fields with Lookups
+    -- ========================================
+    SELECT 
+        aft.ADD_FORM_ID,
+        aft.TAB_ID,
+        aft.FIELD_NAME,
+        aft.CUSTOM_NAME,
+        aft.PLACEHOLDER,
+        aft.SP_NAME,
+        aft.SP_PARAM,
+        aft.TABLE_NAME,
+        aft.TABLE_COLUMNS,
+        aft.STORING_SP,
+        aft.STATUS,
+        aft.C2C_CDATE,
+        aft.C2C_CUSER,
+
+        -- =======================
+        -- FIELD TYPE
+        -- =======================
+        ft.FIELD_NAME AS FIELD_TYPE_NAME,
+
+        -- =======================
+        -- LOOKUPS (LOV DETAILS)
+        -- =======================
+        src.LOV_DET_NAME AS FIELD_SOURCE_NAME,
+        size.LOV_DET_NAME AS FIELD_SIZE_NAME,
+        icon.LOV_DET_NAME AS FIELD_ICON_NAME,
+        ord.LOV_DET_NAME AS FIELD_ORDER_NAME,
+
+        -- =======================
+        -- EVENT HANDLER
+        -- =======================
+        feh.FORM_EVENT_HANDLER_ID,
+        feh.EVENT_NAME AS EVENT_HANDLER_NAME,
+        feh.DESCRIPTION AS EVENT_HANDLER_DESCRIPTION,
+        feh.STATUS AS EVENT_HANDLER_STATUS,
+
+        -- =======================
+        -- FRONTEND HINTS
+        -- =======================
+        CASE 
+            WHEN ft.FIELD_NAME IN ('Textbox','Textarea') THEN 'input'
+            WHEN ft.FIELD_NAME = 'Dropdown' THEN 'select'
+            WHEN ft.FIELD_NAME = 'Checkbox' THEN 'checkbox'
+            WHEN ft.FIELD_NAME = 'Radio' THEN 'radio'
+            ELSE 'custom'
+        END AS RENDER_TYPE,
+
+        -- =======================
+        -- STATUS COLOR MAPPING
+        -- =======================
+        CASE 
+            WHEN aft.STATUS = 'active' THEN 'green'
+            WHEN aft.STATUS = 'inactive' THEN 'red'
+            ELSE 'gray'
+        END AS STATUS_COLOR,
+
+        -- =======================
+        -- VALIDATIONS (AS JSON)
+        -- =======================
+        (
+            SELECT 
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'validation_id', fv.FORM_FIELD_VALIDATION_ID,
+                        'rule', fv.VALIDATION_RULE,
+                        'js_id', fv.JS_SCRIPT_ID,
+                        'js_name', js.js_name,
+                        'js_script', js.js_script,
+                        'status', fv.STATUS
+                    )
+                )
+            FROM form_validation_table fv
+            LEFT JOIN js_script_library js ON js.js_id = fv.JS_SCRIPT_ID
+            WHERE fv.FORM_FIELD_ID = aft.ADD_FORM_ID
+              AND fv.STATUS = 'active'
+        ) AS VALIDATIONS_JSON
+
+    FROM add_form_table aft
+    LEFT JOIN field_type ft ON ft.FIELD_TYPE_ID = aft.FIELD_TYPE_ID
+    LEFT JOIN list_of_values_details src ON src.LOV_DET_ID = aft.FIELD_SOURCE_LOV_DET_ID
+    LEFT JOIN list_of_values_details size ON size.LOV_DET_ID = aft.FIELD_SIZE_LOV_DET_ID
+    LEFT JOIN list_of_values_details icon ON icon.LOV_DET_ID = aft.FIELD_ICON_LOV_DET_ID
+    LEFT JOIN list_of_values_details ord ON ord.LOV_DET_ID = aft.FIELD_ORDER_LOV_DET_ID
+    LEFT JOIN form_event_handler_master feh ON feh.FORM_EVENT_HANDLER_ID = aft.EVENT_HANDLER_ID
+
+    WHERE aft.TAB_ID = p_TAB_ID
+      AND aft.STATUS = 'active'
+
+    ORDER BY CAST(ord.LOV_DET_NAME AS UNSIGNED), aft.ADD_FORM_ID;
+END
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `LT_DCS_SP_SAVE_FORM_GENERATION_DETAILS`(
+    IN p_Project_ID INT,
+    IN p_Product_ID INT,
+    IN p_Layout_ID INT,
+    IN p_Module_ID INT,
+    IN p_PageName VARCHAR(200),
+    IN p_Purpose VARCHAR(500),
+    IN p_TabStructure JSON,   -- Nested JSON for Tabs -> Sections -> Fields
+    IN p_EBMS_User VARCHAR(100),
+    IN p_EBMS_Status ENUM('active','inactive'),
+    IN p_EBMS_Inactive_Reason VARCHAR(250)
+)
+BEGIN
+    DECLARE v_Form_ID INT;
+    DECLARE i INT DEFAULT 0;
+    DECLARE tab_count INT;
+    DECLARE v_TabName VARCHAR(150);
+    DECLARE v_TabImageID INT;
+    DECLARE v_TabID INT;
+    DECLARE section_count INT;
+    DECLARE j INT DEFAULT 0;
+    DECLARE v_SectionOrder INT;
+    DECLARE v_SectionDesc VARCHAR(255);
+    DECLARE v_SectionID INT;
+    DECLARE field_count INT;
+    DECLARE k INT DEFAULT 0;
+    DECLARE v_ColumnName VARCHAR(255);
+    DECLARE v_LabelName VARCHAR(100);
+    DECLARE v_FieldType INT;
+    DECLARE v_FieldID INT;
+    DECLARE eh_count INT;
+    DECLARE l INT DEFAULT 0;
+    DECLARE v_EH_ID INT;
+    DECLARE v_TriggerCond VARCHAR(255);
+    DECLARE val_count INT;
+    DECLARE m INT DEFAULT 0;
+    DECLARE v_JS_ID INT;
+    DECLARE v_ValidationRule VARCHAR(255);
+
+    -- Insert form generation details
+    INSERT INTO m_form_generation_details
+    (Project_ID, Module_ID, Layout_ID, Product_ID, page_name, Purpose, C2C_CDATE, C2C_CUSER, C2C_STATUS, C2C_INACTIVE_REASON)
+    VALUES
+    (p_Project_ID, p_Module_ID, p_Layout_ID, p_Product_ID, p_PageName, p_Purpose, NOW(), p_EBMS_User, p_EBMS_Status, p_EBMS_Inactive_Reason);
+
+    SET v_Form_ID = LAST_INSERT_ID();
+
+    SET tab_count = JSON_LENGTH(p_TabStructure);
+
+    WHILE i < tab_count DO
+        SET v_TabName   = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].TabName')));
+        SET v_TabImageID = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Icon')));
+
+        -- Insert Tab
+        INSERT INTO tab_table
+        (Form_Gen_Details_Id, PROJECT_ID, TAB_NAME, TAB_IMAGE_ID, STATUS, INACTIVE_REASON, C2C_CDATE, C2C_CUSER)
+        VALUES
+        (v_Form_ID, p_Project_ID, v_TabName, v_TabImageID, p_EBMS_Status, p_EBMS_Inactive_Reason, NOW(), p_EBMS_User);
+
+        SET v_TabID = LAST_INSERT_ID();
+
+        -- Loop through Sections
+        SET section_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections')));
+        SET j = 0;
+
+        WHILE j < section_count DO
+            SET v_SectionOrder = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].SectionIndex')));
+            SET v_SectionDesc  = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].SectionType')));
+
+            -- Insert Section
+            INSERT INTO m_section
+            (TAB_ID, Section_Order, Section_Description, Status, Inactive_Reason, C2C_CDATE, C2C_CUSER)
+            VALUES
+            (v_TabID, v_SectionOrder, v_SectionDesc, p_EBMS_Status, p_EBMS_Inactive_Reason, NOW(), p_EBMS_User);
+
+            SET v_SectionID = LAST_INSERT_ID();
+
+            -- Loop through Fields
+            SET field_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields')));
+            SET k = 0;
+
+            WHILE k < field_count DO
+                SET v_ColumnName = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].ColumnName')));
+                SET v_LabelName  = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].LabelName')));
+                SET v_FieldType  = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].FieldType')));
+
+                -- Insert Field
+                INSERT INTO m_form_field_details
+                (SECTION_ID, FIELD_TYPE_ID, CUSTOM_NAME, LABEL_NAME, STATUS, INACTIVE_REASON, C2C_CDATE, C2C_CUSER)
+                VALUES
+                (v_SectionID, v_FieldType, v_ColumnName, v_LabelName, p_EBMS_Status, p_EBMS_Inactive_Reason, NOW(), p_EBMS_User);
+
+                SET v_FieldID = LAST_INSERT_ID();
+
+                -- Insert Event Handlers if exist
+                SET eh_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].EventHandlers')));
+                SET l = 0;
+                WHILE l < eh_count DO
+                    SET v_EH_ID = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].EventHandlers[', l, '].HandlerID')));
+                    SET v_TriggerCond = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].EventHandlers[', l, '].TriggerCondition')));
+
+                    INSERT INTO l_form_event_handler_field_details
+                    (FORM_EVENT_HANDLER_ID, FORM_GEN_FIELD_DETAILS_ID, TRIGGER_CONDITION, STATUS, C2C_CDATE, C2C_CUSER)
+                    VALUES
+                    (v_EH_ID, v_FieldID, v_TriggerCond, p_EBMS_Status, NOW(), p_EBMS_User);
+
+                    SET l = l + 1;
+                END WHILE;
+
+                -- Insert Validations if exist
+                SET val_count = JSON_LENGTH(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].Validations')));
+                SET m = 0;
+                WHILE m < val_count DO
+                    SET v_JS_ID = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].Validations[', m, '].JsID')));
+                    SET v_ValidationRule = JSON_UNQUOTE(JSON_EXTRACT(p_TabStructure, CONCAT('$[', i, '].Sections[', j, '].Fields[', k, '].Validations[', m, '].ValidationRule')));
+
+                    INSERT INTO form_validation_table
+                    (FORM_FIELD_ID, JS_SCRIPT_ID, VALIDATION_RULE, STATUS, C2C_CDATE, C2C_CUSER)
+                    VALUES
+                    (v_FieldID, v_JS_ID, v_ValidationRule, p_EBMS_Status, NOW(), p_EBMS_User);
+
+                    SET m = m + 1;
+                END WHILE;
+
+                SET k = k + 1;
+            END WHILE;
+
+            SET j = j + 1;
+        END WHILE;
+
+        SET i = i + 1;
+    END WHILE;
+
+END
+
+CALL LT_DCS_SP_SAVE_FORM_GENERATION_DETAILS(
+    1,                  -- p_Project_ID
+    2,                  -- p_Product_ID
+    3,                  -- p_Layout_ID
+    4,                  -- p_Module_ID
+    'Employee Form',    -- p_PageName
+    'Form to capture employee data', -- p_Purpose
+    '[
+        {
+            "TabIndex": 1,
+            "TabName": "General Info",
+            "Icon": 1,
+            "Sections": [
+                {
+                    "SectionIndex": 1,
+                    "SectionType": "Grid",
+                    "Fields": [
+                        {"ColumnName": "FirstName", "LabelName": "First Name", "FieldType": 1},
+                        {"ColumnName": "LastName", "LabelName": "Last Name", "FieldType": 1},
+                        {"ColumnName": "Email", "LabelName": "Email ID", "FieldType": 2}
+                    ]
+                },
+                {
+                    "SectionIndex": 2,
+                    "SectionType": "Static",
+                    "Fields": [
+                        {"ColumnName": "DOB", "LabelName": "Date of Birth", "FieldType": 3}
+                    ]
+                }
+            ]
+        },
+        {
+            "TabIndex": 2,
+            "TabName": "Job Details",
+            "Icon": 1,
+            "Sections": [
+                {
+                    "SectionIndex": 1,
+                    "SectionType": "Grid",
+                    "Fields": [
+                        {"ColumnName": "Department", "LabelName": "Department", "FieldType": 4},
+                        {"ColumnName": "Role", "LabelName": "Role", "FieldType": 5}
+                    ]
+                }
+            ]
+        }
+    ]',                  -- p_TabStructure: JSON string
+    101,                 -- p_EBMS_User
+    1,                   -- p_EBMS_Status (1 = active)
+    'Initial Creation'   -- p_EBMS_Inactive_Reason
+);

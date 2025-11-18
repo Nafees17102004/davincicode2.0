@@ -55,12 +55,22 @@ const getFieldTypes = async () => {
   }
 };
 
-const insertFieldTypes = async (fieldName, fStatus, fInactiveReason) => {
+const insertFieldTypes = async (
+  fieldTypeId,
+  elementTypeId,
+  fieldName,
+  fStatus,
+  fInactiveReason,
+  cUser
+) => {
   try {
     const result = await createProjectRepo.insertFieldTypes(
+      fieldTypeId,
+      elementTypeId,
       fieldName,
       fStatus,
-      fInactiveReason
+      fInactiveReason,
+      cUser
     );
     console.log(result);
     return result;

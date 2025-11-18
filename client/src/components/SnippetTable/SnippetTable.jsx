@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Table, Form } from "react-bootstrap";
 import projectAPI from "../../api/Api";
 
-function SnippetTable({ rows, onChange }) {
+function SnippetTable({
+  rows,
+  onChange,
+  snippetTypeData,
+  fielTypeData,
+  elementData,
+}) {
   const [language, setLanguage] = useState([]);
-  const [field, setField] = useState([]);
 
   useEffect(() => {
     fetchLanguages();
-    fetchFieldTypes();
   }, []);
 
   const fetchLanguages = async () => {
@@ -27,44 +31,40 @@ function SnippetTable({ rows, onChange }) {
     }
   };
 
-  const fetchFieldTypes = async () => {
-    try {
-      await projectAPI.getFieldTypes().then((response) => {
-        const formattedFields = response.data.map((field) => ({
-          fId: field.FIELD_TYPE_ID,
-          fName: field.FIELD_NAME,
-          fStatus: field.status,
-          fInactiveReason: field.inactive_reason,
-        }));
-        setField(formattedFields);
-      });
-    } catch (err) {
-      console.error("Error fetching languages:", err);
-    }
-  };
-
   return (
     <Form.Group className="p-2">
-      <Form.Label htmlFor="fieldType">Select Field Name</Form.Label>
+      <Form.Label htmlFor="fieldType">Select Element Type</Form.Label>
       <Form.Select
         id="fieldType"
-        value={rows.fieldTypeId}
-        name="fieldTypeId"
+        value={rows.elementTypeId}
+        name="elementTypeId"
         onChange={(e) => onChange(e)}
         className="mb-3"
       >
-        <option value="">Select Field</option>
-        {field.map((eachField) => (
-          <option key={eachField.fId} value={eachField.fId}>
-            {eachField.fName}
+        {elementData.map((eachField) => (
+          <option key={eachField.id} value={eachField.id}>
+            {eachField.name}
           </option>
         ))}
-        {/* <option value="1">Node JS</option>
-                <option value="2">Python</option>
-                <option value="3">Java</option>
-                <option value="4">React</option>
-                <option value="5">C#</option> */}
       </Form.Select>
+      <Form.Label>Select Field Type</Form.Label>
+      <Form.Select
+        value={rows.fieldTypeId}
+        name="fieldTypeId"
+        onChange={onChange}
+        disabled={!rows.elementTypeId || rows.elementTypeId === "0"}
+      >
+        {!rows.elementTypeId || rows.elementTypeId === "0" ? (
+          <option value="0">-- Select Element Type First --</option>
+        ) : null}
+
+        {fielTypeData.map((eachField) => (
+          <option key={eachField.id} value={eachField.id}>
+            {eachField.name}
+          </option>
+        ))}
+      </Form.Select>
+
       <Form.Label htmlFor="langName">Select language Name</Form.Label>
       <Form.Select
         id="langName"
@@ -80,6 +80,25 @@ function SnippetTable({ rows, onChange }) {
           </option>
         ))}
       </Form.Select>
+
+      {/* CORRECTED SNIPPET TYPE DROPDOWN */}
+      {/* <Form.Label htmlFor="snippetType">Select Snippet Type</Form.Label>
+      <Form.Select
+        id="snippetType"
+        value={rows.snippetTypeId || ""}
+        name="snippetTypeId"
+        onChange={(e) => onChange(e)}
+        className="mb-3"
+      >
+        <option value="">Select Snippet Type</option>
+        {snippetTypeData &&
+          snippetTypeData.map((eachType) => (
+            <option key={eachType.id} value={eachType.id}>
+              {eachType.name}
+            </option>
+          ))}
+      </Form.Select> */}
+
       <Form.Label htmlFor="snipName">Snippet Name</Form.Label>
       <Form.Control
         id="snipName"
