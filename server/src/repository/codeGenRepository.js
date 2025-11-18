@@ -30,11 +30,26 @@ const insertModule = async (
   }
 };
 
-const insertSnippet = async (fieldTypeId, languageId, snippetName, snippet) => {
+const insertSnippet = async (
+  snippetId,
+  elementTypeId,
+  fieldTypeId,
+  languageId,
+  snippetName,
+  snippet
+) => {
   try {
-    const query = "Call InsertSnippet(?,?,?,?)";
-    const data = [fieldTypeId, languageId, snippetName, snippet];
+    const query = "Call LT_DCS_SP_INSERT_UPDATE_SNIPPET(?,?,?,?,?,?)";
+    const data = [
+      snippetId,
+      elementTypeId,
+      fieldTypeId,
+      languageId,
+      snippetName,
+      snippet,
+    ];
     const result = await pool.query(query, data);
+    console.log(result[0]);
     return result[0];
   } catch (err) {
     console.error("Error in Repository.insertSnippet:", err);

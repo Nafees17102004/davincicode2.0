@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 import projectAPI from "../../api/Api";
 import { useNavigate } from "react-router-dom";
@@ -7,22 +7,42 @@ import FieldTypeTable from "../FieldTypeTable/FieldTypeTable";
 function FieldTypeForm() {
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
+  const [elementType, setElementType] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchLanguageData();
+  }, []);
+
+  const fetchLanguageData = async () => {
+    try {
+      await projectAPI.getLovDropdown("ELEMENT_TYPE", null).then((res) => {
+        const formattedData = res.data.result.map((eachItem) => ({
+          id: eachItem.Id,
+          name: eachItem.Name,
+        }));
+        setElementType(formattedData);
+      });
+    } catch (error) {
+      console.error("Error while fetching lanuage dropdown: ", error);
+    }
+  };
 
   const handleAddRow = () => {
     setRows([
       ...rows,
       {
         sNO: idCounter,
+        fieldTypeId: null,
+        elementTypeId: 0,
         fieldName: "",
-        fStatus: "active",
+        fStatus: "1",
         fInactiveReason: null,
+        cUser: "admin",
       },
     ]);
     setIdCounter(idCounter + 1);
   };
-
-  console.log(rows);
 
   const handleChange = (index, field, value) => {
     const updatedRows = [...rows];
@@ -57,16 +77,17 @@ function FieldTypeForm() {
         </Button>
       </div>
 
-      <FieldTypeTable rows={rows} onChange={handleChange} />
+      <FieldTypeTable
+        rows={rows}
+        onChange={handleChange}
+        elementType={elementType}
+      />
 
       <div className="project-btn-container">
         <Button onClick={handleSubmit} className="submit-btn">
           Submit
         </Button>
-        <Button
-          className="view-project-btn"
-          onClick={() => handleViewField()}
-        >
+        <Button className="view-project-btn" onClick={() => handleViewField()}>
           View Stored Data
         </Button>
       </div>

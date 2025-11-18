@@ -3,6 +3,7 @@ const API_BASE_URL = "http://localhost:5000/code"; // Replace with your backend 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: true,
 });
 
 const insertProject = (projectData) => {
@@ -41,8 +42,13 @@ const insertFieldTypes = (fieldData) => {
   return api.post("/add-field-type", fieldData);
 };
 
+// Snippet API's
 const insertSnippet = (snippetData) => {
   return api.post("/insertSnippet", snippetData);
+};
+
+const getSnippet = () => {
+  return api.get("/snippet");
 };
 
 // Lov API's
@@ -78,6 +84,22 @@ const insertTabDet = (tabData) => {
   return api.post(`/insert-tab`, tabData);
 };
 
+const insertAddFormDet = (addFormData) => {
+  return api.post(`/add-form-det`, addFormData);
+};
+
+const insertFormGen = (formGenData) => {
+  return api.post("/form-generation/save", formGenData);
+};
+
+const viewFormGenList = () => {
+  return api.get("/form-generation/get");
+};
+
+const codeGen = (payload) => {
+  return api.post("/form-generation/gen", payload);
+};
+
 const projectAPI = {
   insertProject,
   viewProjects,
@@ -88,6 +110,7 @@ const projectAPI = {
   getSnippetById,
   insertFieldTypes,
   insertSnippet,
+  getSnippet,
   getFieldTypes,
   insertLov,
   viewLovs,
@@ -97,6 +120,10 @@ const projectAPI = {
   getLovWithDet,
   getLovDropdown,
   insertTabDet,
+  insertAddFormDet,
+  insertFormGen,
+  viewFormGenList,
+  codeGen,
 };
 
 export default projectAPI;

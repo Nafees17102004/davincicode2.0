@@ -74,3 +74,37 @@
     margin-bottom: 10px;
   }
 }
+/* Success highlight */
+.success-highlight {
+  background-color: #c2f0c2; /* green for success */
+  color: #000; /* text color */
+  padding: 5px 10px; /* optional styling */
+  border-radius: 4px; /* optional styling */
+}
+
+/* Error highlight */
+.error-highlight {
+  background-color: #ffcccc; /* red for error */
+  color: #000; /* text color */
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+/* ColumnEditor.css */
+.event-handler-modal-container {
+  position: relative;
+  z-index: 1000;
+}
+
+.column-editor-wrapper {
+  position: relative;
+}
+
+/* Ensure modal stays within column editor context */
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+.modal {
+  z-index: 1050 !important;
+}

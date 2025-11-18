@@ -43,7 +43,7 @@ function ProjectForm() {
       alert("An error occurred while submitting the projects.");
     });
     setRows([]);
-    useNavigate('/view-projects');
+    navigate('/view-projects');
   };
   return (
     <div className="project-form-container mt-4">

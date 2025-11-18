@@ -1,0 +1,35 @@
+{{! Repository File Template }}
+const pool = require("../config/dbConfig.js");
+
+{{#each Tabs}}
+  {{#each Sections}}
+    {{#each Fields}}
+      const insert{{pascalCase labelName}}Details = async (
+      {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+      {{/if}}
+      ) => { try { const query = `CALL
+      {{spName}}(
+      {{#if spParams.length}}
+        {{#each spParams}}?{{#unless @last}}, {{/unless}}{{/each}}
+      {{/if}}
+      );`; const params = [
+      {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+      {{/if}}
+      ]; const [rows] = await pool.query(query, params); return rows; } catch
+      (error) { console.error("Repository Error ({{labelName}}):", error); throw
+      error; } };
+    {{/each}}
+  {{/each}}
+{{/each}}
+
+module.exports = {
+{{#each Tabs}}
+  {{#each Sections}}
+    {{#each Fields}}
+      insert{{pascalCase labelName}}Details,
+    {{/each}}
+  {{/each}}
+{{/each}}
+};

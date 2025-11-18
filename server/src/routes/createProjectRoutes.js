@@ -52,4 +52,7 @@ router.put(
 router.post("/add-form-det", addFormController.insertFormDetails);
 // router.post("/add-tab", addFormController.insertTabDetails);
 
+//DEMO
+router.get("/generate-field-code", addFormController.demoGenerateCode);
+
 module.exports = router;

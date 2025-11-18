@@ -72,11 +72,6 @@ function ProjectTable({rows, onChange}) {
                     {eachLang.lName}
                   </option>
                 ))}
-                {/* <option value="1">Node JS</option>
-                <option value="2">Python</option>
-                <option value="3">Java</option>
-                <option value="4">React</option>
-                <option value="5">C#</option> */}
               </Form.Select>
             </td>
             <td>
