@@ -59,7 +59,26 @@ const formGenRepository = {
       return { success: false, error: "Error in fetching the data in Repo" };
     }
   },
-  getSnippetsByElementAndLanguage: async (elementTypeId, languageId) => {
+  getSnippetsByElementAndLanguage: async (
+    fieldTypeId,
+    elementTypeId,
+    languageId
+  ) => {
+    if (fieldTypeId) {
+      const fieldTypeCheckingQuery = `
+    SELECT 
+    ft.FIELD_TYPE_ID,
+    ft.FIELD_NAME,
+    et.element_name AS elementType
+FROM field_type ft
+LEFT JOIN dcs_m_element_type et 
+    ON et.element_type_id = ft.element_type_id
+WHERE ft.FIELD_TYPE_ID = ?;
+    `;
+      const [check] = await pool.query(fieldTypeCheckingQuery, fieldTypeId);
+      console.log(check);
+    }
+
     const query = `
     SELECT 
         ft.FIELD_NAME AS layer_name,
