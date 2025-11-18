@@ -132,7 +132,7 @@ const formGenService = {
             // Extracting template from DB using fieldTypeId and languageId via ProjectId
             const snippetRows =
               await formGenRepository.getSnippetsByElementAndLanguage(
-                field.elementTypeId,
+                53,
                 languageId
               );
             for (const snippet of snippetRows) {

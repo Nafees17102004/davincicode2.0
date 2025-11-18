@@ -5,8 +5,7 @@ import projectAPI from "../../api/Api";
 function SnippetTable({
   rows,
   onChange,
-  snippetTypeData,
-  fielTypeData,
+  fieldTypeData,
   elementData,
 }) {
   const [language, setLanguage] = useState([]);
@@ -58,7 +57,7 @@ function SnippetTable({
           <option value="0">-- Select Element Type First --</option>
         ) : null}
 
-        {fielTypeData.map((eachField) => (
+        {fieldTypeData.map((eachField) => (
           <option key={eachField.id} value={eachField.id}>
             {eachField.name}
           </option>
@@ -67,6 +66,7 @@ function SnippetTable({
 
       <Form.Label htmlFor="langName">Select language Name</Form.Label>
       <Form.Select
+      is
         id="langName"
         value={rows.languageId}
         name="languageId"
