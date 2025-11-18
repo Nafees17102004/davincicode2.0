@@ -75,6 +75,11 @@ const formGenService = {
       // Compile properly
       // const template = handleBarJs.compile(templateContent);
 
+      // Comparison operator
+      handleBarJs.registerHelper("eq", function (a, b) {
+        return a === b;
+      });
+
       // handleBarJs pascalCase
       handleBarJs.registerHelper("pascalCase", function (str) {
         if (!str) return "";
@@ -110,7 +115,7 @@ const formGenService = {
       // Handlebars expects raw "result", not service wrapper
       const payload = data.result;
 
-      console.log(payload);
+      // console.log(payload);
       // fetch language id dynamically using project id from json
       const languageId = await formGenRepository.getLanguageIdByProjectId(
         payload.ProjectID
@@ -132,7 +137,8 @@ const formGenService = {
             // Extracting template from DB using fieldTypeId and languageId via ProjectId
             const snippetRows =
               await formGenRepository.getSnippetsByElementAndLanguage(
-                53,
+                field.fieldTypeId,
+                53, // Element ID (layers)
                 languageId
               );
             for (const snippet of snippetRows) {
@@ -159,16 +165,18 @@ const formGenService = {
         }
       }
 
+      let testCode = "";
       for (const tab of payload.Tabs) {
         for (const section of tab.Sections) {
           for (const field of section.Fields) {
-            console.log(field); // To check data of individual field or columns
+            // console.log(field); // To check data of individual field or columns
+            // Generate component code
+            // const output = template(field);
+            // Updating the final output using finalOutput
+            // testCode += output + "\n\n";
           }
         }
       }
-
-      // Generate component code
-      // const output = template(payload);
 
       // Testing the template by writing the content to the specific path
       const outputPath = path.join(__dirname, "GeneratedForm.js");
