@@ -7,7 +7,7 @@ import FieldTypeTable from "../FieldTypeTable/FieldTypeTable";
 function FieldTypeForm() {
   const [rows, setRows] = useState([]);
   const [idCounter, setIdCounter] = useState(1);
-  const [fieldType, setFieldType] = useState([]);
+  const [elementType, setElementType] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,35 +16,33 @@ function FieldTypeForm() {
 
   const fetchLanguageData = async () => {
     try {
-      await projectAPI.getLovDropdown("FIELD_TYPE", null).then((res) => {
+      await projectAPI.getLovDropdown("ELEMENT_TYPE", null).then((res) => {
         const formattedData = res.data.result.map((eachItem) => ({
           id: eachItem.Id,
           name: eachItem.Name,
         }));
-        setFieldType(formattedData);
+        setElementType(formattedData);
       });
     } catch (error) {
       console.error("Error while fetching lanuage dropdown: ", error);
     }
   };
 
-  console.log(fieldType);
-
   const handleAddRow = () => {
     setRows([
       ...rows,
       {
         sNO: idCounter,
-        fieldTypeId: 0,
+        fieldTypeId: null,
+        elementTypeId: 0,
         fieldName: "",
-        fStatus: "active",
+        fStatus: "1",
         fInactiveReason: null,
+        cUser: "admin",
       },
     ]);
     setIdCounter(idCounter + 1);
   };
-
-  console.log(rows);
 
   const handleChange = (index, field, value) => {
     const updatedRows = [...rows];
@@ -82,7 +80,7 @@ function FieldTypeForm() {
       <FieldTypeTable
         rows={rows}
         onChange={handleChange}
-        fieldType={fieldType}
+        elementType={elementType}
       />
 
       <div className="project-btn-container">

@@ -59,37 +59,25 @@ const formGenRepository = {
       return { success: false, error: "Error in fetching the data in Repo" };
     }
   },
-  getSnippetByFsm: async (fieldTypeId, languageId, snippetTypeId = null) => {
-    try {
-      const query = `
-      SELECT 
-          cs.Snippet_ID,
-          cs.Snippet_Name,
-          cs.Snippet,
-          cs.Snippet_type_id,
-          st.Snippet_type_name,
-          f.FIELD_NAME,
-          l.name AS language_name
-      FROM field_snippet_map fsm
-      JOIN code_snippet cs ON fsm.SNIPPET_ID = cs.Snippet_ID
-      JOIN dcs_m_snippet_type st ON cs.Snippet_type_id = st.Snippet_type_id
-      JOIN field_type f ON fsm.FIELD_TYPE_ID = f.FIELD_TYPE_ID
-      JOIN languages l ON fsm.LANGUAGE_ID = l.id
-      WHERE fsm.FIELD_TYPE_ID = ?
-        AND fsm.LANGUAGE_ID = ?
-        ${snippetTypeId ? "AND cs.Snippet_type_id = ?" : ""};
-    `;
+  getSnippetsByElementAndLanguage: async (elementTypeId, languageId) => {
+    const query = `
+    SELECT 
+      ft.FIELD_NAME AS layer_name,
+      cs.Snippet AS snippet
+    FROM field_snippet_map fsm
+    JOIN code_snippet cs 
+        ON cs.Snippet_ID = fsm.SNIPPET_ID
+    JOIN field_type ft
+        ON ft.FIELD_TYPE_ID = fsm.FIELD_TYPE_ID
+    WHERE ft.element_type_id = ?
+      AND fsm.LANGUAGE_ID = ?
+    ORDER BY ft.FIELD_NAME;
+  `;
 
-      const params = snippetTypeId
-        ? [fieldTypeId, languageId, snippetTypeId]
-        : [fieldTypeId, languageId];
+    const params = [elementTypeId, languageId];
 
-      const [rows] = await pool.query(query, params);
-      return rows;
-    } catch (error) {
-      console.error("Error fetching snippet:", error);
-      throw error;
-    }
+    const [rows] = await pool.query(query, params);
+    return rows;
   },
 
   getLanguageIdByProjectId: async (projectId) => {

@@ -25,7 +25,6 @@ import {
   setTableCol,
   setShowJson,
 } from "../../context/FormBuilderContext/formAction";
-import { use } from "react";
 import { useState } from "react";
 
 // --- Main Component ---
@@ -74,7 +73,6 @@ const FormPreviewPage = () => {
     const updatedToasts = toasts.filter((toast) => toast.id !== id);
     dispatch(updateToast(updatedToasts));
   };
-
   useEffect(() => {
     const isModuleEnabled = !!config.projectId;
     if (!config.projectId) {
@@ -95,7 +93,7 @@ const FormPreviewPage = () => {
           fetchIconData(),
           fetchSpListData(),
           fetchTableListData(),
-          fetchFieldTypeData(),
+          fetchElementTypeData(),
           fetchStoringSPData(),
           fetchEventHandlerData(),
           fetchLayoutData(),
@@ -284,19 +282,19 @@ const FormPreviewPage = () => {
     }
   };
 
-  const fetchFieldTypeData = async () => {
+  const fetchElementTypeData = async () => {
     try {
-      const res = await projectAPI.getLovDropdown("FIELD_TYPE", null);
+      const res = await projectAPI.getLovDropdown("ELEMENT_TYPE", null);
       const formattedData = res.data.result.map((each) => ({
         id: each.Id,
         name: each.Name,
       }));
-      dispatch(setDropdownData({ fieldType: formattedData }));
+      dispatch(setDropdownData({ elementTypeData: formattedData }));
     } catch (error) {
       console.error("Error fetching field types:", error);
       dispatch(
         setDropdownData({
-          fieldType: [
+          elementTypeData: [
             { id: "1", name: "Text Input" },
             { id: "2", name: "Number Input" },
           ],
@@ -795,7 +793,7 @@ const FormPreviewPage = () => {
                 removeColumn={removeColumn}
                 removeTab={removeTab}
                 fieldSource={dropdownData.fieldSource}
-                fieldType={dropdownData.fieldType}
+                elementTypeData={dropdownData.elementTypeData}
                 fieldOrder={dropdownData.fieldOrder}
                 fieldIcon={dropdownData.fieldIcon}
                 jsVal={dropdownData.jsVal}

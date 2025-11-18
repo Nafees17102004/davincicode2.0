@@ -32,9 +32,9 @@ const insertModule = async (
 
 const insertSnippet = async (
   snippetId,
+  elementTypeId,
   fieldTypeId,
   languageId,
-  snippetTypeId,
   snippetName,
   snippet
 ) => {
@@ -42,9 +42,9 @@ const insertSnippet = async (
     const query = "Call LT_DCS_SP_INSERT_UPDATE_SNIPPET(?,?,?,?,?,?)";
     const data = [
       snippetId,
+      elementTypeId,
       fieldTypeId,
       languageId,
-      snippetTypeId,
       snippetName,
       snippet,
     ];

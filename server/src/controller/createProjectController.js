@@ -83,7 +83,7 @@ const insertLanguage = async (req, res) => {
           lInactiveReason
         );
         if (!result || result.affectedRows == 0) {
-          errors.push({  
+          errors.push({
             index,
             error: "Duplicate Error",
             language: lang,
@@ -132,7 +132,14 @@ const insertFieldTypes = async (req, res) => {
     const errors = [];
 
     for (const [index, field] of FieldArray.entries()) {
-      const { fieldName, fStatus, fInactiveReason } = field;
+      const {
+        fieldTypeId,
+        elementTypeId,
+        fieldName,
+        fStatus,
+        fInactiveReason,
+        cUser,
+      } = field;
       if (!fieldName || !fStatus) {
         errors.push({
           index,
@@ -143,9 +150,12 @@ const insertFieldTypes = async (req, res) => {
       }
       try {
         const result = await createProjectService.insertFieldTypes(
+          fieldTypeId,
+          elementTypeId,
           fieldName,
           fStatus,
-          fInactiveReason
+          fInactiveReason,
+          cUser
         );
         if (!result || result.affectedRows == 0) {
           errors.push({

@@ -130,18 +130,22 @@ const formGenService = {
               field.spParams = [];
             }
             // Extracting template from DB using fieldTypeId and languageId via ProjectId
-            const snippetRows = await formGenRepository.getSnippetByFsm(
-              field.fieldType,
-              languageId
-            );
+            const snippetRows =
+              await formGenRepository.getSnippetsByElementAndLanguage(
+                field.elementTypeId,
+                languageId
+              );
             for (const snippet of snippetRows) {
-              const template = handleBarJs.compile(snippet.Snippet);
+              const template = handleBarJs.compile(snippet.snippet);
               const output = template(field);
 
-              if (!generatedCode[snippet.Snippet_type_name])
-                generatedCode[snippet.Snippet_type_name] = "";
+              const layer = snippet.layer_name;
 
-              generatedCode[snippet.Snippet_type_name] += output + "\n\n";
+              if (!generatedCode[layer]) {
+                generatedCode[layer] = "";
+              }
+
+              generatedCode[layer] += output + "\n\n";
             }
             // Extracting just the code template
             const snippetTemplate = snippetRows?.[0]?.Snippet || "";

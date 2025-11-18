@@ -56,13 +56,24 @@ const getFieldTypes = async () => {
   }
 };
 
-const insertFieldTypes = async (fieldName, fStatus, fInactiveReason) => {
+const insertFieldTypes = async (
+  fieldTypeId,
+  elementTypeId,
+  fieldName,
+  fStatus,
+  fInactiveReason,
+  cUser
+) => {
   try {
-    const query = "CALL InsertFieldType(?)";
+    const query = "CALL LT_DCS_SP_INSERT_UPDATE_FIELD_TYPE(?,?,?,?,?,?)";
+
     const result = await pool.query(query, [
+      fieldTypeId,
+      elementTypeId,
       fieldName,
       fStatus,
       fInactiveReason,
+      cUser,
     ]);
     return result[0];
   } catch (err) {
