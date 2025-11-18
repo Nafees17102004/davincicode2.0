@@ -71,18 +71,18 @@ const insertSnippet = async (req, res) => {
     for (const [index, snip] of snippets.entries()) {
       const {
         snippetId,
+        elementTypeId,
         fieldTypeId,
         languageId,
-        snippetTypeId,
         snippetName,
         snippet,
       } = snip;
 
       if (
         (!snippetId,
-        !fieldTypeId ||
+        !elementTypeId ||
+          !fieldTypeId ||
           !languageId ||
-          !snippetTypeId ||
           !snippetName ||
           !snippet)
       ) {
@@ -93,9 +93,9 @@ const insertSnippet = async (req, res) => {
       try {
         const result = await service.insertSnippet(
           snippetId,
+          elementTypeId,
           fieldTypeId,
           languageId,
-          snippetTypeId,
           snippetName,
           snippet
         );

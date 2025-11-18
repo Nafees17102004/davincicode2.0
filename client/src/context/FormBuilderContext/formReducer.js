@@ -12,7 +12,7 @@ const generateId = () => {
 const defaultColumn = (order = 1) => ({
   column_id: generateId(),
   labelName: "",
-  fieldType: "",
+  elementTypeId: "",
   fieldSourceLovDetId: "",
   spName: null,
   spParam: null,
@@ -62,7 +62,7 @@ const initialState = {
     iconData: [],
     spList: [],
     tableList: [],
-    fieldType: [],
+    elementTypeData: [],
     storedProcedures: [],
     eventHandler: [],
     layout: [],

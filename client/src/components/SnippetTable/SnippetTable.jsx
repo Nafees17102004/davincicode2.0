@@ -2,13 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Table, Form } from "react-bootstrap";
 import projectAPI from "../../api/Api";
 
-function SnippetTable({ rows, onChange, snippetTypeData }) {
+function SnippetTable({
+  rows,
+  onChange,
+  snippetTypeData,
+  fielTypeData,
+  elementData,
+}) {
   const [language, setLanguage] = useState([]);
-  const [field, setField] = useState([]);
 
   useEffect(() => {
     fetchLanguages();
-    fetchFieldTypes();
   }, []);
 
   const fetchLanguages = async () => {
@@ -27,45 +31,34 @@ function SnippetTable({ rows, onChange, snippetTypeData }) {
     }
   };
 
-  const fetchFieldTypes = async () => {
-    try {
-      await projectAPI.getLovDropdown("FIELD_TYPE", null).then((response) => {
-        const formattedFields = response.data.result.map((field) => ({
-          id: field.Id,
-          name: field.Name,
-        }));
-        setField(formattedFields);
-      });
-    } catch (err) {
-      console.error("Error fetching languages:", err);
-    }
-  };
-
   return (
     <Form.Group className="p-2">
-      <Form.Label htmlFor="fieldType">Select Field Type</Form.Label>
+      <Form.Label htmlFor="fieldType">Select Element Type</Form.Label>
       <Form.Select
         id="fieldType"
-        value={rows.fieldTypeId}
-        name="fieldTypeId"
+        value={rows.elementTypeId}
+        name="elementTypeId"
         onChange={(e) => onChange(e)}
         className="mb-3"
       >
-        {field.map((eachField) => (
+        {elementData.map((eachField) => (
           <option key={eachField.id} value={eachField.id}>
             {eachField.name}
           </option>
         ))}
       </Form.Select>
-      <Form.Label htmlFor="fieldType">Select Field Name</Form.Label>
+      <Form.Label>Select Field Type</Form.Label>
       <Form.Select
-        id="fieldType"
         value={rows.fieldTypeId}
         name="fieldTypeId"
-        onChange={(e) => onChange(e)}
-        className="mb-3"
+        onChange={onChange}
+        disabled={!rows.elementTypeId || rows.elementTypeId === "0"}
       >
-        {field.map((eachField) => (
+        {!rows.elementTypeId || rows.elementTypeId === "0" ? (
+          <option value="0">-- Select Element Type First --</option>
+        ) : null}
+
+        {fielTypeData.map((eachField) => (
           <option key={eachField.id} value={eachField.id}>
             {eachField.name}
           </option>
@@ -89,7 +82,7 @@ function SnippetTable({ rows, onChange, snippetTypeData }) {
       </Form.Select>
 
       {/* CORRECTED SNIPPET TYPE DROPDOWN */}
-      <Form.Label htmlFor="snippetType">Select Snippet Type</Form.Label>
+      {/* <Form.Label htmlFor="snippetType">Select Snippet Type</Form.Label>
       <Form.Select
         id="snippetType"
         value={rows.snippetTypeId || ""}
@@ -104,7 +97,7 @@ function SnippetTable({ rows, onChange, snippetTypeData }) {
               {eachType.name}
             </option>
           ))}
-      </Form.Select>
+      </Form.Select> */}
 
       <Form.Label htmlFor="snipName">Snippet Name</Form.Label>
       <Form.Control

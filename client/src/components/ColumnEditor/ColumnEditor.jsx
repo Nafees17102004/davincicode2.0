@@ -8,6 +8,7 @@ const ColumnEditor = ({
   dispatch,
   removeColumn,
   eventHandler,
+  elementTypeData,
   fieldSource,
   fieldType,
   fieldOrder,
@@ -153,12 +154,12 @@ const ColumnEditor = ({
           </label>
           <select
             className="form-select"
-            value={column.fieldType || ""}
-            onChange={(e) => handleFieldChange("fieldType", e.target.value)}
+            value={column.elementTypeId || ""}
+            onChange={(e) => handleFieldChange("elementTypeId", e.target.value)}
             required
           >
-            {fieldType &&
-              fieldType.map((eachItem) => (
+            {elementTypeData &&
+              elementTypeData.map((eachItem) => (
                 <option key={eachItem.id} value={eachItem.id}>
                   {eachItem.name}
                 </option>

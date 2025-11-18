@@ -7,37 +7,65 @@ import { useEffect } from "react";
 
 function SnippetForm() {
   const [snippetTypeData, setSnippetTypeData] = useState([]);
+  const [fielTypeData, setFieldTypeData] = useState([]);
+  const [elementData, setElementData] = useState([]);
   const [rows, setRows] = useState({
     snippetId: null,
+    elementTypeId: 0,
     fieldTypeId: 0,
     languageId: 0,
-    snippetTypeId: 0,
     snippetName: "",
     snippet: "",
   });
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchSnippetType();
+    fetchElementTypes();
   }, []);
 
-  const fetchSnippetType = async () => {
+  const fetchElementTypes = async () => {
     try {
-      await projectAPI.getLovDropdown("SNIPPET_TYPE", null).then((res) => {
+      await projectAPI.getLovDropdown("ELEMENT_TYPE", null).then((response) => {
+        const formattedFields = response.data.result.map((field) => ({
+          id: field.Id,
+          name: field.Name,
+        }));
+        setElementData(formattedFields);
+      });
+    } catch (err) {
+      console.error("Error fetching languages:", err);
+    }
+  };
+
+  const handleChange = async (e) => {
+    const { name, value } = e.target;
+
+    // Update row immediately
+    setRows((prev) => ({ ...prev, [name]: value }));
+
+    // 🚀 Dependent dropdown trigger
+    if (name === "elementTypeId") {
+      try {
+        const res = await projectAPI.getLovDropdown(
+          "FIELD_TYPE_BY_ELEMENT",
+          value
+        );
+
+        // Formatted Data
         const formattedData = res.data.result.map((eachItem) => ({
           id: eachItem.Id,
           name: eachItem.Name,
         }));
-        setSnippetTypeData(formattedData);
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
 
-  const handleChange = (e) => {
-    setRows({ ...rows, [e.target.name]: e.target.value });
+        // Update the Field Type Dropdown Data
+        setFieldTypeData(formattedData);
+
+        // Reset fieldTypeId AFTER data refresh
+        setRows((prev) => ({ ...prev, fieldTypeId: 0 }));
+      } catch (err) {
+        console.error(err);
+      }
+    }
   };
 
   const handleSubmit = (e) => {
@@ -54,7 +82,14 @@ function SnippetForm() {
         console.error("There was an error!", error);
         alert("An error occurred while submitting the projects.");
       });
-    setRows([]);
+    setRows({
+      snippetId: null,
+      elementTypeId: 0,
+      fieldTypeId: 0,
+      languageId: 0,
+      snippetName: "",
+      snippet: "",
+    });
   };
   return (
     <div className="project-form-container mt-4">
@@ -66,6 +101,8 @@ function SnippetForm() {
         rows={rows}
         onChange={(e) => handleChange(e)}
         snippetTypeData={snippetTypeData}
+        fielTypeData={fielTypeData}
+        elementData={elementData}
       />
 
       <div className="project-btn-container">
