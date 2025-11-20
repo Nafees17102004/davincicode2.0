@@ -12,17 +12,14 @@ import {
   CBadge,
 } from "@coreui/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import projectAPI from "../../api/Api";
-import LeftTabMenu from "../../components/LeftTabMenu/LeftTabMenu";
 import "./CodeGenerationPage.css";
 
 const CodeGenerationPage = ({ codeData }) => {
   const navigate = useNavigate();
-  // const location = useLocation();
+  const location = useLocation();
 
-  // const demoGeneratedCode = location?.generatedCode;
-  // console.log(demoGeneratedCode);
-  console.log(codeData);
+  console.log("Received codeData:", codeData);
+  console.log("Location state:", location.state);
 
   const [formData, setFormData] = useState({});
   const [generatedCode, setGeneratedCode] = useState({
@@ -30,6 +27,7 @@ const CodeGenerationPage = ({ codeData }) => {
     controller: "",
     route: "",
     model: "",
+    service: "",
   });
 
   const [activeCodeTab, setActiveCodeTab] = useState("repository");
@@ -37,17 +35,93 @@ const CodeGenerationPage = ({ codeData }) => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Function to format code with proper indentation
+  const formatCode = (code) => {
+    if (!code) return "";
+
+    // Remove extra carriage returns and normalize line endings
+    let formattedCode = code.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+    // Remove extra whitespace and fix indentation
+    let indentLevel = 0;
+    const lines = formattedCode.split("\n");
+    const formattedLines = lines.map((line) => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) return "";
+
+      // Decrease indent level for closing braces
+      if (trimmedLine.includes("}") && !trimmedLine.includes("{")) {
+        indentLevel = Math.max(0, indentLevel - 1);
+      }
+
+      // Apply current indent level
+      const indentedLine = "    ".repeat(indentLevel) + trimmedLine;
+
+      // Increase indent level for opening braces
+      if (trimmedLine.includes("{") && !trimmedLine.includes("}")) {
+        indentLevel += 1;
+      }
+
+      return indentedLine;
+    });
+
+    return formattedLines.filter((line) => line !== "").join("\n");
+  };
+
   useEffect(() => {
-    if (location.state?.formData) {
-      setFormData(location.state.formData);
-      generateAllCode(location.state.formData);
+    // Check for codeData prop first, then location state
+    const dataToUse =
+      codeData || location.state?.formData || location.state?.generatedCode;
+
+    if (dataToUse) {
+      console.log("Using data:", dataToUse);
+      handleReceivedCodeData(dataToUse);
+    } else {
+      setError(
+        "No code data available. Please go back and generate code first."
+      );
     }
-  }, [location]);
+  }, [location, codeData]);
+
+  const handleReceivedCodeData = (data) => {
+    // If data contains generated code files (Controller, Repository, Route, Service)
+    if (data.Controller || data.Repository || data.Route || data.Service) {
+      console.log("Received generated code files");
+
+      // Map the received code to our state structure with formatting
+      const mappedCode = {
+        controller: formatCode(data.Controller) || "",
+        repository: formatCode(data.Repository) || "",
+        route: formatCode(data.Route) || "",
+        service: formatCode(data.Service) || "",
+        model: formatCode(data.Model) || "",
+      };
+
+      setGeneratedCode(mappedCode);
+      setActiveCodeTab("repository");
+      setSuccess("Generated code loaded successfully!");
+
+      // Set a default formData for display
+      setFormData({
+        pageName: "Generated Code",
+        formName: "Auto-generated Form",
+      });
+    }
+    // If it's form data with pageName
+    else if (data.pageName) {
+      setFormData(data);
+      generateAllCode(data);
+    }
+    // If it's empty or invalid
+    else {
+      setError("Invalid code data received. Please regenerate the code.");
+    }
+  };
 
   const generateAllCode = async (formDataFromProps = null) => {
     const dataToUse = formDataFromProps || formData;
 
-    if (!dataToUse.pageName) {
+    if (!dataToUse?.pageName) {
       setError(
         "No form configuration found. Please go back and save your form first."
       );
@@ -59,12 +133,13 @@ const CodeGenerationPage = ({ codeData }) => {
       setError("");
       setSuccess("");
 
-      // Mock data - replace with actual DB fetch later
+      // Generate code using the helper functions with formatting
       const mockGeneratedCode = {
-        repository: generateRepositoryCode(dataToUse),
-        controller: generateControllerCode(dataToUse),
-        route: generateRouteCode(dataToUse),
-        model: generateModelCode(dataToUse),
+        repository: formatCode(generateRepositoryCode(dataToUse)),
+        controller: formatCode(generateControllerCode(dataToUse)),
+        route: formatCode(generateRouteCode(dataToUse)),
+        model: formatCode(generateModelCode(dataToUse)),
+        service: formatCode(generateServiceCode(dataToUse)),
       };
 
       setGeneratedCode(mockGeneratedCode);
@@ -290,8 +365,43 @@ const ${entityName} = sequelize.define('${entityName}', {
 module.exports = ${entityName};`;
   };
 
+  const generateServiceCode = (formData) => {
+    const entityName = formData.pageName.replace(/\s+/g, "");
+    return `// ${entityName}Service.js
+const ${entityName}Repository = require('../repositories/${entityName}Repository');
+
+class ${entityName}Service {
+  static async getAll() {
+    return await ${entityName}Repository.findAll();
+  }
+
+  static async getById(id) {
+    return await ${entityName}Repository.findById(id);
+  }
+
+  static async create(data) {
+    return await ${entityName}Repository.create(data);
+  }
+
+  static async update(id, data) {
+    return await ${entityName}Repository.update(id, data);
+  }
+
+  static async delete(id) {
+    return await ${entityName}Repository.delete(id);
+  }
+}
+
+module.exports = ${entityName}Service;`;
+  };
+
   const copyToClipboard = () => {
     const codeToCopy = generatedCode[activeCodeTab];
+    if (!codeToCopy) {
+      setError("No code available to copy");
+      return;
+    }
+
     navigator.clipboard.writeText(codeToCopy).then(() => {
       const originalSuccess = success;
       setSuccess("Code copied to clipboard!");
@@ -300,16 +410,26 @@ module.exports = ${entityName};`;
   };
 
   const downloadCode = () => {
-    if (!generatedCode[activeCodeTab]) return;
+    if (!generatedCode[activeCodeTab]) {
+      setError("No code available to download");
+      return;
+    }
 
     const element = document.createElement("a");
     const file = new Blob([generatedCode[activeCodeTab]], {
       type: "text/plain",
     });
     element.href = URL.createObjectURL(file);
-    element.download = `${formData.pageName}${
-      activeCodeTab.charAt(0).toUpperCase() + activeCodeTab.slice(1)
-    }.js`;
+
+    const fileName = formData.pageName
+      ? `${formData.pageName}${
+          activeCodeTab.charAt(0).toUpperCase() + activeCodeTab.slice(1)
+        }.js`
+      : `Generated${
+          activeCodeTab.charAt(0).toUpperCase() + activeCodeTab.slice(1)
+        }.js`;
+
+    element.download = fileName;
     document.body.appendChild(element);
     element.click();
     document.body.removeChild(element);
@@ -324,161 +444,183 @@ module.exports = ${entityName};`;
     });
   };
 
+  const hasGeneratedCode =
+    generatedCode.repository ||
+    generatedCode.controller ||
+    generatedCode.route ||
+    generatedCode.service ||
+    generatedCode.model;
+
   return (
     <div className="code-generation-page-container">
-      {/* Sidebar */}
-      <div className="sidebar-section">
-        <LeftTabMenu />
-      </div>
-
-      {/* Main Content */}
+      {/* Main Content - Full width without sidebar */}
       <div className="main-content-section">
-        <CContainer fluid className="code-generation-page">
-          <CRow>
-            <CCol>
-              <div className="page-header">
-                <h2>Code Generation</h2>
-                <div className="language-display">
-                  <CBadge color="primary">
-                    Form: {formData.pageName || "No form selected"}
-                  </CBadge>
-                </div>
-              </div>
+        <CContainer fluid>
+          {/* Simple Back Button */}
+          <div className="mb-4">
+            <CButton
+              color="outline-secondary"
+              onClick={() => navigate(-1)}
+              className="back-button"
+            >
+              <i className="fa fa-arrow-left me-2"></i>
+              Back
+            </CButton>
+          </div>
 
-              {error && (
-                <CAlert color="danger" dismissible onClose={() => setError("")}>
-                  {error}
-                </CAlert>
-              )}
+          {/* Simple Header */}
+          <div className="text-center mb-4">
+            <h2 className="text-primary">Generated Code</h2>
+            {formData.pageName && (
+              <CBadge color="primary" className="mt-2 fs-6">
+                {formData.pageName}
+              </CBadge>
+            )}
+          </div>
 
-              {success && (
-                <CAlert
-                  color="success"
-                  dismissible
-                  onClose={() => setSuccess("")}
-                >
-                  {success}
-                </CAlert>
-              )}
+          {codeData === null ? (
+            <CAlert color="danger" dismissible onClose={() => setError("")}>
+              {error}
+            </CAlert>
+          ) : (
+            <CAlert color="success" dismissible onClose={() => setSuccess("")}>
+              {success}
+            </CAlert>
+          )}
 
-              <CRow>
-                {/* Code Type Selection Panel */}
-                <CCol md={3}>
-                  <CCard className="code-type-card">
-                    <CCardHeader>
-                      <h6 className="mb-0">Generated Files</h6>
-                    </CCardHeader>
-                    <CCardBody className="code-type-buttons">
-                      <CButton
-                        color={
-                          activeCodeTab === "repository"
-                            ? "primary"
-                            : "secondary"
-                        }
-                        className="w-100 mb-2"
-                        onClick={() => setActiveCodeTab("repository")}
-                      >
-                        <i className="fa fa-database me-2"></i>Repository
-                      </CButton>
-                      <CButton
-                        color={
-                          activeCodeTab === "controller"
-                            ? "primary"
-                            : "secondary"
-                        }
-                        className="w-100 mb-2"
-                        onClick={() => setActiveCodeTab("controller")}
-                      >
-                        <i className="fa fa-cogs me-2"></i>Controller
-                      </CButton>
-                      <CButton
-                        color={
-                          activeCodeTab === "route" ? "primary" : "secondary"
-                        }
-                        className="w-100 mb-2"
-                        onClick={() => setActiveCodeTab("route")}
-                      >
-                        <i className="fa fa-route me-2"></i>Routes
-                      </CButton>
-                      <CButton
-                        color={
-                          activeCodeTab === "model" ? "primary" : "secondary"
-                        }
-                        className="w-100 mb-2"
-                        onClick={() => setActiveCodeTab("model")}
-                      >
-                        <i className="fa fa-table me-2"></i>Model
-                      </CButton>
-                    </CCardBody>
-                  </CCard>
-                </CCol>
-
-                {/* Code Display Panel */}
-                <CCol md={9}>
-                  {generatedCode.repository ? (
-                    <CCard className="code-display-card">
-                      <CCardHeader className="d-flex justify-content-between align-items-center">
-                        <h5 className="mb-0 text-capitalize">
-                          {activeCodeTab} Code
-                        </h5>
-                        <CButton
-                          color="outline-primary"
-                          size="sm"
-                          onClick={copyToClipboard}
-                        >
-                          Copy Code
-                        </CButton>
-                      </CCardHeader>
-                      <CCardBody>
-                        <pre className="generated-code">
-                          {generatedCode[activeCodeTab]}
-                        </pre>
-
-                        {/* Action Buttons */}
-                        <div className="code-actions mt-3">
-                          <CButton
-                            color="success"
-                            onClick={downloadCode}
-                            className="me-2"
-                          >
-                            Download{" "}
-                            {activeCodeTab.charAt(0).toUpperCase() +
-                              activeCodeTab.slice(1)}
-                          </CButton>
-                          <CButton color="primary" onClick={handleContinue}>
-                            Continue to Form Builder
-                          </CButton>
-                        </div>
-                      </CCardBody>
-                    </CCard>
-                  ) : (
-                    <CCard className="text-center placeholder-card">
-                      <CCardBody className="py-5">
-                        <div className="placeholder-icon">
-                          <i className="fa fa-code fa-3x text-muted mb-3"></i>
-                        </div>
-                        <h4 className="text-muted">Ready to Generate Code</h4>
-                        <p className="text-muted">
-                          Click any button to generate the corresponding code
-                          files.
-                        </p>
-                        <CButton
-                          color="primary"
-                          onClick={() => generateAllCode()}
-                          className="mt-3"
-                          disabled={loading}
-                        >
-                          {loading ? (
-                            <CSpinner size="sm" />
-                          ) : (
-                            "Generate All Code"
-                          )}
-                        </CButton>
-                      </CCardBody>
-                    </CCard>
+          <CRow className="justify-content-center">
+            {/* Code Type Selection Panel */}
+            <CCol md={3}>
+              <CCard className="code-type-card">
+                <CCardHeader className="bg-primary text-white">
+                  <h6 className="mb-0">Code Files</h6>
+                </CCardHeader>
+                <CCardBody className="code-type-buttons p-3">
+                  {generatedCode.repository && (
+                    <CButton
+                      color={
+                        activeCodeTab === "repository"
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      className="w-100 mb-2 text-start"
+                      onClick={() => setActiveCodeTab("repository")}
+                    >
+                      <i className="fa fa-database me-2"></i>Repository
+                    </CButton>
                   )}
-                </CCol>
-              </CRow>
+                  {generatedCode.controller && (
+                    <CButton
+                      color={
+                        activeCodeTab === "controller"
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      className="w-100 mb-2 text-start"
+                      onClick={() => setActiveCodeTab("controller")}
+                    >
+                      <i className="fa fa-cogs me-2"></i>Controller
+                    </CButton>
+                  )}
+                  {generatedCode.route && (
+                    <CButton
+                      color={
+                        activeCodeTab === "route"
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      className="w-100 mb-2 text-start"
+                      onClick={() => setActiveCodeTab("route")}
+                    >
+                      <i className="fa fa-route me-2"></i>Routes
+                    </CButton>
+                  )}
+                  {generatedCode.model && (
+                    <CButton
+                      color={
+                        activeCodeTab === "model"
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      className="w-100 mb-2 text-start"
+                      onClick={() => setActiveCodeTab("model")}
+                    >
+                      <i className="fa fa-table me-2"></i>Model
+                    </CButton>
+                  )}
+                  {generatedCode.service && (
+                    <CButton
+                      color={
+                        activeCodeTab === "service"
+                          ? "primary"
+                          : "outline-primary"
+                      }
+                      className="w-100 mb-2 text-start"
+                      onClick={() => setActiveCodeTab("service")}
+                    >
+                      <i className="fa fa-gears me-2"></i>Service
+                    </CButton>
+                  )}
+                </CCardBody>
+              </CCard>
+            </CCol>
+
+            {/* Code Display Panel */}
+            <CCol md={9}>
+              {hasGeneratedCode ? (
+                <CCard className="code-display-card">
+                  <CCardHeader className="bg-light d-flex justify-content-between align-items-center">
+                    <h5 className="mb-0 text-capitalize text-dark">
+                      {activeCodeTab} Code
+                    </h5>
+                    <div>
+                      <CButton
+                        color="outline-primary"
+                        size="sm"
+                        onClick={copyToClipboard}
+                        className="me-2"
+                      >
+                        <i className="fa fa-copy me-1"></i> Copy Code
+                      </CButton>
+                    </div>
+                  </CCardHeader>
+                  <CCardBody className="p-0">
+                    <pre className="generated-code">
+                      {generatedCode[activeCodeTab]}
+                    </pre>
+
+                    {/* Action Buttons */}
+                    <div className="code-actions p-3">
+                      <CButton
+                        color="success"
+                        onClick={downloadCode}
+                        className="me-2"
+                      >
+                        <i className="fa fa-download me-1"></i>
+                        Download{" "}
+                        {activeCodeTab.charAt(0).toUpperCase() +
+                          activeCodeTab.slice(1)}
+                      </CButton>
+                      <CButton color="primary" onClick={() => handleContinue()}>
+                        <i className="fa fa-arrow-right me-1"></i>
+                        Continue to Form Builder
+                      </CButton>
+                    </div>
+                  </CCardBody>
+                </CCard>
+              ) : (
+                <CCard className="text-center placeholder-card">
+                  <CCardBody className="py-5">
+                    <div className="placeholder-icon">
+                      <i className="fa fa-code fa-3x text-muted mb-3"></i>
+                    </div>
+                    <h4 className="text-muted">No Code Generated</h4>
+                    <p className="text-muted">
+                      Please go back and generate code first.
+                    </p>
+                  </CCardBody>
+                </CCard>
+              )}
             </CCol>
           </CRow>
         </CContainer>
