@@ -606,7 +606,10 @@ const FormPreviewPage = () => {
           </div>
         </nav>
         {showGeneratedCode ? (
-          <CodeGenerationPage codeData={generatedCode} />
+          <CodeGenerationPage
+            codeData={generatedCode}
+            setShowGeneratedCode={setShowGeneratedCode}
+          />
         ) : (
           <>
             {/* --- Project Setup Details --- */}

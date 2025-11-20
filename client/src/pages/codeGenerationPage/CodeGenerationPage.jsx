@@ -14,7 +14,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import "./CodeGenerationPage.css";
 
-const CodeGenerationPage = ({ codeData }) => {
+const CodeGenerationPage = ({ codeData, setShowGeneratedCode }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,14 +23,19 @@ const CodeGenerationPage = ({ codeData }) => {
 
   const [formData, setFormData] = useState({});
   const [generatedCode, setGeneratedCode] = useState({
+    // Backend Code
     repository: "",
     controller: "",
     route: "",
     model: "",
     service: "",
+
+    // Frontend Code
+    reactComponent: "",
   });
 
   const [activeCodeTab, setActiveCodeTab] = useState("repository");
+  const [activeSection, setActiveSection] = useState("backend");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -84,315 +89,80 @@ const CodeGenerationPage = ({ codeData }) => {
   }, [location, codeData]);
 
   const handleReceivedCodeData = (data) => {
-    // If data contains generated code files (Controller, Repository, Route, Service)
-    if (data.Controller || data.Repository || data.Route || data.Service) {
-      console.log("Received generated code files");
+    console.log("Processing received data:", data);
+
+    // Check if data has the structure we see in console
+    if (data.backendCode || data.frontendCode) {
+      console.log(
+        "Received code data with backendCode and frontendCode structure"
+      );
+
+      // Extract backend code from backendCode object
+      const backendCode = data.backendCode || {};
+      const frontendCode = data.frontendCode || "";
 
       // Map the received code to our state structure with formatting
       const mappedCode = {
-        controller: formatCode(data.Controller) || "",
-        repository: formatCode(data.Repository) || "",
-        route: formatCode(data.Route) || "",
-        service: formatCode(data.Service) || "",
-        model: formatCode(data.Model) || "",
+        // Backend Code from backendCode object
+        controller: formatCode(backendCode.Controller || "") || "",
+        repository: formatCode(backendCode.Repository || "") || "",
+        route: formatCode(backendCode.Route || "") || "",
+        service: formatCode(backendCode.Service || "") || "",
+        model: formatCode(backendCode.Model || "") || "",
+
+        // Frontend Code - ONLY use the actual code from backend, NO fallback generation
+        reactComponent: formatCode(frontendCode) || "",
       };
 
-      setGeneratedCode(mappedCode);
-      setActiveCodeTab("repository");
-      setSuccess("Generated code loaded successfully!");
+      console.log("Mapped code structure:", {
+        backend: {
+          controller: !!mappedCode.controller,
+          repository: !!mappedCode.repository,
+          route: !!mappedCode.route,
+          service: !!mappedCode.service,
+          model: !!mappedCode.model,
+        },
+        frontend: {
+          reactComponent: !!mappedCode.reactComponent,
+        },
+      });
 
-      // Set a default formData for display
+      setGeneratedCode(mappedCode);
+
+      // Set active section based on what code is available
+      if (
+        mappedCode.controller ||
+        mappedCode.repository ||
+        mappedCode.route ||
+        mappedCode.service
+      ) {
+        setActiveSection("backend");
+        setActiveCodeTab("repository");
+      } else if (mappedCode.reactComponent) {
+        setActiveSection("frontend");
+        setActiveCodeTab("reactComponent");
+      }
+
+      setSuccess("Generated code loaded successfully from backend!");
+
+      // Set formData for display
       setFormData({
-        pageName: "Generated Code",
-        formName: "Auto-generated Form",
+        pageName: data.pageName || "Generated Code",
+        formName: data.formName || "Auto-generated Form",
       });
     }
-    // If it's form data with pageName
+    // If it's form data with pageName but no generated code yet
     else if (data.pageName) {
       setFormData(data);
-      generateAllCode(data);
+      setError(
+        "No generated code found in the response. Please check if code generation completed successfully."
+      );
     }
     // If it's empty or invalid
     else {
       setError("Invalid code data received. Please regenerate the code.");
+      console.log("Invalid data structure:", data);
     }
-  };
-
-  const generateAllCode = async (formDataFromProps = null) => {
-    const dataToUse = formDataFromProps || formData;
-
-    if (!dataToUse?.pageName) {
-      setError(
-        "No form configuration found. Please go back and save your form first."
-      );
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setError("");
-      setSuccess("");
-
-      // Generate code using the helper functions with formatting
-      const mockGeneratedCode = {
-        repository: formatCode(generateRepositoryCode(dataToUse)),
-        controller: formatCode(generateControllerCode(dataToUse)),
-        route: formatCode(generateRouteCode(dataToUse)),
-        model: formatCode(generateModelCode(dataToUse)),
-        service: formatCode(generateServiceCode(dataToUse)),
-      };
-
-      setGeneratedCode(mockGeneratedCode);
-      setActiveCodeTab("repository");
-      setSuccess("Code generated successfully from form configuration!");
-    } catch (error) {
-      console.error("Error generating code:", error);
-      setError("Failed to generate code from configuration");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Helper functions to generate code based on form data
-  const generateRepositoryCode = (formData) => {
-    const entityName = formData.pageName.replace(/\s+/g, "");
-    return `// ${entityName}Repository.js
-const pool = require('../config/database');
-
-class ${entityName}Repository {
-  static async findAll() {
-    const query = 'SELECT * FROM ${formData.pageName.toLowerCase()}';
-    const [rows] = await pool.query(query);
-    return rows;
-  }
-
-  static async findById(id) {
-    const query = 'SELECT * FROM ${formData.pageName.toLowerCase()} WHERE id = ?';
-    const [rows] = await pool.query(query, [id]);
-    return rows[0];
-  }
-
-  static async create(data) {
-    const query = 'INSERT INTO ${formData.pageName.toLowerCase()} SET ?';
-    const [result] = await pool.query(query, data);
-    return result.insertId;
-  }
-
-  static async update(id, data) {
-    const query = 'UPDATE ${formData.pageName.toLowerCase()} SET ? WHERE id = ?';
-    const [result] = await pool.query(query, [data, id]);
-    return result.affectedRows;
-  }
-
-  static async delete(id) {
-    const query = 'DELETE FROM ${formData.pageName.toLowerCase()} WHERE id = ?';
-    const [result] = await pool.query(query, [id]);
-    return result.affectedRows;
-  }
-}
-
-module.exports = ${entityName}Repository;`;
-  };
-
-  const generateControllerCode = (formData) => {
-    const entityName = formData.pageName.replace(/\s+/g, "");
-    return `// ${entityName}Controller.js
-const ${entityName}Service = require('../services/${entityName}Service');
-
-class ${entityName}Controller {
-  static async getAll(req, res) {
-    try {
-      const data = await ${entityName}Service.getAll();
-      res.json({ success: true, data });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: 'Error fetching ${formData.pageName.toLowerCase()}' 
-      });
-    }
-  }
-
-  static async getById(req, res) {
-    try {
-      const { id } = req.params;
-      const data = await ${entityName}Service.getById(id);
-      if (!data) {
-        return res.status(404).json({ 
-          success: false, 
-          message: '${formData.pageName} not found' 
-        });
-      }
-      res.json({ success: true, data });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: 'Error fetching ${formData.pageName.toLowerCase()}' 
-      });
-    }
-  }
-
-  static async create(req, res) {
-    try {
-      const newItem = await ${entityName}Service.create(req.body);
-      res.status(201).json({ success: true, data: newItem });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: 'Error creating ${formData.pageName.toLowerCase()}' 
-      });
-    }
-  }
-
-  static async update(req, res) {
-    try {
-      const { id } = req.params;
-      const updated = await ${entityName}Service.update(id, req.body);
-      if (!updated) {
-        return res.status(404).json({ 
-          success: false, 
-          message: '${formData.pageName} not found' 
-        });
-      }
-      res.json({ success: true, message: '${
-        formData.pageName
-      } updated successfully' });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: 'Error updating ${formData.pageName.toLowerCase()}' 
-      });
-    }
-  }
-
-  static async delete(req, res) {
-    try {
-      const { id } = req.params;
-      const deleted = await ${entityName}Service.delete(id);
-      if (!deleted) {
-        return res.status(404).json({ 
-          success: false, 
-          message: '${formData.pageName} not found' 
-        });
-      }
-      res.json({ success: true, message: '${
-        formData.pageName
-      } deleted successfully' });
-    } catch (error) {
-      res.status(500).json({ 
-        success: false, 
-        message: 'Error deleting ${formData.pageName.toLowerCase()}' 
-      });
-    }
-  }
-}
-
-module.exports = ${entityName}Controller;`;
-  };
-
-  const generateRouteCode = (formData) => {
-    const entityName = formData.pageName.replace(/\s+/g, "");
-    return `// ${entityName}Routes.js
-const express = require('express');
-const router = express.Router();
-const ${entityName}Controller = require('../controllers/${entityName}Controller');
-
-// @route   GET /api/${formData.pageName.toLowerCase()}
-// @desc    Get all ${formData.pageName.toLowerCase()}
-// @access  Public
-router.get('/', ${entityName}Controller.getAll);
-
-// @route   GET /api/${formData.pageName.toLowerCase()}/:id
-// @desc    Get ${formData.pageName.toLowerCase()} by ID
-// @access  Public
-router.get('/:id', ${entityName}Controller.getById);
-
-// @route   POST /api/${formData.pageName.toLowerCase()}
-// @desc    Create new ${formData.pageName.toLowerCase()}
-// @access  Public
-router.post('/', ${entityName}Controller.create);
-
-// @route   PUT /api/${formData.pageName.toLowerCase()}/:id
-// @desc    Update ${formData.pageName.toLowerCase()}
-// @access  Public
-router.put('/:id', ${entityName}Controller.update);
-
-// @route   DELETE /api/${formData.pageName.toLowerCase()}/:id
-// @desc    Delete ${formData.pageName.toLowerCase()}
-// @access  Public
-router.delete('/:id', ${entityName}Controller.delete);
-
-module.exports = router;`;
-  };
-
-  const generateModelCode = (formData) => {
-    const entityName = formData.pageName.replace(/\s+/g, "");
-    return `// ${entityName}Model.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-const ${entityName} = sequelize.define('${entityName}', {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  name: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  status: {
-    type: DataTypes.ENUM('active', 'inactive'),
-    defaultValue: 'active'
-  },
-  created_at: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW
-  }
-}, {
-  tableName: '${formData.pageName.toLowerCase()}',
-  timestamps: false,
-  underscored: true
-});
-
-module.exports = ${entityName};`;
-  };
-
-  const generateServiceCode = (formData) => {
-    const entityName = formData.pageName.replace(/\s+/g, "");
-    return `// ${entityName}Service.js
-const ${entityName}Repository = require('../repositories/${entityName}Repository');
-
-class ${entityName}Service {
-  static async getAll() {
-    return await ${entityName}Repository.findAll();
-  }
-
-  static async getById(id) {
-    return await ${entityName}Repository.findById(id);
-  }
-
-  static async create(data) {
-    return await ${entityName}Repository.create(data);
-  }
-
-  static async update(id, data) {
-    return await ${entityName}Repository.update(id, data);
-  }
-
-  static async delete(id) {
-    return await ${entityName}Repository.delete(id);
-  }
-}
-
-module.exports = ${entityName}Service;`;
   };
 
   const copyToClipboard = () => {
@@ -424,10 +194,10 @@ module.exports = ${entityName}Service;`;
     const fileName = formData.pageName
       ? `${formData.pageName}${
           activeCodeTab.charAt(0).toUpperCase() + activeCodeTab.slice(1)
-        }.js`
+        }.txt`
       : `Generated${
           activeCodeTab.charAt(0).toUpperCase() + activeCodeTab.slice(1)
-        }.js`;
+        }.txt`;
 
     element.download = fileName;
     document.body.appendChild(element);
@@ -436,27 +206,76 @@ module.exports = ${entityName}Service;`;
   };
 
   const handleContinue = () => {
-    navigate("/dynamic-form", {
-      state: {
-        formData,
-        generatedCode: true,
-      },
-    });
+    setShowGeneratedCode(false);
+    // navigate("/form-preview", {
+    //   state: {
+    //     formData,
+    //     generatedCode: true,
+    //   },
+    // });
   };
 
-  const hasGeneratedCode =
+  // Check if we have any backend code
+  const hasBackendCode =
     generatedCode.repository ||
     generatedCode.controller ||
     generatedCode.route ||
     generatedCode.service ||
     generatedCode.model;
 
+  // Check if we have any frontend code
+  const hasFrontendCode = generatedCode.reactComponent;
+
+  const hasGeneratedCode = hasBackendCode || hasFrontendCode;
+
+  // Backend tabs configuration
+  const backendTabs = [
+    {
+      key: "repository",
+      label: "Repository",
+      icon: "fa-database",
+      available: !!generatedCode.repository,
+    },
+    {
+      key: "controller",
+      label: "Controller",
+      icon: "fa-cogs",
+      available: !!generatedCode.controller,
+    },
+    {
+      key: "route",
+      label: "Routes",
+      icon: "fa-route",
+      available: !!generatedCode.route,
+    },
+    {
+      key: "model",
+      label: "Model",
+      icon: "fa-table",
+      available: !!generatedCode.model,
+    },
+    {
+      key: "service",
+      label: "Service",
+      icon: "fa-gears",
+      available: !!generatedCode.service,
+    },
+  ];
+
+  // Frontend tabs configuration - Only show React Component
+  const frontendTabs = [
+    {
+      key: "reactComponent",
+      label: "React Component",
+      icon: "fa-code",
+      available: !!generatedCode.reactComponent,
+    },
+  ];
+
   return (
     <div className="code-generation-page-container">
-      {/* Main Content - Full width without sidebar */}
       <div className="main-content-section">
         <CContainer fluid>
-          {/* Simple Back Button */}
           <div className="mb-4">
             <CButton
               color="outline-secondary"
@@ -468,7 +287,6 @@ module.exports = ${entityName}Service;`;
             </CButton>
           </div>
 
-          {/* Simple Header */}
           <div className="text-center mb-4">
             <h2 className="text-primary">Generated Code</h2>
             {formData.pageName && (
@@ -476,6 +294,7 @@ module.exports = ${entityName}Service;`;
                 {formData.pageName}
               </CBadge>
             )}
+            <p className="text-muted mt-2">Showing actual code from database</p>
           </div>
 
           {error && (
@@ -490,90 +309,120 @@ module.exports = ${entityName}Service;`;
             </CAlert>
           )}
 
+          <div className="section-toggle mb-4 text-center">
+            <CButton
+              color={
+                activeSection === "backend" ? "primary" : "outline-primary"
+              }
+              className="me-2"
+              onClick={() => {
+                setActiveSection("backend");
+                const firstAvailable = backendTabs.find((tab) => tab.available);
+                if (firstAvailable) {
+                  setActiveCodeTab(firstAvailable.key);
+                }
+              }}
+              disabled={!hasBackendCode}
+            >
+              <i className="fa fa-server me-2"></i>
+              Backend Code{" "}
+              {hasBackendCode &&
+                `(${backendTabs.filter((tab) => tab.available).length})`}
+            </CButton>
+            <CButton
+              color={
+                activeSection === "frontend" ? "primary" : "outline-primary"
+              }
+              onClick={() => {
+                setActiveSection("frontend");
+                const firstAvailable = frontendTabs.find(
+                  (tab) => tab.available
+                );
+                if (firstAvailable) {
+                  setActiveCodeTab(firstAvailable.key);
+                }
+              }}
+              disabled={!hasFrontendCode}
+            >
+              <i className="fa fa-desktop me-2"></i>
+              Frontend Code{" "}
+              {hasFrontendCode &&
+                `(${frontendTabs.filter((tab) => tab.available).length})`}
+            </CButton>
+          </div>
+
           <CRow className="justify-content-center">
-            {/* Code Type Selection Panel */}
             <CCol md={3}>
               <CCard className="code-type-card">
                 <CCardHeader className="bg-primary text-white">
-                  <h6 className="mb-0">Code Files</h6>
+                  <h6 className="mb-0">
+                    {activeSection === "backend"
+                      ? "Backend Files"
+                      : "Frontend Files"}
+                  </h6>
                 </CCardHeader>
                 <CCardBody className="code-type-buttons p-3">
-                  {generatedCode.repository && (
-                    <CButton
-                      color={
-                        activeCodeTab === "repository"
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      className="w-100 mb-2 text-start"
-                      onClick={() => setActiveCodeTab("repository")}
-                    >
-                      <i className="fa fa-database me-2"></i>Repository
-                    </CButton>
+                  {activeSection === "backend"
+                    ? backendTabs.map(
+                        (tab) =>
+                          tab.available && (
+                            <CButton
+                              key={tab.key}
+                              color={
+                                activeCodeTab === tab.key
+                                  ? "primary"
+                                  : "outline-primary"
+                              }
+                              className="w-100 mb-2 text-start"
+                              onClick={() => setActiveCodeTab(tab.key)}
+                            >
+                              <i className={`fa ${tab.icon} me-2`}></i>
+                              {tab.label}
+                            </CButton>
+                          )
+                      )
+                    : frontendTabs.map(
+                        (tab) =>
+                          tab.available && (
+                            <CButton
+                              key={tab.key}
+                              color={
+                                activeCodeTab === tab.key
+                                  ? "primary"
+                                  : "outline-primary"
+                              }
+                              className="w-100 mb-2 text-start"
+                              onClick={() => setActiveCodeTab(tab.key)}
+                            >
+                              <i className={`fa ${tab.icon} me-2`}></i>
+                              {tab.label}
+                            </CButton>
+                          )
+                      )}
+
+                  {activeSection === "backend" && !hasBackendCode && (
+                    <p className="text-muted text-center mt-3">
+                      No backend code available
+                    </p>
                   )}
-                  {generatedCode.controller && (
-                    <CButton
-                      color={
-                        activeCodeTab === "controller"
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      className="w-100 mb-2 text-start"
-                      onClick={() => setActiveCodeTab("controller")}
-                    >
-                      <i className="fa fa-cogs me-2"></i>Controller
-                    </CButton>
-                  )}
-                  {generatedCode.route && (
-                    <CButton
-                      color={
-                        activeCodeTab === "route"
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      className="w-100 mb-2 text-start"
-                      onClick={() => setActiveCodeTab("route")}
-                    >
-                      <i className="fa fa-route me-2"></i>Routes
-                    </CButton>
-                  )}
-                  {generatedCode.model && (
-                    <CButton
-                      color={
-                        activeCodeTab === "model"
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      className="w-100 mb-2 text-start"
-                      onClick={() => setActiveCodeTab("model")}
-                    >
-                      <i className="fa fa-table me-2"></i>Model
-                    </CButton>
-                  )}
-                  {generatedCode.service && (
-                    <CButton
-                      color={
-                        activeCodeTab === "service"
-                          ? "primary"
-                          : "outline-primary"
-                      }
-                      className="w-100 mb-2 text-start"
-                      onClick={() => setActiveCodeTab("service")}
-                    >
-                      <i className="fa fa-gears me-2"></i>Service
-                    </CButton>
+                  {activeSection === "frontend" && !hasFrontendCode && (
+                    <p className="text-muted text-center mt-3">
+                      No frontend code available
+                    </p>
                   )}
                 </CCardBody>
               </CCard>
             </CCol>
 
-            {/* Code Display Panel */}
             <CCol md={9}>
               {hasGeneratedCode ? (
                 <CCard className="code-display-card">
                   <CCardHeader className="bg-light d-flex justify-content-between align-items-center">
                     <h5 className="mb-0 text-capitalize text-dark">
-                      {activeCodeTab} Code
+                      {activeCodeTab.replace(/([A-Z])/g, " $1")} Code
+                      <CBadge color="success" className="ms-2">
+                        From Database
+                      </CBadge>
                     </h5>
                     <div>
                       <CButton
@@ -588,15 +437,16 @@ module.exports = ${entityName}Service;`;
                   </CCardHeader>
                   <CCardBody className="p-0">
                     <pre className="generated-code">
-                      {generatedCode[activeCodeTab]}
+                      {generatedCode[activeCodeTab] ||
+                        "No code content available for this file."}
                     </pre>
 
-                    {/* Action Buttons */}
                     <div className="code-actions p-3">
                       <CButton
                         color="success"
                         onClick={downloadCode}
                         className="me-2"
+                        disabled={!generatedCode[activeCodeTab]}
                       >
                         <i className="fa fa-download me-1"></i>
                         Download{" "}

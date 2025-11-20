@@ -1,8 +1,8 @@
 
 import React from "react";
 
-const A = ({
-  title = "a",
+const Z = ({
+  title = "z",
   onClick,
   type = "button",
   disabled = false,
@@ -32,6 +32,6 @@ const A = ({
   );
 };
 
-export default A;
+export default Z;
 
 
