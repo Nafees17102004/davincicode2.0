@@ -120,8 +120,8 @@ const formGenService = {
       const languageId = await formGenRepository.getLanguageIdByProjectId(
         payload.ProjectID
       );
-      let generatedCode = {};
-      let finalOutput = "";
+      let backendCode = {};
+      let frontendCode = "";
       for (const tab of payload.Tabs) {
         for (const section of tab.Sections) {
           for (const field of section.Fields) {
@@ -135,32 +135,56 @@ const formGenService = {
               field.spParams = [];
             }
             // Extracting template from DB using fieldTypeId and languageId via ProjectId
-            const snippetRows =
+            const { component, node_layers_raw } =
               await formGenRepository.getSnippetsByElementAndLanguage(
                 field.fieldTypeId,
                 53, // Element ID (layers)
                 languageId
               );
-            for (const snippet of snippetRows) {
-              const template = handleBarJs.compile(snippet.snippet);
-              const output = template(field);
 
-              const layer = snippet.layer_name;
+            if (node_layers_raw && node_layers_raw.length) {
+              for (const layerRow of node_layers_raw) {
+                const template = handleBarJs.compile(layerRow.snippet);
+                const rendered = template(field);
 
-              if (!generatedCode[layer]) {
-                generatedCode[layer] = "";
+                const layer = layerRow.layer_name;
+                if (!backendCode[layer]) backendCode[layer] = "";
+                backendCode[layer] += rendered + "\n\n";
               }
-
-              generatedCode[layer] += output + "\n\n";
             }
-            // Extracting just the code template
-            const snippetTemplate = snippetRows?.[0]?.Snippet || "";
-            // Using handleBarJs compiling the code snippet into template
-            const template = handleBarJs.compile(snippetTemplate);
-            // Passing the payload from recievedFormData(using formReducer) as parameters
-            const output = template(field);
-            // Updating the final output using finalOutput
-            finalOutput += output + "\n\n";
+
+            if (component && component.component_code) {
+              const reactTemplate = handleBarJs.compile(
+                component.component_code
+              );
+              frontendCode += reactTemplate(field) + "\n\n";
+            }
+            // // Loop for just the node layer
+            // for (const snippet of snippetRows) {
+            //   const template = handleBarJs.compile(snippet.snippet);
+            //   const output = template(field);
+
+            //   const layer = snippet.layer_name;
+
+            //   if (!backendCode[layer]) {
+            //     backendCode[layer] = "";
+            //   }
+
+            //   backendCode[layer] += output + "\n\n";
+            // }
+
+            // // Extracting just the code template
+
+            // const snippetTemplate = snippetRows?.[0]?.Snippet || "";
+
+            // // Using handleBarJs compiling the code snippet into template
+            // const template = handleBarJs.compile(snippetTemplate);
+
+            // // Passing the payload from recievedFormData(using formReducer) as parameters
+            // const output = template(field);
+
+            // // Updating the final output using frontendCode
+            // frontendCode += output + "\n\n";
           }
         }
       }
@@ -170,9 +194,9 @@ const formGenService = {
         for (const section of tab.Sections) {
           for (const field of section.Fields) {
             // console.log(field); // To check data of individual field or columns
-            // Generate component code
+            // // Generate component code
             // const output = template(field);
-            // Updating the final output using finalOutput
+            // // Updating the final output using frontendCode
             // testCode += output + "\n\n";
           }
         }
@@ -180,11 +204,11 @@ const formGenService = {
 
       // Testing the template by writing the content to the specific path
       const outputPath = path.join(__dirname, "GeneratedForm.js");
-      fs.writeFileSync(outputPath, finalOutput);
+      fs.writeFileSync(outputPath, frontendCode);
 
       console.log("✅ React Form Generated →", outputPath);
 
-      return generatedCode; // Let controller respond with download or view later
+      return { backendCode, frontendCode }; // Let controller respond with download or view later
     } catch (error) {
       console.error("❌ Code Generation Failed:", error);
       throw error;
