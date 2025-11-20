@@ -159,6 +159,9 @@ const formGenService = {
               );
               frontendCode += reactTemplate(field) + "\n\n";
             }
+
+            // let finalOutput = ""
+
             // // Loop for just the node layer
             // for (const snippet of snippetRows) {
             //   const template = handleBarJs.compile(snippet.snippet);
@@ -184,7 +187,7 @@ const formGenService = {
             // const output = template(field);
 
             // // Updating the final output using frontendCode
-            // frontendCode += output + "\n\n";
+            // finalOutput += output + "\n\n";
           }
         }
       }
