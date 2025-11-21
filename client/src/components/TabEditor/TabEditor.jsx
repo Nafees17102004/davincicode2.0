@@ -12,7 +12,7 @@ const TabEditor = React.memo(
     tabIndex,
     dispatch,
     addSection,
-    removeSection,
+   removeSection,
     addColumn,
     removeColumn,
     ...props
@@ -47,7 +47,9 @@ const TabEditor = React.memo(
         })
       );
     };
-
+   const handleRemoveSection = (tabIndex, sectionIndex) => {
+      dispatch(removeSection(tabIndex, sectionIndex));
+    };
     const tabColorClass =
       tabIndex % 2 === 0 ? "border-primary" : "border-success";
 
@@ -112,7 +114,7 @@ const TabEditor = React.memo(
             <>
               {tab.sections.map((section, sectionIndex) => (
                 <SectionEditor
-                  key={section.sectionIndex}
+                  key={sectionIndex}
                   section={section}
                   path={[tabIndex, sectionIndex]}
                   dispatch={dispatch}
@@ -120,7 +122,7 @@ const TabEditor = React.memo(
                   updateField={updateField}
                   addColumn={addColumn}
                   removeColumn={removeColumn}
-                  removeSection={removeSection}
+                  removeSection={handleRemoveSection}
                   {...props}
                 />
               ))}

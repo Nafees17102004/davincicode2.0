@@ -20,7 +20,7 @@ export const removeTab = (tabIndex) => ({
 
 export const addSection = (tabIndex) => ({
   type: ACTION_TYPES.ADD_SECTION,
-  payload: tabIndex,
+  payload: {tabIndex},
 });
 
 export const removeSection = (tabIndex, sectionIndex) => ({

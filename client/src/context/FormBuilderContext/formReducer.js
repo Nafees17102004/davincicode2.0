@@ -187,7 +187,7 @@ const formReducer = (state, action) => {
         config: {
           ...state.config,
           tabs: state.config.tabs.map((tab, tIndex) => {
-            if (tIndex === tabIndex) return tab;
+            if (tIndex !== tabIndex) return tab;
             return {
               ...tab,
               sections: [...tab.sections, defaultSection()],
@@ -198,6 +198,7 @@ const formReducer = (state, action) => {
     case ACTION_TYPES.REMOVE_SECTION:
       const { tabIndex: removeTabIndex, sectionIndex: removeSectionIndex } =
         action.payload;
+          console.log("Reducer received:", removeTabIndex, removeSectionIndex);
       return {
         ...state,
         config: {
@@ -213,6 +214,7 @@ const formReducer = (state, action) => {
           }),
         },
       };
+
 
     case ACTION_TYPES.ADD_COLUMN:
       const { tabIndex: addColTabIndex, sectionIndex: addColSectionIndex } =

@@ -22,7 +22,6 @@ const SectionEditor = React.memo(
 
     const handleSectionNameChange = (e) => {
       const newName = e.target.value;
-      setSectionName(newName);
       updateConfig((config) => {
         const newTabs = [...config.tabs];
         newTabs[tabIndex].sections[sectionIndex].sectionType = newName;
@@ -105,7 +104,7 @@ const SectionEditor = React.memo(
               <i className="fa fa-plus me-1" aria-hidden="true"></i> Add Field
             </button>
             <button
-              onClick={handleRemoveSection}
+              onClick={ handleRemoveSection}
               className="btn btn-sm btn-outline-light"
               style={{
                 transition: "all 0.3s ease",
