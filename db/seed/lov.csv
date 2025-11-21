@@ -1,0 +1,5 @@
+LOV_ID,LOV_NAME,LOV_DESCRIPTION,LOV_STATUS,INACTIVE_REASON,cDate,cUser,uDate,uUser
+1,FIELD_SOURCE,"Specifies where the field’s data comes from (SP, Table, Custom)",active,NULL,"2025-10-10 10:41:07",NULL,NULL,NULL
+2,FIELD_SIZE,"Size of input fields",active,NULL,"2025-10-10 10:45:30",NULL,NULL,NULL
+3,FIELD_ICON,"Icons for field visuals",active,NULL,"2025-10-10 10:45:30",NULL,NULL,NULL
+4,FIELD_ORDER,"Display order for form fields",active,NULL,"2025-10-10 10:45:30",NULL,NULL,NULL

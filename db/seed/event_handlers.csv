@@ -1,0 +1,17 @@
+FORM_EVENT_HANDLER_ID,EVENT_NAME,FUNCTION_NAME,DESCRIPTION,STATUS,C2C_CDATE,C2C_CUSER,C2C_UDATE,C2C_UUSER
+1,onChange,NULL,"Triggered when the value of the field changes",active,"2025-10-23 11:38:07",system,"2025-11-21 11:49:58",NULL
+2,onClick,NULL,"Triggered when the user clicks the field",active,"2025-10-23 11:38:07",system,"2025-11-21 11:49:58",NULL
+3,onFocus,NULL,"Triggered when the field gains focus",active,"2025-10-23 11:38:07",system,NULL,NULL
+4,onBlur,NULL,"Triggered when the field loses focus",active,"2025-10-23 11:38:07",system,NULL,NULL
+5,onInput,NULL,"Triggered immediately when user types in input field",active,"2025-10-23 11:38:07",system,NULL,NULL
+6,onKeyUp,NULL,"Triggered when a key is released while focusing on the field",active,"2025-10-23 11:38:07",system,NULL,NULL
+7,onKeyDown,NULL,"Triggered when a key is pressed down while focusing on the field",active,"2025-10-23 11:38:07",system,NULL,NULL
+8,onSubmit,NULL,"Triggered when the form is submitted",active,"2025-10-23 11:38:07",system,NULL,NULL
+9,onMouseEnter,NULL,"Triggered when mouse enters the element area",active,"2025-10-23 11:38:07",system,NULL,NULL
+10,onMouseLeave,NULL,"Triggered when mouse leaves the element area",active,"2025-10-23 11:38:07",system,NULL,NULL
+11,onSelect,NULL,"Triggered when user selects text inside a field",active,"2025-10-23 11:38:07",system,NULL,NULL
+12,onDoubleClick,NULL,"Triggered when user double clicks the field",active,"2025-10-23 11:38:07",system,NULL,NULL
+13,onScroll,NULL,"Triggered when user scrolls within an element",inactive,"2025-10-23 11:38:07",system,NULL,NULL
+14,onPaste,NULL,"Triggered when user pastes content into the field",active,"2025-10-23 11:38:07",system,NULL,NULL
+15,onCopy,NULL,"Triggered when user copies content from the field",inactive,"2025-10-23 11:38:07",system,NULL,NULL
+16,onCut,NULL,"Triggered when user cuts content from the field",inactive,"2025-10-23 11:38:07",system,NULL,NULL

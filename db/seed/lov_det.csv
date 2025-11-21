@@ -1,0 +1,15 @@
+LOV_DET_ID,LOV_ID,LOV_DET_NAME,LOV_DET_DESCP,LOV_DET_STATUS,INACTIVE_REASON,cDate,cUser,uDate,uUser
+1,1,SP,"Data populated from a Stored Procedure",active,NULL,"2025-10-10 10:41:14",NULL,NULL,NULL
+2,1,Table,"Data populated from a database table",active,NULL,"2025-10-10 10:41:14",NULL,NULL,NULL
+3,1,Custom,"Data manually defined within the form or API",active,NULL,"2025-10-10 10:41:14",NULL,NULL,NULL
+4,2,small,"Small width input",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+5,2,medium,"Medium width input",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+6,2,large,"Large width input",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+7,3,user,"User icon",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+8,3,email,"Email icon",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+9,3,calendar,"Calendar icon",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+10,4,1,"First in order",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+11,4,2,"Second in order",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+12,4,3,"Third in order",active,NULL,"2025-10-10 10:45:58",NULL,NULL,NULL
+13,4,4,"Fourth in order",active,NULL,"2025-10-27 13:49:11",NULL,NULL,NULL
+14,4,5,"Fifth in order",active,NULL,"2025-10-27 13:49:26",NULL,NULL,NULL

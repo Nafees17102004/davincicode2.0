@@ -1,0 +1,9 @@
+js_id,js_name,js_script,status,inactive_reason,cDate,cUser,uDate,uUser
+1,ValidateEmail,"function validateEmail(email) { const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; const allowedDomains = ["example.com","evoulth.com"]; if (!re.test(email)) return false; const domain = email.split("@")[1]; return allowedDomains.includes(domain); }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+2,ValidatePassword,"function validatePassword(password) { const re = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/; return re.test(password); }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+3,ValidatePhone,"function validatePhone(number) { const re = /^(\+91[\-\s]?)?[6-9]\d{9}$/; return re.test(number); }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+4,ValidateDate,"function validateDate(date) { const parsed = Date.parse(date); if (isNaN(parsed)) return false; return new Date(parsed) <= new Date(); }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+5,ValidateUsername,"function validateUsername(username) { const re = /^[a-zA-Z0-9_]{3,20}$/; return re.test(username); }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+6,ValidateCardNumber,"function validateCardNumber(number) { const sanitized = number.replace(/\D/g, ""); let sum = 0; let shouldDouble = false; for (let i = sanitized.length - 1; i >= 0; i--) { let digit = parseInt(sanitized[i]); if (shouldDouble) { digit *= 2; if (digit > 9) digit -= 9; } sum += digit; shouldDouble = !shouldDouble; } return sum % 10 === 0; }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+7,ValidateFileSize,"function validateFileSize(file, maxMB = 5) { return file.size <= maxMB * 1024 * 1024; }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
+8,ValidateFileType,"function validateFileType(file, allowedTypes = ["image/jpeg", "image/png"]) { return allowedTypes.includes(file.type); }",active,NULL,"2025-10-06 14:40:47",system,NULL,NULL
