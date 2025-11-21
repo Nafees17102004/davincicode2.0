@@ -60,26 +60,32 @@ const formGenRepository = {
     }
   },
   getSnippetsByElementAndLanguage: async (
-    fieldTypeId,
-    elementTypeId,
-    languageId
+    fieldTypeId, // Field Type Id from the form Gen Payload
+    elementTypeId, // Element Type Id from default id value
+    languageId // Language Id from getLanguageIdByProjectId using projectId
   ) => {
-    if (fieldTypeId) {
-      const fieldTypeCheckingQuery = `
-    SELECT 
-    ft.FIELD_TYPE_ID,
-    ft.FIELD_NAME,
-    et.element_name AS elementType
-FROM field_type ft
-LEFT JOIN dcs_m_element_type et 
-    ON et.element_type_id = ft.element_type_id
-WHERE ft.FIELD_TYPE_ID = ?;
+    // React code snippet query
+    const reactQuery = `
+    SELECT
+        ft.FIELD_NAME AS component_name,
+        cs.Snippet AS component_code
+    FROM dcs_l_element_field_lang_snippet_map map
+    JOIN code_snippet cs 
+        ON cs.Snippet_ID = map.snippet_id
+    JOIN field_type ft
+        ON ft.FIELD_TYPE_ID = map.field_type_id
+    WHERE map.field_type_id = ?
+    LIMIT 1;
     `;
-      const [check] = await pool.query(fieldTypeCheckingQuery, fieldTypeId);
-      console.log(check);
-    }
 
-    const query = `
+    // Params required for react code snippet
+    const reactParams = [fieldTypeId];
+
+    // Obtaining the react code snippet from the DB
+    const [reactRows] = await pool.query(reactQuery, reactParams);
+
+    // Node code snippet query
+    const nodeQuery = `
     SELECT 
         ft.FIELD_NAME AS layer_name,
         cs.Snippet AS snippet
@@ -94,10 +100,17 @@ WHERE ft.FIELD_TYPE_ID = ?;
     ORDER BY ft.FIELD_NAME;
   `;
 
-    const params = [elementTypeId, languageId];
+    // Params required for node code snippet
+    const nodeParams = [elementTypeId, languageId];
 
-    const [rows] = await pool.query(query, params);
-    return rows;
+    // Obtaining the node code snippet from the DB
+    const [nodeRows] = await pool.query(nodeQuery, nodeParams);
+
+    // Return the obtained code
+    return {
+      component: reactRows.length ? reactRows[0] : null,
+      node_layers_raw: nodeRows,
+    };
   },
 
   getLanguageIdByProjectId: async (projectId) => {
