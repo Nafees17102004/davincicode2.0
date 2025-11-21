@@ -142,8 +142,9 @@ const CodeGenerationPage = ({ codeData, setShowGeneratedCode }) => {
         setActiveSection("frontend");
         setActiveCodeTab("reactComponent");
       }
-
-      setSuccess("Generated code loaded successfully from backend!");
+      if (codeData) {
+        setSuccess("Generated code loaded successfully from backend!");
+      }
 
       // Set formData for display
       setFormData({

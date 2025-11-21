@@ -1,8 +1,8 @@
 
 import React from "react";
 
-const Z = ({
-  title = "z",
+const A = ({
+  title = "a",
   onClick,
   type = "button",
   disabled = false,
@@ -11,10 +11,14 @@ const Z = ({
 }) => {
 
   // Auto-generated event handlers for button
+  const handleA = (e) => {
+    a(e);
+  };
 
   const handleClick = (e) => {
     if (disabled) return;
 
+        handleA(e);
 
     if (onClick) onClick(e);
   };
@@ -32,6 +36,6 @@ const Z = ({
   );
 };
 
-export default Z;
+export default A;
 
 
