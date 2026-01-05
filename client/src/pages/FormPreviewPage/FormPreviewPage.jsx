@@ -93,7 +93,7 @@ const FormPreviewPage = () => {
           fetchIconData(),
           fetchSpListData(),
           fetchTableListData(),
-          fetchElementTypeData(),
+          fetchFieldTypeData(),
           fetchStoringSPData(),
           fetchEventHandlerData(),
           fetchLayoutData(),
@@ -282,19 +282,22 @@ const FormPreviewPage = () => {
     }
   };
 
-  const fetchElementTypeData = async () => {
+  const fetchFieldTypeData = async () => {
     try {
-      const res = await projectAPI.getLovDropdown("ELEMENT_TYPE", null);
+      const res = await projectAPI.getLovDropdown(
+        "FIELD_TYPE_COMPONENT_ONLY",
+        null
+      );
       const formattedData = res.data.result.map((each) => ({
         id: each.Id,
         name: each.Name,
       }));
-      dispatch(setDropdownData({ elementTypeData: formattedData }));
+      dispatch(setDropdownData({ fieldTypeData: formattedData }));
     } catch (error) {
       console.error("Error fetching field types:", error);
       dispatch(
         setDropdownData({
-          elementTypeData: [
+          fieldTypeData: [
             { id: "1", name: "Text Input" },
             { id: "2", name: "Number Input" },
           ],
@@ -793,7 +796,7 @@ const FormPreviewPage = () => {
                 removeColumn={removeColumn}
                 removeTab={removeTab}
                 fieldSource={dropdownData.fieldSource}
-                elementTypeData={dropdownData.elementTypeData}
+                fieldTypeData={dropdownData.fieldTypeData}
                 fieldOrder={dropdownData.fieldOrder}
                 fieldIcon={dropdownData.fieldIcon}
                 jsVal={dropdownData.jsVal}

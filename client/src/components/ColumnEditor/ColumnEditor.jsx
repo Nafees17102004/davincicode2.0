@@ -8,7 +8,7 @@ const ColumnEditor = ({
   dispatch,
   removeColumn,
   eventHandler,
-  elementTypeData,
+  fieldTypeData,
   fieldSource,
   fieldType,
   fieldOrder,
@@ -125,6 +125,25 @@ const ColumnEditor = ({
         <i className="fa fa-times"></i>
       </button>
 
+      <div className="col-md-4">
+        <label className="form-label fw-semibold">
+          Field Type <span className="text-danger">*</span>
+        </label>
+        <select
+          className="form-select"
+          value={column.fieldType || ""}
+          onChange={(e) => handleFieldChange("fieldType", e.target.value)}
+          required
+        >
+          {fieldTypeData &&
+            fieldTypeData.map((eachItem) => (
+              <option key={eachItem.id} value={eachItem.id}>
+                {eachItem.name}
+              </option>
+            ))}
+        </select>
+      </div>
+
       {/* Row 1 - Required Fields */}
       <div className="row g-3 mb-3">
         <div className="col-md-4">
@@ -148,49 +167,7 @@ const ColumnEditor = ({
           </select>
         </div>
 
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">
-            Field Type <span className="text-danger">*</span>
-          </label>
-          <select
-            className="form-select"
-            value={column.elementTypeId || ""}
-            onChange={(e) => handleFieldChange("elementTypeId", e.target.value)}
-            required
-          >
-            {elementTypeData &&
-              elementTypeData.map((eachItem) => (
-                <option key={eachItem.id} value={eachItem.id}>
-                  {eachItem.name}
-                </option>
-              ))}
-          </select>
-        </div>
-
-        <div className="col-md-4">
-          <label className="form-label fw-semibold">
-            Field Order <span className="text-danger">*</span>
-          </label>
-          <select
-            className="form-select"
-            value={column.fieldOrderLovDetId || ""}
-            onChange={(e) =>
-              handleFieldChange("fieldOrderLovDetId", e.target.value)
-            }
-            required
-          >
-            {fieldOrder &&
-              fieldOrder.map((eachOrder) => (
-                <option key={eachOrder.id} value={eachOrder.id}>
-                  {eachOrder.name}
-                </option>
-              ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Field Source Specific Fields */}
-      <div className="row g-3 mb-3">
+        {/* Field Source Specific Fields */}
         <div className="col-md-4">
           {column.fieldSourceLovDetId === "1" && (
             <>
@@ -287,6 +264,26 @@ const ColumnEditor = ({
             onChange={(e) => handleFieldChange("placeHolder", e.target.value)}
             placeholder="Enter placeholder text"
           />
+        </div>
+        <div className="col-md-4">
+          <label className="form-label fw-semibold">
+            Field Order <span className="text-danger">*</span>
+          </label>
+          <select
+            className="form-select"
+            value={column.fieldOrderLovDetId || ""}
+            onChange={(e) =>
+              handleFieldChange("fieldOrderLovDetId", e.target.value)
+            }
+            required
+          >
+            {fieldOrder &&
+              fieldOrder.map((eachOrder) => (
+                <option key={eachOrder.id} value={eachOrder.id}>
+                  {eachOrder.name}
+                </option>
+              ))}
+          </select>
         </div>
       </div>
 

@@ -158,7 +158,7 @@ const getLovWithDet = async (req, res) => {
         .status(400)
         .json({ success: false, message: "lovId is required" });
     }
-    const result = await listOfValuesService.getLovWithDet(lovId);
+    const result = await listOfValuesService.getLovWithDet(lovId);   
     res.status(200).json({ success: true, result });
   } catch (error) {
     console.error("getLovWithDet error:", error);

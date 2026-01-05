@@ -6,15 +6,16 @@ import { useState } from "react";
 function ViewFieldPage() {
   const [rows, setRows] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchFieldTypes();
-  },[])
+  }, []);
   const fetchFieldTypes = async () => {
     try {
       await projectAPI.getFieldTypes().then((res) => {
         const formatData = res.data.map((eachData) => ({
           fTypeId: eachData.FIELD_TYPE_ID,
           fName: eachData.FIELD_NAME,
+          elementName: eachData.element_name,
           fStatus: eachData.status,
           fInactiveReason: eachData.inactive_reason,
         }));
@@ -25,9 +26,8 @@ function ViewFieldPage() {
     }
   };
 
-  console.log(rows);
   return (
-    <div>
+    <div className="p-4">
       <ViewFieldTable rows={rows} />
     </div>
   );

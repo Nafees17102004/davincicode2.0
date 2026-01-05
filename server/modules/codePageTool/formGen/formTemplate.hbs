@@ -1,35 +1,52 @@
-{{! Repository File Template }}
-const pool = require("../config/dbConfig.js");
+{{! Primary Button Component Template }}
 
-{{#each Tabs}}
-  {{#each Sections}}
-    {{#each Fields}}
-      const insert{{pascalCase labelName}}Details = async (
-      {{#if spParams.length}}
-        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
-      {{/if}}
-      ) => { try { const query = `CALL
-      {{spName}}(
-      {{#if spParams.length}}
-        {{#each spParams}}?{{#unless @last}}, {{/unless}}{{/each}}
-      {{/if}}
-      );`; const params = [
-      {{#if spParams.length}}
-        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
-      {{/if}}
-      ]; const [rows] = await pool.query(query, params); return rows; } catch
-      (error) { console.error("Repository Error ({{labelName}}):", error); throw
-      error; } };
-    {{/each}}
-  {{/each}}
-{{/each}}
+import React from "react";
 
-module.exports = {
-{{#each Tabs}}
-  {{#each Sections}}
-    {{#each Fields}}
-      insert{{pascalCase labelName}}Details,
-    {{/each}}
+const {{pascalCase labelName}} = ({
+  title = "{{labelName}}",
+  onClick,
+  type = "button",
+  disabled = false,
+  className = "",
+  ...props
+}) => {
+
+  {{#if eventHandlers.length}}
+  // Auto-generated event handlers for button
+  {{#each eventHandlers}}
+  {{#if (eq eventName "onClick")}}
+  const handle{{pascalCase functionName}} = (e) => {
+    {{functionName}}(e);
+  };
+  {{/if}}
   {{/each}}
-{{/each}}
+  {{/if}}
+
+  const handleClick = (e) => {
+    if (disabled) return;
+
+    {{#if eventHandlers.length}}
+      {{#each eventHandlers}}
+        {{#if (eq eventName "onClick")}}
+        handle{{pascalCase functionName}}(e);
+        {{/if}}
+      {{/each}}
+    {{/if}}
+
+    if (onClick) onClick(e);
+  };
+
+  return (
+    <button
+      type={type}
+      disabled={disabled}
+      onClick={handleClick}
+      className={`primary-btn ${className}`}
+      {...props}
+    >
+      {title}
+    </button>
+  );
 };
+
+export default {{pascalCase labelName}};

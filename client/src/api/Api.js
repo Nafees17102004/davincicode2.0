@@ -127,3 +127,19 @@ const projectAPI = {
 };
 
 export default projectAPI;
+
+// import ProjectAPI from "./project";
+// import LanguageAPI from "./language";
+// import FieldTypeAPI from "./fieldType";
+// import SnippetAPI from "./snippet";
+// import LovAPI from "./lov";
+
+// const Api = {
+//   project: ProjectAPI,
+//   language: LanguageAPI,
+//   fieldType: FieldTypeAPI,
+//   snippet: SnippetAPI,
+//   lov: LovAPI,
+// };
+
+// export default Api;

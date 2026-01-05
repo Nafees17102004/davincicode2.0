@@ -59,18 +59,38 @@ const formGenRepository = {
       return { success: false, error: "Error in fetching the data in Repo" };
     }
   },
-  getSnippetsByElementAndLanguage: async (elementTypeId, languageId) => {
+  getSnippetsByElementAndLanguage: async (
+    fieldTypeId,
+    elementTypeId,
+    languageId
+  ) => {
+    if (fieldTypeId) {
+      const fieldTypeCheckingQuery = `
+    SELECT 
+    ft.FIELD_TYPE_ID,
+    ft.FIELD_NAME,
+    et.element_name AS elementType
+FROM field_type ft
+LEFT JOIN dcs_m_element_type et 
+    ON et.element_type_id = ft.element_type_id
+WHERE ft.FIELD_TYPE_ID = ?;
+    `;
+      const [check] = await pool.query(fieldTypeCheckingQuery, fieldTypeId);
+      console.log(check);
+    }
+
     const query = `
     SELECT 
-      ft.FIELD_NAME AS layer_name,
-      cs.Snippet AS snippet
-    FROM field_snippet_map fsm
+        ft.FIELD_NAME AS layer_name,
+        cs.Snippet AS snippet
+    FROM dcs_l_element_field_lang_snippet_map map
     JOIN code_snippet cs 
-        ON cs.Snippet_ID = fsm.SNIPPET_ID
+        ON cs.Snippet_ID = map.snippet_id
     JOIN field_type ft
-        ON ft.FIELD_TYPE_ID = fsm.FIELD_TYPE_ID
-    WHERE ft.element_type_id = ?
-      AND fsm.LANGUAGE_ID = ?
+        ON ft.FIELD_TYPE_ID = map.field_type_id
+    WHERE map.element_type_id = ?
+      AND map.language_id = ?
+      AND map.c2c_status = 1
     ORDER BY ft.FIELD_NAME;
   `;
 

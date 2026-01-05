@@ -7,7 +7,7 @@ import { useEffect } from "react";
 
 function SnippetForm() {
   const [snippetTypeData, setSnippetTypeData] = useState([]);
-  const [fielTypeData, setFieldTypeData] = useState([]);
+  const [fieldTypeData, setFieldTypeData] = useState([]);
   const [elementData, setElementData] = useState([]);
   const [rows, setRows] = useState({
     snippetId: null,
@@ -101,7 +101,7 @@ function SnippetForm() {
         rows={rows}
         onChange={(e) => handleChange(e)}
         snippetTypeData={snippetTypeData}
-        fielTypeData={fielTypeData}
+        fieldTypeData={fieldTypeData}
         elementData={elementData}
       />
 
