@@ -23,7 +23,6 @@ router.get(
   addFormController.getLovDropdown
 );
 
-router.get("/get-lov-with-det/:lovId", listOfValuesController.getLovWithDet);
 router.get("/getTabImgs", tabController.getTabImg);
 router.get("/getTabImg/:tabId", tabController.getTabImg);
 // Post request

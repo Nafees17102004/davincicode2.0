@@ -15,9 +15,9 @@ function ViewFieldPage() {
         const formatData = res.data.map((eachData) => ({
           fTypeId: eachData.FIELD_TYPE_ID,
           fName: eachData.FIELD_NAME,
-          elementName: eachData.element_name,
-          fStatus: eachData.status,
-          fInactiveReason: eachData.inactive_reason,
+          elementName: eachData.element_type_name,
+          fStatus: eachData.c2c_status,
+          fInactiveReason: eachData.c2c_inactive_reason,
         }));
         setRows(formatData);
       });
@@ -25,6 +25,7 @@ function ViewFieldPage() {
       console.error(error);
     }
   };
+  console.log(rows);
 
   return (
     <div className="p-4">
