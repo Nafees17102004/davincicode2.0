@@ -28,14 +28,14 @@ const LovDetViewpage = () => {
         const formattedLovDetData = res.data.result.map((eachItem) => ({
           lovDetName: eachItem.LOV_DET_NAME,
           lovDetDescp: eachItem.LOV_DET_DESCP,
-          lovDetStatus: eachItem.LOV_DET_STATUS,
-          lovDetInactiveReason: eachItem.DET_INACTIVE_REASON,
+          lovDetStatus: eachItem.c2c_status,
+          lovDetInactiveReason: eachItem.c2c_inactive_reason,
           lovDetCUser: eachItem.DET_CREATED_USER,
         }));
         const formattedLovData = res.data.result.map((eachItem) => ({
           lovName: eachItem.LOV_NAME,
           lovDescp: eachItem.LOV_DESCRIPTION,
-          lovStatus: eachItem.LOV_STATUS,
+          lovStatus: eachItem.c2c_status,
           lovCUser: eachItem.LOV_CREATED_USER,
         }));
         setLovDet(formattedLovDetData);
@@ -48,13 +48,12 @@ const LovDetViewpage = () => {
     fetchLov();
   }, []);
 
-  console.log(lovs);
   const handleAddModule = (lovId) => {
     navigate(`/add-lovDet/${lovId}`); // go to Add Module Page
   };
 
   return (
-    <div className="d-flex">
+    <div className="d-flex p-4">
       {/* Sidebar */}
       <div style={{ width: "250px" }}>
         <LeftTabMenu />
@@ -84,10 +83,8 @@ const LovDetViewpage = () => {
                   </Col>
                   <Col>
                     <strong>Status:</strong>{" "}
-                    <Badge
-                      bg={lovs.lovStatus === "active" ? "success" : "secondary"}
-                    >
-                      {lovs.lovStatus}
+                    <Badge bg={lovs.c2c_status ? "success" : "secondary"}>
+                      {lovs.c2c_status ? "Active" : "Inactive"}
                     </Badge>
                   </Col>
                 </Row>
@@ -117,8 +114,13 @@ const LovDetViewpage = () => {
                         <td>{i + 1}</td>
                         <td>{l.lovDetName}</td>
                         <td>{l.lovDetDescp}</td>
-                        <td>{l.lovDetStatus}</td>
-                        <td>{l.lovDetInactiveReason}</td>
+                        <td>{l.lovDetStatus ? "Active" : "Inactive"}</td>
+                        <td>
+                          {l.lovDetInactiveReason === null ||
+                          l.lovDetInactiveReason === ""
+                            ? "No Inactive Reason"
+                            : ""}
+                        </td>
                         <td>{l.lovDetCUser}</td>
                       </tr>
                     ))

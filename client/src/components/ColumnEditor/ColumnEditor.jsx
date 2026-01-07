@@ -202,6 +202,21 @@ const ColumnEditor = ({
               </select>
             </>
           )}
+
+          {column.fieldSourceLovDetId === "3" && (
+            <>
+              <label className="form-label fw-semibold">Custom Name</label>
+              <input
+                type="text"
+                className="form-control"
+                value={column.customName || ""}
+                onChange={(e) =>
+                  handleFieldChange("customName", e.target.value)
+                }
+                placeholder="Enter custom name"
+              />
+            </>
+          )}
         </div>
 
         <div className="col-md-4">

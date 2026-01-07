@@ -18,6 +18,7 @@ const defaultColumn = (order = 1) => ({
   spParam: null,
   tableName: null,
   tableColumns: null,
+  customName: null,
   eventHandlers: [],
   placeholder: "",
   validations: [],

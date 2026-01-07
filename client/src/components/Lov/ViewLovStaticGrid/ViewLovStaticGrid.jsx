@@ -32,7 +32,7 @@ function ViewLovStaticGrid({ rows }) {
               </a>
             </td>
             <td className="row-item">{row.lovDescp}</td>
-            <td className="row-item">{row.lovStatus.toUpperCase()}</td>
+            <td className="row-item">{row.lovStatus ? "Active" : "Inactive"}</td>
             <td className="row-item">{row.lovInactiveReason}</td>
             <td className="row-item">{row.createdUser}</td>
           </tr>

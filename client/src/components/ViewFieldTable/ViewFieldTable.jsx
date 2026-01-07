@@ -9,6 +9,7 @@ function ViewFieldTable({ rows }) {
   const handleBack = () => {
     navigate("/field");
   };
+
   return (
     <>
       <Table bordered hover className="table p-4">
@@ -35,7 +36,7 @@ function ViewFieldTable({ rows }) {
                 </td>
                 <td className="row-item">{row.fName}</td>
                 <td className="row-item">
-                  {row.fStatus === 1 ? "Active" : "Inactive"}
+                  {row.fStatus ? "Active" : "Inactive"}
                 </td>
                 <td className="row-item">
                   {row.fInactiveReason === "" || row.fInactiveReason === null
