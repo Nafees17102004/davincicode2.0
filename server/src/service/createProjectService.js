@@ -1,12 +1,19 @@
 const createProjectRepo = require("../repository/createProjectRepository");
 
-const insertProject = async (pName, pLanguageId, pStatus, pInactiveReason) => {
+const insertProject = async (
+  pCode,
+  pName,
+  pLanguageId,
+  pStatus,
+  pInactiveReason,
+) => {
   try {
     const result = await createProjectRepo.insertProject(
+      pCode,
       pName,
       pLanguageId,
       pStatus,
-      pInactiveReason
+      pInactiveReason,
     );
     return result;
   } catch (err) {

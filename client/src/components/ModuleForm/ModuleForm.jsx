@@ -24,7 +24,7 @@ const ModuleForm = ({ modules, setModules, handleSubmit }) => {
         module_name: "",
         module_desc: "",
         inactive_reason: null,
-        status: "active", // default
+        status: 1, // default
       },
     ]);
   };
