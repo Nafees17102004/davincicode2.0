@@ -45,7 +45,7 @@ const ModuleTable = ({ modules, onChange }) => {
               <td>
                 <Form.Select
                   name="status"
-                  value={module.status || "active"}
+                  value={module.status || 1}
                   onChange={(e) => onChange(e, index)}
                 >
                   <option value="active">Active</option>

@@ -18,7 +18,7 @@ function ProjectForm() {
         pCode: '',
         pName: '',
         pLanguageId: 0,
-        pStatus: "active",
+        pStatus: 1,
         pInactiveReason: null
       },
     ]);

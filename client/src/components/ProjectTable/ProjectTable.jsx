@@ -78,8 +78,8 @@ function ProjectTable({rows, onChange}) {
               <Form.Check
                 type="switch"
                 id={`status-switch-${index}`}
-                label={row.pStatus === "active" ? "active" : "inactive"}
-                checked={row.pStatus === "active"}
+                label={row.pStatus === 1 ? "active" : "inactive"}
+                checked={row.pStatus === 1}
                 onChange={(e) =>
                   onChange(
                     index,
@@ -89,7 +89,7 @@ function ProjectTable({rows, onChange}) {
                 }
               />
             </td>
-            {row.pStatus === "inactive" && (
+            {row.pStatus === 0 && (
               <td>
                 <Form.Control
                   as="textarea"

@@ -10,7 +10,7 @@ function LanguageTable({ rows, onChange }) {
           <th className="field-name">S.no</th>
           <th className="field-name">Language Name</th>
           <th className="field-name">Language Status</th>
-          {rows.some((row) => row.lStatus === "inactive") && (
+          {rows.some((row) => row.lStatus === 0) && (
             <th className="field-name">Inactive Reason</th>
           )}
         </tr>
@@ -31,8 +31,8 @@ function LanguageTable({ rows, onChange }) {
               <Form.Check
                 type="switch"
                 id={`status-switch-${index}`}
-                label={row.lStatus === "active" ? "active" : "inactive"}
-                checked={row.lStatus === "active"}
+                label={row.lStatus === 1 ? "Active" : "Inactive"}
+                checked={row.lStatus === 1}
                 onChange={(e) =>
                   onChange(
                     index,

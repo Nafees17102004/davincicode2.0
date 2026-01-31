@@ -1,9 +1,16 @@
 const pool = require("../config/dbConfig");
 
-const insertProject = async (pName, pLanguageId, pStatus, pInactiveReason) => {
+const insertProject = async (
+  pCode,
+  pName,
+  pLanguageId,
+  pStatus,
+  pInactiveReason,
+) => {
   try {
-    const query = "CALL InsertProject(?,?,?,?);";
+    const query = "CALL InsertProject(?,?,?,?,?);";
     const result = await pool.query(query, [
+      pCode,
       pName,
       pLanguageId,
       pStatus,
@@ -62,7 +69,7 @@ const insertFieldTypes = async (
   fieldName,
   fStatus,
   fInactiveReason,
-  cUser
+  cUser,
 ) => {
   try {
     const query = "CALL LT_DCS_SP_INSERT_UPDATE_FIELD_TYPE(?,?,?,?,?,?)";

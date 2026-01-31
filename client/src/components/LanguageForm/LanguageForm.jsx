@@ -16,7 +16,7 @@ function LanguageForm() {
       {
         sNO: idCounter,
         lName: "",
-        lStatus: "active",
+        lStatus: 1,
         lInactiveReason: null,
       },
     ]);

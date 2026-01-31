@@ -7,10 +7,10 @@ const insertProject = async (req, res) => {
     const errors = [];
 
     for (const [index, project] of projects.entries()) {
-      const { pName, pLanguageId, pStatus, pInactiveReason } = project;
+      const {pCode, pName, pLanguageId, pStatus, pInactiveReason } = project;
 
       // validation
-      if (!pName || !pLanguageId || !pStatus) {
+      if (!pCode || !pName || !pLanguageId || !pStatus) {
         errors.push({
           index,
           error: "All fields are required",
@@ -21,6 +21,7 @@ const insertProject = async (req, res) => {
 
       try {
         const result = await createProjectService.insertProject(
+          pCode,
           pName,
           pLanguageId,
           pStatus,
