@@ -1,0 +1,94 @@
+Repository:
+
+    {{! --- Repository Unit (Per Field) --- }}
+    const save{{pascalCase labelName}} = async (
+    {{#if spParams.length}}
+    {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+    {{/if}}
+    ) => {
+    try {
+        const query = `CALL {{spName}}(
+        {{#if spParams.length}}
+        {{#each spParams}}?{{#unless @last}}, {{/unless}}{{/each}}
+        {{/if}}
+        );`;
+
+        const params = [
+        {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+        {{/if}}
+        ];
+
+        const [rows] = await pool.query(query, params);
+        return rows;
+
+    } catch (error) {
+        console.error("Repository Error ({{labelName}}):", error);
+        throw error;
+    }
+    };
+
+    module.exports = {
+    save{{pascalCase labelName}},
+    };
+
+Service:
+
+    const repository = require("../repository/{{camelCase labelName}}Repository");
+
+    const save{{pascalCase labelName}} = async (
+    {{#if spParams.length}}
+    {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+    {{/if}}
+    ) => {
+    try {
+        const result = await repository.save{{pascalCase labelName}}(
+        {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+        {{/if}}
+        );
+        return result;
+    } catch (error) {
+        console.error("Service Error ({{labelName}} Service):", error);
+        throw error;
+    }
+    };
+
+    module.exports = { save{{pascalCase labelName}} };
+
+Controller:
+
+    const service = require("../service/{{camelCase labelName}}Service");
+
+    const save{{pascalCase labelName}} = async (req, res) => {
+    try {
+        const {
+        {{#if spParams.length}}
+            {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+        {{/if}}
+        } = req.body;
+
+        const result = await service.save{{pascalCase labelName}}(
+        {{#if spParams.length}}
+        {{#each spParams}}{{name}}{{#unless @last}}, {{/unless}}{{/each}}
+        {{/if}}
+        );
+
+        return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+        console.error("Controller Error ({{labelName}}):", error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+    };
+
+    module.exports = { save{{pascalCase labelName}} };
+
+Route:
+
+    const express = require("express");
+    const router = express.Router();
+    const controller = require("../controller/{{camelCase labelName}}Controller");
+
+    router.post("/{{dashCase labelName}}", controller.save{{pascalCase labelName}});
+
+    module.exports = router;
